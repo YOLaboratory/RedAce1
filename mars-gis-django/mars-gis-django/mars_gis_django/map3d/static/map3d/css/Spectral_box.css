@@ -1,0 +1,303 @@
+#graph_move {
+    width: 0px;
+    height: 0px;
+    background: #FFF;
+    position: absolute;
+    top: 100%;
+    left: 0px;
+    z-index: 1000;
+    border: solid 1px rgba(255, 255, 255, 0.6);
+}
+/*see https://bagelee.com/design/css/create_tabs_using_only_css/*/
+.tabs {
+    margin-top: 50px;
+    padding-bottom: 40px;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+    width: 700px;
+    margin: 0 auto;
+}
+.tab_item {
+    width: calc(100%/3);
+    height: 20px;
+    border-bottom: 3px solid #5ab4bd;
+    background-color: #d9d9d9;
+    line-height: 20px;
+    font-size: 12px;
+    text-align: center;
+    color: #565656;
+    display: block;
+    float: left;
+    text-align: center;
+    font-weight: bold;
+    transition: all 0.2s ease;
+}
+.tab_item:hover {
+    opacity: 0.75;
+    /* background-color:goldenrod; */
+}
+input[name="tab_item"] {
+    display: none;  
+}
+.tab_content {
+    display: none;
+    padding: 40px 40px 0;
+    clear: both;
+    overflow: hidden;
+}
+#graph_1:checked ~ #graph_1_content,
+#graph_2:checked ~ #graph_2_content,
+#graph_3:checked ~ #graph_3_content {
+    display: block;
+}
+#graph {
+    width: 0px;
+    height: 0px;
+    background: #FFF;
+    position: absolute;
+    top: 30px;
+    left: 0px;
+    z-index: 1001;
+}
+.graph1, .graph2, .graph3 {
+    width: 0px;
+    height: 0px;
+    background: #FFF;
+    position: absolute;
+}
+
+
+
+/* ??? */
+/* .switch__label {
+	width: 50px;
+	position: relative;
+	display: inline-block;
+}
+.switch__content {
+	display: block;
+  cursor: pointer;
+  position: relative;
+  border-radius: 30px;
+  height: 31px;
+overflow: hidden;
+}
+.switch__content:before {
+	content: "";
+	display: block;
+	position: absolute;
+	width: calc(100% - 3px);
+	height: calc(100% - 3px);
+	top: 0;
+	left: 0;
+	border: 1.5px solid #E5E5EA;
+	border-radius: 30px;
+	background-color: #fff;
+}
+.switch__content:after {
+	content: "";
+	display: block;
+	position: absolute;
+	background-color: transparent;
+	width: 0;
+	height: 0;
+	top: 50%;
+	left: 50%;
+	border-radius: 30px;
+	-webkit-transition: all .5s;
+	   -moz-transition: all .5s;
+	    -ms-transition: all .5s;
+	     -o-transition: all .5s;
+	        transition: all .5s;
+}
+.switch__input {
+	display: none;
+}
+
+.switch__circle {
+	display: block;
+	top: 2px;
+	left: 2px;
+	position: absolute;
+	-webkit-box-shadow: 0 2px 6px #999;
+	        box-shadow: 0 2px 6px #999;
+	width: 27px;
+	height: 27px;
+	-webkit-border-radius: 20px;
+	        border-radius: 20px;
+	background-color: #fff;
+	-webkit-transition: all .5s;
+	   -moz-transition: all .5s;
+	    -ms-transition: all .5s;
+	     -o-transition: all .5s;
+	        transition: all .5s;
+}
+.switch__input:checked ~ .switch__circle {
+	left: 21px;
+}
+
+.switch__input:checked ~ .switch__content:after {
+	background-color: #4BD964;
+	top: 0;
+	left: 0;
+	width: 100%;
+	height: 100%;
+} */
+.switch2__label {
+	width: 44px;
+	position: relative;
+    margin-left: 5px;
+	display: inline-block;
+    vertical-align:middle;
+}
+.switch2__content {
+	display: block;
+    cursor: pointer;
+    position: relative;
+    border-radius: 30px;
+    height: 20px;
+    -webkit-transition: all .1s .4s;
+	   -moz-transition: all .1s .4s;
+	    -ms-transition: all .1s .4s;
+	     -o-transition: all .1s .4s;
+	        transition: all .1s .4s;
+	overflow: hidden;
+}
+.switch2__content:before {
+	content: "";
+	display: block;
+	position: absolute;
+	width: calc(100% - 4px);
+	height: calc(100% - 4px);
+	top: 0;
+	left: 0;
+    border: 0.5px solid #000000;
+	border-radius: 20px;
+	background-color: #fff;
+}
+.switch2__content:after {
+	content: "";
+	display: block;
+	position: absolute;
+	background-color: transparent;
+	width: 0;
+    height: calc(100% - 4px);
+	top: 0;
+	left: 0;
+	border-radius: 20px;
+	-webkit-transition: all .5s;
+	   -moz-transition: all .5s;
+	    -ms-transition: all .5s;
+	     -o-transition: all .5s;
+	        transition: all .5s;
+}
+.switch2__input {
+	display: none;
+}
+.switch2__circle {
+	display: block;
+	top: 3.8px;
+	left: 3px;
+	position: absolute;
+	width: 10px;
+	height: 10px;
+	-webkit-border-radius: 10px;
+	        border-radius: 10px;
+	background-color: #000000;
+	-webkit-transition: all .5s;
+	   -moz-transition: all .5s;
+	    -ms-transition: all .5s;
+	     -o-transition: all .5s;
+	        transition: all .5s;
+}
+.switch2__input:checked ~ .switch2__circle {
+	left: 27.5px;
+	background-color: #fff;
+}
+.switch2__input:checked ~ .switch2__content {
+	border-color: transparent;
+	-webkit-transition: all 0s;
+	   -moz-transition: all 0s;
+	    -ms-transition: all 0s;
+	     -o-transition: all 0s;
+	        transition: all 0s;
+}
+.switch2__input:checked ~ .switch2__content:after {
+	background-color: #0078D7;
+    width: calc(100% - 3.0px);
+}
+
+
+
+.squareA{
+    pointer-events:auto;
+    top: 5px;
+    text-align:left;
+    width: 300px;
+    height: 30px;
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid #808080;
+    text-decoration: none;
+    color: #00BCD4;
+    background-color: rgba(0,0,255,0.2);
+    transition: .4s;
+}
+.squareA:hover {
+    background: #00bcd4;
+    color: white;
+}
+.squareB{
+    pointer-events:auto;
+    top: 5px;
+    text-align:left;
+    width: 100%;
+    height: 30px;
+    position: relative;
+    display: inline-block;
+    font-weight: bold;
+    padding: 0px;
+    margin: 0px;
+    border: 1px solid #808080;
+    text-decoration: none;
+    color: #00BCD4;
+    background-color: rgba(0,0,255,0.2);
+    transition: .4s;
+}
+.squareB:hover {
+    background: #00bcd4;
+    color: white;
+}
+
+.balloonoya {
+    position   : relative;
+    pointer-events:auto;
+}
+.balloonoya:hover .balloon {
+    display: inline;
+}
+.balloon {
+    position   : relative;
+    pointer-events:auto;
+    display: none;
+    padding: 2px;
+    background-color: rgba(102, 102, 255, 0.50);
+    width:180px;
+    right : -50%;
+    font-size: 80%;
+    overflow: visible;
+}
+.balloon:after{
+    border-right: 12px solid rgba(102, 102, 255, 0.50);
+    pointer-events:auto;
+    border-top: 10px solid transparent;
+    border-bottom: 10px solid transparent;
+    left: -12px;
+    top: 5%;
+    content: "";
+    position: relative;
+    overflow: visible;
+}

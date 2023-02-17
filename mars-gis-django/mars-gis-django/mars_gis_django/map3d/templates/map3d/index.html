@@ -1,0 +1,473 @@
+<!doctype html>
+<head>
+    {% load static %}
+    <meta charset="UTF-8">
+    <meta name="viewport" content="initial-scale=1.0, user-scalable=no">
+    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
+    <meta http-equiv="content-style-type" content="text/css">
+    <meta http-equiv="content-script-type" content="text/javascript">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>Mars web-GIS</title>
+
+    <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" /> -->
+
+    <!-- cesium css -->
+    <link rel="stylesheet" href="/collectstatic/map3d/assets_ol4_4.3.1/ol4/css/ol.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/cesium_1.47/cesium/Build/Cesium/Widgets/widgets.css">
+
+    <!-- css file (django) -->
+    <link rel="stylesheet" href="/collectstatic/map3d/css/mars_all.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/First_loading.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Spectral_loading.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Upside_menu.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Hamburger_menu.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/SpectralList_menu.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Back_function.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/ObservationID_box.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Spectral_box.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Thumbnail_box.css" type="text/css" />
+    <link rel="stylesheet" href="/collectstatic/map3d/css/Information_box.css" type="text/css" />
+
+</head>
+
+
+<!-- First Loading --><!-- First_loading.css --><!-- First_loading.js -->
+<div class="body"></div>
+<div class="grad"></div>
+<div class="header"><div>RedAce</div></div>
+<div id="load"><div>G</div><div>N</div><div>I</div><div>D</div><div>A</div><div>O</div><div>L</div></div>
+<!-- First Loading END -->
+
+
+<!-- Upside Menu --><!-- Upside_menu.css --><!-- Upside_menu.js -->
+<nav id="menu">
+    <ul class="nav">
+        <li><a href="https://pds.nasa.gov/" target="_blank">Link</a>
+            <ul>
+                <li><a href="http://ode.rsl.wustl.edu/mars/pagehelp/quickstartguide/index.html?What_are_Footprint_Product_Coverage_Maps.htm#naming" target="_blank">Search</a></li>
+                <li><a href="#"><marquee width="150px">Mars Reconnaissance Orbiter</marquee></a></li>
+                <li><a href="https://www.nasa.gov/mission_pages/odyssey/index.html" target="_blank">Mars Odyssey</a>
+                    <ul>
+                        <li><a href="https://mars.nasa.gov/odyssey/" target="_blank">Mars Odyssey HP</a></li>
+                        <li><a href="https://themis.asu.edu/" target="_blank">THEMIS</a>
+                            <ul>
+                                <li><a href="http://static.mars.asu.edu/pds/" target="_blank">PDS</a></li>
+                                <li><a href="#">d3</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><a href="http://127.0.0.1:8888/lab" target="_blank">JupyterLab</a>
+            <!-- <ul >
+                <li><a href="#">c1</a>
+                    <ul class="left">
+                        <li><a href="#">c2</a></li>
+                        <li><a href="#">c2</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">c1</a></li>
+            </ul> -->
+        </li>
+        <li><a href="#">RED ACE</a>
+        </li>
+        <li><a href="#">Works</a>
+            <ul>
+                <li><a href="#">d1</a></li>
+                <li><a href="#">d1</a>
+                    <ul>
+                        <li><a href="#">d2</a></li>
+                        <li><a href="#">d2</a>
+                            <ul class="left">
+                                <li><a href="#">d3</a></li>
+                                <li><a href="#">d3</a></li>
+                            </ul>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+        <li><a href="#">PDS Link</a>
+            <ul>
+                <li><a href="#">e1</a>
+                    <ul class="left">
+                        <li><a href="#">e2-1</a></li>
+                        <li><a href="#">e2-1</a></li>
+                    </ul>
+                </li>
+                <li><a href="#">e1</a>
+                    <ul class="left">
+                        <li><a href="#">e2-2</a></li>
+                        <li><a href="#">e2-2</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </li>
+    </ul>
+</nav>
+<a href="#" id="menubutton">MENU</a>
+<!-- Upside Menu END -->
+
+
+<body  onload="init_map()"  id="body">
+    <!-- Spectral loading --><!-- Spectral_loading.css -->
+    <div class="back-loading is-hide" style="position: fixed;z-index: 999998;"></div>
+    <div class="cssload-thecube is-hide" style="  position: fixed;top: 0%;right: 0px;bottom: 0px;left: 0%;margin: auto;z-index: 999999;">
+        <div class="cssload-cube cssload-c1"></div>
+        <div class="cssload-cube cssload-c2"></div>
+        <div class="cssload-cube cssload-c4"></div>
+        <div class="cssload-cube cssload-c3"></div>
+    </div>
+    <!-- Spectral loading END -->
+
+    <!-- Hamburger menu --><!-- Hamburguer_menu.css -->
+    <div id="nav-drawer" >
+        <input id="nav-input" type="checkbox" class="nav-unshown" >
+        <div class=line_l style="position:fixed;top:10px">
+            <label id="nav-open-text" for="nav-input">Layer</label>
+            <label id="nav-open" for="nav-input"><span></span></label>
+        </div>
+        <label class="nav-unshown" id="nav-close" for="nav-input"></label>
+        <div id="nav-content">
+            <div id="toolbar" style="position: relative;">
+                <table>
+                    <tbody data-bind="foreach: layers">
+                        <tr data-bind="css: { up: $parent.upLayer === $data, down: $parent.downLayer === $data }">
+                            <td><input type="checkbox" data-bind="attr: { id: 'checkbox' + $index() }, checked: show">
+                            
+                                <label class="label" data-bind="attr: { for: 'checkbox' + $index() }, text: name, visible: !$parent.isSelectableLayer($data)"></label>
+                                <select class="cp_ipselect cp_sl04" data-bind="visible: $parent.isSelectableLayer($data), options: $parent.baseLayers, optionsText: 'name', value: $parent.selectedLayer"></select>
+                            </td>
+                            <td><button type="button" class="cesium-button" data-bind="click: function() { $parent.raise($data, $index()); }, visible: $parent.canRaise($index())">▲</button></td>
+                            <td><button type="button" class="cesium-button" data-bind="click: function() { $parent.lower($data, $index()); }, visible: $parent.canLower($index())">▼</button></td>
+                            <td>
+                                <input class="trLayer" type="range" min="0" max="1" step="0.01" data-bind="value: alpha, valueUpdate: 'input'">
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="switch2">
+                <p style="color:#fff">&emsp;Plot Your Saved Coordinate
+                    <label class="switch2__label">
+                        <input type="checkbox" class="switch2__input" onclick='loadgeojson({{record_json}}, this.checked)'>
+                        <span class="switch2__content"></span>
+                        <span class="switch2__circle"></span>
+                    </label>
+                </p>
+            </div>
+            <p style="color:#fff">&emsp;Terrain magnification</p>
+            <p style="color:#fff">&emsp;0<input id="rangeTerrain" type="range" style="background-color:rgba(255, 100, 100, 0.7);width:300px" value="2" min="0" max="20" step="2" onchange="terrain_magni(this.value)"/>20</p>
+        </div>
+    </div>
+    <!-- Hamburger menu END -->
+
+    <div id="main">
+        <div id="map" style=" position:absolute; top:0px; left:0px; font-size:100%; clear: both;width: 100%;height: 97%">
+            <!-- Spectral box --><!-- Spectral_box.css --><!-- MapConf.js -->
+            <div id="graph_move">
+                <input id="graph_1" type="radio" value="graphtab1" name="tab_item" checked>
+                <label class="tab_item" id="graphtab1" for="graph_1">Spectral 1</label>
+                <input id="graph_2" type="radio" value="graphtab2"  name="tab_item">
+                <label class="tab_item" id="graphtab2" for="graph_2">Spectral 2</label>
+                <input id="graph_3" type="radio" value="graphtab3"  name="tab_item">
+                <label class="tab_item" id="graphtab3" for="graph_3">Spectral 3</label>
+
+                <div class="tab_content" id="graph_1_content">
+                    <div id="graph" class="graph1" ></div>
+                </div>
+                <div class="tab_content" id="graph_2_content">
+                    <div id="graph" class="graph2" ></div>
+                </div>
+                <div class="tab_content" id="graph_3_content">
+                    <div id="graph" class="graph3" ></div>
+                </div>
+            </div>
+            <div id="download_csv" style="position:absolute; top:250%; left:10px; "></div><!-- MapConf.js -->
+            <!-- Spectral box END-->
+            <!-- Thumbnail box --><!-- Thumbnail_box.css --><!-- MapConf.js -->
+            <div id="image_move">
+                <div id="imageArea" ></div>
+            </div>
+            <div id="image_move2">
+                <div id="imageArea2" ></div>
+            </div>
+            <!-- Thumbnail box END-->
+        </div>
+    </div>
+ 
+    <!-- Back function --><!-- Back_function.css -->
+    <div>
+        <form class=line_ly name="locationSetForm" style="position:fixed; top:0px; left:105px; width: 70px;height: 70px;z-index: -1" >
+            <input type="text" style="width:54px;margin:7px 1px 1px 5px;" name="latitude" placeholder="latitude" ><br>
+            <input type="text" style="width:54px;margin:7px 1px 1px 5px;" name="longitude" placeholder="longitude"><br>
+            <div class="cp_ipselect cp_sl04" style="top:-62px; left:75px">
+                <p>zoom level</p>
+                <select name="select_zoom" style="vertical-align:baseline;">
+                    <option value="15000000">0</option>
+                    <option value="10000000">1</option>
+                    <option value="8000000">2</option>
+                    <option value="6000000">3</option>
+                    <option value="4000000">4</option>
+                    <option value="2000000">5</option>
+                    <option value="1500000">6</option>
+                    <option value="1000000">7</option>
+                    <option value="700000">8</option>
+                    <option value="500000">9</option>
+                    <option value="420000">10</option>
+                </select>
+            </div>
+            <input class=jump_co style="position: absolute; top:40px;left:75px" type="button" value="jump" onclick="jumpLocation(-1)">
+        </form>
+    </div>
+    <div class="line_lx">
+        <p>Circle radius</p>
+        <input id="circle_mouse" type="number" value="300" style="width: 6em;" min="0" >
+    </div>
+    <!-- Back function END-->
+
+    <!-- ObservationID box --><!-- ObservationID_box.css -->
+    <table border="1">
+        <tr>
+        </tr>
+        <tr>
+            <td bgcolor="#FFFFFF">    
+                <div  id="IDArea" style="position:fixed; top:130px; left:1px;"></div>
+            </td>
+        </tr>
+    </table>
+    <!-- ObservationID box END-->
+   
+    <!-- SpectralList menu --><!-- SpectralList_menu.css --><!-- SpectralList menu js -->
+    <script type="text/javascript" src="/collectstatic/node_modules/dygraphs/dist/dygraph.js"></script>
+    <body>
+        <div class="cp_cont">
+            <div class="cp_offcm01">
+		        <input type="checkbox" id="cp_toggle01">
+		        <label id="spectral_list_open" for="cp_toggle01"><span>Spectral List</span></label>
+		        <label id="spectral_list_close" for="cp_toggle01"><span>Close</span></label>
+                <div class="cp_menu">
+                    <ul>
+                        <span>
+                            <div class="right_menu">
+                                <div id="app_vue">
+                                    <select id="select_list" name="example_select" v-on:change="change_list(record_spectra);">
+                                        <option value="my_all">my list (ALL)</option>
+                                        <option value="private">my list (Private only)</option>
+                                        {% for group in groups %}
+                                        <option value="{{group}}">{{group}}</option>
+                                        {% endfor %}
+                                    </select>
+                                    <button type="submit" id="updatebtn" v-on:click="get_record_spectra();">Update</button><br><br>
+
+                                    <select id="order_by#1" name="order_by">
+                                        <option value="">--- Sort key ---</option>
+                                        <option value="instrument">Instrument</option>
+                                        <option value="data_id">Observation id</option>
+                                        <option value="created_date">Creation time</option>
+                                        <option value="user">User</option>
+                                        <option value="permission">Permission</option>
+                                    </select>
+
+                                    <select id="order_by#1_how" name="order_by">
+                                        <option value="ascending">ASC</option>
+                                        <option value="descending">DESC</option>
+                                    </select>
+
+                                    <select id="order_by#2" name="order_by">
+                                        <option value="">--- Sort key ---</option>
+                                        <option value="instrument">Instrument</option>
+                                        <option value="data_id">Observation id</option>
+                                        <option value="created_date">Creation time</option>
+                                        <option value="user">User</option>
+                                        <option value="permission">Permission</option>
+                                    </select>
+
+                                    <select id="order_by#2_how" name="order_by">
+                                        <option value="ascending">ASC</option>
+                                        <option value="descending">DESC</option>
+                                    </select>
+                                    <button type="submit" id="sortbtn" v-on:click="change_order(record_spectra);">Sort</button><br>
+
+
+                                    <div class="search_function_right_menu">
+                                        <table border="1" style="table-layout:fixed; color: silver; border-style: none; border-collapse: separate; border-spacing: 5px 0px; empty-cells:show;">
+                                            <tr align="left" style="font-size: 9pt;">
+                                                <th width="100">Obs. ID</th>
+                                                <th width="100" colspan="3">Lat(-90, 90)</th>
+                                                <th width="100" colspan="3">Lon(-180, 180)</th>
+                                                <th width="200">Keyword in Note</th>
+                                                <th width="100"></th>
+                                            </tr>
+                                            <tr>
+                                                <td>
+                                                    <input type="text" id="search_obs_id" value="" style="width:100px; margin-right: 10px;">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="search_lat_min" value="" style="width:50px;">
+                                                </td>
+                                                <td>
+                                                    ~
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="search_lat_max" value="" style="width:50px; margin-right: 10px;">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="search_lon_min" value="" style="width:50px;">
+                                                </td>
+                                                <td>
+                                                    ~
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="search_lon_max" value="" style="width:50px; margin-right: 10px;">
+                                                </td>
+                                                <td>
+                                                    <input type="text" id="search_note" value="" style="width:200px;">
+                                                </td>
+                                                <td>
+                                                    <button type="submit" id="searchbtn" v-on:click="search_from_list();">Search</button>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+
+
+                                    <table align="center" border="1" style="width:690px; table-layout:fixed; font-size: 11pt; color: silver; margin-top:5px;">
+                                        <tr>
+                                            <th width="110">ID</th>
+                                            <th width="60">Lat</th>
+                                            <th width="60">Lon</th>
+                                            <th width="135">Creation-time</th>
+                                            <th width="275">Note</th>
+                                            <th style="width:50px; font-size: 8pt;">
+                                                <button type="submit" id="deletebtn" v-on:click="delete_from_list();">Delete</button>
+                                            </th>
+                                        </tr>
+                                    </table>
+
+                                    <div class="scroll_contents">
+                                        <li v-cloak v-for="(item, index) in record_spectra">
+                                            <div class="accordion_menu">
+                                                <div class="nonhidden_contents">
+                                                    <label :for="[[ item.id_accordion ]]">
+                                                        <table align="center" border="1" style="width:690px; table-layout:fixed; font-size: 10pt;">
+                                                            <tr>
+                                                                <td width="110">[[item.data_id]]</td>
+                                                                <td width="60">[[item.latitude]]</td>
+                                                                <td width="60">[[item.longitude]]</td>
+                                                                <td width="135" style="overflow-x:scroll; white-space:nowrap;">[[item.created_date]]</td>
+                                                                <td width="275" style="overflow-x:scroll; white-space:nowrap;">[[item.description]]</td>
+                                                                <td width="50" style="text-align: center;">
+                                                                    <input type="checkbox" id="delete_from_list" :value="[[ item.id_delete ]]"></input>
+                                                                </td>
+                                                            </tr>
+                                                        </table>
+                                                    </label>
+                                                </div>
+
+                                                <input type="checkbox" :id="[[ item.id_accordion ]]" class="on-off" @click="graph(), original_thumbnail([[ item ]])" />
+
+                                                <div>
+                                                    <div class="hidden_contents">
+                                                        <div class="plot_rightmenu">
+                                                            <div :id="[[ dygraphs[index].id_graph ]]" class="plot_table_rightmenu" style="width:465px; height:300px; display: inline-block; _display: inline;"></div>
+                                                            <div class="plot_table_rightmenu">
+                                                                <table align="center" border="1" style="width:240px; table-layout:fixed; font-size: 10pt; color: black;">
+                                                                    <tr>
+                                                                        <td width="70">Instrument</td>
+                                                                        <td widht="130">[[item.instrument]]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td width="70">X Pixel</td>
+                                                                        <td widht="130">[[item.x_pixel]]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td width="70">Y Pixel</td>
+                                                                        <td widht="130">[[item.y_pixel]]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td width="70">User</td>
+                                                                        <td widht="130">[[item.user]]</td>
+                                                                    </tr>
+                                                                    <tr>
+                                                                        <td width="70">Permission</td>
+                                                                        <td widht="130">[[item.permission]]</td>
+                                                                    </tr>
+                                                                </table>
+                                                                <!-- Change permission: -->
+                                                                <select :id="[[ item.id_permission ]]" name="select_permission" v-on:change="change_permission([[item.id_permission]]);">
+                                                                    <option value="" selected disabled>--- Permissions ---</option>
+                                                                    <option value="private">private</option>
+                                                                    {% for group in groups %}
+                                                                    <option value="{{group}}">{{group}}</option>
+                                                                    {% endfor %}
+                                                                </select><br><br>
+
+                                                                <div class="original_thumbnail" :id="[[ item.id_thumbnail ]]" style="height:250px; width:240px; table-layout:fixed; border: 1px solid #ff8c00;">
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                        <div class="hidden_box">
+                                                            <label :for="[[ item.id_edit ]]">Edit</label>
+                                                            <input class="Edit_btn" type="checkbox" :id="[[ item.id_edit ]]" :value="[[ item.id_edit ]]"></input><br>
+                                                            <div class="created_description" id="created_description">
+                                                                [[item.description]]<br><br>
+                                                            </div>
+                                                            <div class="hidden_show">
+                                                                <textarea :id="[[item.id_update]]" :value="[[item.description]]" style="width:420px; height:50px;font-size:12pt;"></textarea><br>
+                                                                <button type="submit"  style="position: absolute; left: 380px;" :id="[[ item.id_update ]]" v-on:click="update_description([[ item.id_update ]]);">Update</button><br><br>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </li>
+                                    </div>
+                                </div>
+                            </div>
+                        </span>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </body>
+    <!-- SpectralList menu END-->
+</body>
+
+
+<!-- Api js -->
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.9.10/xlsx.full.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/FileSaver.js/1.3.3/FileSaver.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/proj4js/2.5.0/proj4.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.js"></script>
+<script src="https://unpkg.com/axios/dist/axios.min.js"></script>
+<script src="https://unpkg.com/vue"></script><!-- Vue.js -->
+<script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script><!-- Vue2.js -->
+<!-- cesium js -->  
+<script src="/collectstatic/map3d/cesium_1.47/cesium/Build/Cesium/Cesium.js"></script>
+<script src="/collectstatic/map3d/assets_ol4_4.3.1/ol4/js/ol.js"></script>
+<!-- js file (django) -->
+<script src="/collectstatic/map3d/js_file/MapConf.js"></script>
+<script src="/collectstatic/map3d/js_file/Download.js"></script>
+<script src="/collectstatic/map3d/js_file/NetworkSetting.js"></script>
+<script src="/collectstatic/map3d/js_file/GetData_From_Database.js"></script>
+<script src="/collectstatic/map3d/js_file/HeadConf.js"></script>
+<script src="/collectstatic/map3d/js_file/Save.js"></script>
+<script src="/collectstatic/map3d/js_file/First_loading.js"></script>
+<script src="/collectstatic/map3d/js_file/Upside_menu.js"></script>
+
+
+<script>
+    var DjangoURL = {
+        get_spectra_axios: "{% url 'spectra:get_spectra_axios' %}",
+        record_spectra_user_id: "{{ record_spectra.user.id }}",
+        record_spectra_user: "{{ record_spectra.user }}",
+        change_permission: "{% url 'spectra:change_permission' %}",
+        description_update: "{% url 'spectra:description_update' %}",
+        delete_from_list: "{% url 'spectra:delete_from_list' %}"
+    }
+</script>
+<script src="/collectstatic/map3d/js_file/SpectralList.js"></script>

@@ -1,0 +1,57 @@
+<!doctype html>
+<head>
+    {% load static %}
+    <title>RedAce -Select-</title>
+    <!-- ゲスト用にする？ホームに詰め込んだら良いと思う。 -->
+    <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" />
+    <link rel="stylesheet" type="text/css" href="{% static 'accounts/css/select.css' %}" />
+<!-- </head> -->
+
+ <!-- <button type="button" class="btn btn-primary btn-lg">GIS Application</button> -->
+<!-- <button type="button" class="btn btn-default btn-lg" onclick="window.open('{% url 'map3d:default' %}')">GIS Application</button> -->
+
+<!-- <div class="body"></div>
+<div class="grad"></div> -->
+<div class="row">
+  <div class="col-md-6">
+    <div class="h-100">
+      <div class="align-middle">
+        <div class="jumbotron">
+          <div class="container">
+            <button type="button" class="btn btn-default btn-lg" onclick="window.open('{% url 'map3d:default' %}')">GIS Application</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="h-100">
+        <div class="align-middle">
+          <div class="jumbotron">
+            <div class="container">
+              <button type="button" class="btn btn-default btn-lg" onclick="window.open('{% url 'accounts:home' %}')">YOUR HOME</button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <div class="h-100">
+      <div class="align-middle">
+        <div class="jumbotron">
+          <div class="container">
+            <button type="button" class="btn btn-default btn-lg" onclick=window.open("http://127.0.0.1:8888/lab") target="_blank">JupyterLab</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+</head>
