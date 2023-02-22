@@ -1,38 +1,38 @@
 {% load static %}
 <html>
 <head>
-    <title>RedAce -Login-</title>
-    <!-- <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" /> -->
-    <!-- <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script> -->
-    <!-- <script src="/static/jquery/dist/jquery.min.js"></script> -->
-    <!-- <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
-    <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script> -->
-    <!-- <link href="{% static 'accounts/css/login.css' %}" rel="stylesheet"></link> -->
-    <link href="/collectstatic/accounts/css/login.css" rel="stylesheet"></link><!-- 22/09/28 -->
+  <title>RedAce -Login-</title>
+  <!-- <link rel="stylesheet" type="text/css" href="{% static 'bootstrap/dist/css/bootstrap.css' %}" /> -->
+  <!-- <script src="{% static 'bootstrap/dist/js/bootstrap.min.js' %}"></script> -->
+  <!-- <script src="/static/jquery/dist/jquery.min.js"></script> -->
+  <!-- <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <link href="/static/bootstrap/dist/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+  <script src="/static/bootstrap/dist/js/bootstrap.min.js"></script> -->
+  <!-- <link href="{% static 'accounts/css/login.css' %}" rel="stylesheet"></link> -->
+  <link href="/collectstatic/accounts/css/login.css" rel="stylesheet"></link><!-- 22/09/28 -->
 </head>
 
 <div class="body"></div>
 <div class="grad"></div>
 <div class="header">
-    <div>RedAce</div>
+  <div>RedAce</div>
 </div>
 <br>
 <div class="login">
-    <p>Please enter your account and password.</p>
-    <form method="post" action="{% url 'accounts:login' %}">
-        {% load widget_tweaks %}
-        {% csrf_token %}
-        <small class="errors-text">{{ form.non_field_errors }}</small>
-        <small class="errors-text">{{ form.errors.username }}</small>
-        {% render_field form.username class="form-control" placeholder="account" %}
-        <small class="errors-text">{{ form.errors.password }}</small>
-        {% render_field form.password class="form-control" placeholder="password" %}
+  <p>Please enter your account and password.</p>
+  <form method="post" action="{% url 'accounts:login' %}">
+    {% load widget_tweaks %}
+    {% csrf_token %}
+    <small class="errors-text">{{ form.non_field_errors }}</small>
+    <small class="errors-text">{{ form.errors.username }}</small>
+    {% render_field form.username class="form-control" placeholder="account" %}
+    <small class="errors-text">{{ form.errors.password }}</small>
+    {% render_field form.password class="form-control" placeholder="password" %}
 
-        <input type="submit" value="Login">
-        <br>
-    </form>
-    <a href="{% url 'accounts:signup' %}">Signup</a>
+    <input type="submit" value="Login">
+    <br>
+  </form>
+  <a href="{% url 'accounts:signup' %}">Signup</a>
 </div>
 
 

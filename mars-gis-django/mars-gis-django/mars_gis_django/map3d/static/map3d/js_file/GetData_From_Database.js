@@ -166,6 +166,7 @@ function getdatafromdb(lon, lat) {
         contentType: 'application/json',
         data: JSON.stringify(Remodeling_getfeatureinfo)
     }).then(function(data) {
+        console.log('nnnnn');
         obsID_box(data);
     }, function() {
         alert("読み込み失敗");
@@ -272,6 +273,8 @@ function thumbnail_box(data) {
         palette = 1;
     }
 
+    console.log(palette);
+
     if (palette === 0) {
         FootprintHist[0]=coordinateObs;
         roots.map.entities.remove(wyoming);
@@ -353,13 +356,8 @@ function thumbnail_box(data) {
             layers: [
                 new ol.layer.Image({
                     source: new ol.source.ImageStatic({
-                        url: data_object['Image_path'], //usui220922
+                        url: '/collectstatic/' + data_object['Image_path'], //220928
                         // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
-                        // url: headname+data_object['Image_path'],
-                        // url: "http://192.168.1.14/redace/mars_data_distributed/distributed/pds/MO/THEMIS/pds-geosciences.wustl.edu/Odyssey/THEMIS/pds/ODTGEO_v2/browse/odtbws2_0048/i523xxbws2/I52359002SNU.png",
-                        // url: "http://192.168.1.14/redace/mars_data/generated/thumbnail/pds/MRO/CRISM/pds-geosciences.wustl.edu/mro/mro-m-crism-3-rdr-targeted-v1/mrocr_2101/trdr/2006/2006_314/frt00002f46/frt00002f46_07_if168l_trr3.png",
-                        // url: "http://192.168.1.103/redace/mars_data/generated/thumbnail/pds/MRO/CRISM/pds-geosciences.wustl.edu/mro/mro-m-crism-3-rdr-targeted-v1/mrocr_2101/trdr/2006/2006_314/frt00002f46/frt00002f46_07_if168l_trr3.png",
-                        // url: "http://localhost:8000/mars_data/generated/thumbnail/pds/MRO/CRISM/pds-geosciences.wustl.edu/mro/mro-m-crism-3-rdr-targeted-v1/mrocr_2101/trdr/2006/2006_314/frt00002f46/frt00002f46_07_if168l_trr3.png", ///usui
                         projection: projection,
                         imageExtent: extent
                     })
@@ -401,8 +399,11 @@ function thumbnail_box(data) {
         hist0count = 0;
         history_json0.length = 0;
         histTop1 = "";
+
+        console.log(data_object['Image_path']);
+
         wms_layers.thumbnail.on('click', function(evt) {
-            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
+            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
         });
     } else if (palette === 1) {
         FootprintHist[1]=coordinateObs;
@@ -472,8 +473,7 @@ function thumbnail_box(data) {
             layers: [
                 new ol.layer.Image({
                     source: new ol.source.ImageStatic({
-                        // url: headname+data_object['Image_path'], //usui
-                        url: data_object['Image_path'], //usui220922
+                        url: '/collectstatic/' + data_object['Image_path'], //usui220922
                         // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
                         projection: projection,
                         imageExtent: extent
@@ -517,8 +517,11 @@ function thumbnail_box(data) {
         hist1count = 0;
         history_json1.length = 0;
         histTop2 = "";
+
+        console.log(data_object['Image_path']);
+
         wms_layers.thumbnail2.on('click', function(evt) {
-            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
+            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
         });
     }
 }
@@ -672,28 +675,15 @@ function ancillary_box(data) {
     var data_object = JSON.parse(data);
     var inner_ref_ID;
     var flag_ref_ID = false;
-    // var head_url = "http://localhost:8000"; //220922
-    // var infobox_txt_all =  '<div style="height:500px;">\
-    //                         <button style="' + style_anc_dl + 'top:90px;" id="anc_dl_xlsx">Download XLSX</button>\
-    //                         <button style="' + style_anc_dl + 'top:113px;" id="anc_dl_json">Download JSON</button>\
-    //                         <button style="' + style_anc_dl + 'top:136px;" id="anc_dl_csv">Download CSV</button>\
-    //                         <button style="' + style_anc_dl + 'top:159px;" id="anc_dl_pvl">Download PVL</button><div>\
-    //                         <img src="'+ head_url + data_object["Image_path"] + '" style="position:absolute; left:10px; width:180px; height:180px; object-fit:contain;" >\
-    //                         <div class="infobox_name" style="position:absolute; right:5px; top:0px; padding:0.5em 1em; margin:2em 0; background-color:rgba(0, 117, 226, 0.7); border-left:solid 10px #ffc06e;">\
-    //                         <font size="4">' + data_object["obs_name"] + '</font></div></div><br>\
-    //                         <table class="ancillary" border="1" style="position:absolute; top:200px; width:97%; table-layout:auto; font-size:8pt; font-family:serif;" cellspacing="0">';
-    //                         // <img src="'+ head_url + data_object["Image_path"] + '" style="position:absolute; left:10px; width:180px; height:180px; object-fit:contain;" >\
-    //220922
     var infobox_txt_all =  '<div style="height:500px;">\
                             <button style="' + style_anc_dl + 'top:90px;" id="anc_dl_xlsx">Download XLSX</button>\
                             <button style="' + style_anc_dl + 'top:113px;" id="anc_dl_json">Download JSON</button>\
                             <button style="' + style_anc_dl + 'top:136px;" id="anc_dl_csv">Download CSV</button>\
                             <button style="' + style_anc_dl + 'top:159px;" id="anc_dl_pvl">Download PVL</button><div>\
-                            <img src="'+ data_object["Image_path"] + '" style="position:absolute; left:10px; width:180px; height:180px; object-fit:contain;" >\
+                            <img src="/collectstatic/'+ data_object["Image_path"] + '" style="position:absolute; left:10px; width:180px; height:180px; object-fit:contain;" >\
                             <div class="infobox_name" style="position:absolute; right:5px; top:0px; padding:0.5em 1em; margin:2em 0; background-color:rgba(0, 117, 226, 0.7); border-left:solid 10px #ffc06e;">\
                             <font size="4">' + data_object["obs_name"] + '</font></div></div><br>\
                             <table class="ancillary" border="1" style="position:absolute; top:200px; width:97%; table-layout:auto; font-size:8pt; font-family:serif;" cellspacing="0">';
-                            // <img src="'+ head_url + data_object["Image_path"] + '" style="position:absolute; left:10px; width:180px; height:180px; object-fit:contain;" >\
     
     var key_check;
     infobox_txt_name = '<tr>';
@@ -747,7 +737,12 @@ function ancillary_box(data) {
 
 //umemo 引数：クリックされた点(ピクセル)のデータ等     
 //umemo クリックされた点(ピクセル)にデータがあれば取り出す 
-function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, obs_name, wavelength, re_flag) {
+function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, image_path, obs_name, wavelength, re_flag) {
+    console.log(pixels);
+    console.log(Image_size);
+    console.log(obs_ID);
+    console.log(path);
+    console.log(image_path);
     if (re_flag === 0) {//umemo thumbnailをclick
         Alignment_setting(pixels, Image_size);
         pixels[0] = pixels[0] - 1;
@@ -768,7 +763,7 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, obs_
             headers: { "X-CSRFToken": csrftoken },
             url: 'reflectance/',
             contentType: 'application/json',
-            data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "wavelength": wavelength, "pixels": pixels }),
+            data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "Image_path": image_path, "wavelength": wavelength, "pixels": pixels }),
             beforeSend: function() {
                 $loading.removeClass("is-hide");
                 $loading2.removeClass("is-hide");
@@ -776,6 +771,7 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, obs_
         }).then (function(data) {
             $loading.addClass("is-hide");
             $loading2.addClass("is-hide");
+            console.log(image_path);
             spectral_box(data);
         }, function() {
             alert("読み込み失敗");
@@ -791,6 +787,7 @@ spectral_jagged = new Array(3);
 
 //umemo 引数：プロットするスペクトルデータに関するデータ
 function spectral_box(data) {
+    console.log(data);
     var csv_format = [];
     var data_object = JSON.parse(data);
     graph_list.length = 0;
@@ -1100,6 +1097,7 @@ function click_reRef(result) {
         var obs_ID = data_object["obs_ID"];
         var obs_name = data_object["obs_name"];
         var path = data_object["path"];
+        var image_path = data_object["Image_path"];
         var wavelength = data_object["band_bin_center"]
     } else if (info[0] == 1) {
         var hisjson = JSON.stringify(history_json1[info[1]]);
@@ -1109,9 +1107,10 @@ function click_reRef(result) {
         var obs_ID = data_object["obs_ID"];
         var obs_name = data_object["obs_name"];
         var path = data_object["path"];
+        var image_path = data_object["Image_path"];
         var wavelength = data_object["band_bin_center"]
     }
-    getdatafromdirectory_reflectance(re_pixels, Image_size_xy, obs_ID, path, obs_name, wavelength, 1);
+    getdatafromdirectory_reflectance(re_pixels, Image_size_xy, obs_ID, path, image_path, obs_name, wavelength, 1);
 }
 
 

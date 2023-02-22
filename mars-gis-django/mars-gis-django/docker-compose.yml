@@ -114,7 +114,7 @@ services:
     depends_on:
       - postgis
     expose:
-      - "80"
+      - "8010"
     networks:
       redace_network:
         ipv4_address: 172.16.238.3

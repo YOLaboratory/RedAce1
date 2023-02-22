@@ -10,16 +10,6 @@ body{
     background: #565656;
 }
 
-
-
-
-
-
-
-
-
-
-
 #position_buttonArea {
     pointer-events: none;
     width: 20%;
@@ -33,26 +23,12 @@ body{
     z-index: 1999;
 }
 
-
-
-
-
-
-
-
-
-
-
-
 .line_lj {
     -webkit-box-shadow: 0 0 100px rgba(0, 0, 0, 0.2) inset, 0 0 100px rgba(0, 0, 0, 0.2);
     padding: 5px;
     background: #3c383a;
     color: #FFF;
 }
-
-
-
 
 .ratio2[type=range][orient=vertical] {
     writing-mode: bt-lr;
