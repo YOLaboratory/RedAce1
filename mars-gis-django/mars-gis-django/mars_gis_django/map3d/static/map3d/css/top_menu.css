@@ -13,7 +13,7 @@
     text-decoration: none;
     display: block;
     padding: 5px 0;
-    width: 78px;
+    width: 88px;
     right: 0px;
     background: rgba(135,5,34,0.5);
     color: #FFF;
@@ -27,7 +27,7 @@
 }
 .top_menu_contents {
     position: absolute;
-    right: 80px;
+    right: 90px;
     top: -20vw;
     -webkit-transition: 0.53s transform;
             transition: 0.53s transform;
@@ -50,7 +50,7 @@
 .nav li a {
     display: block;
     height: 30px;
-    padding: 5px 0;
+    padding: 5px 5px;
     background: rgba(255,0,0,0.3); 
     transition: 0.5s;
     text-decoration: none;
@@ -58,6 +58,10 @@
     box-sizing: border-box;
     text-align: center;
     color: #fff;
+}
+.nav ul.first a {
+    padding: 5px 5px;
+    text-align: left;
 }
 .nav li.bar {
     width: 90px;

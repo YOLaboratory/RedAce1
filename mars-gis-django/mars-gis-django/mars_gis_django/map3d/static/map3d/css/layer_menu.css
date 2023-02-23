@@ -27,11 +27,11 @@
     display: block;
     float: right;
     margin: 8px;
-    padding: 2px 5px;
+    padding: 2px 0px;
     border: 1px solid rgb(99, 99, 99);
     background-color: rgba(233, 64, 64, 0.583);
     color: white;
-    width: 70px;
+    width: 55px;
 	text-align: center;
 }
 #layer_menu_close:hover {
@@ -40,6 +40,7 @@
 }
 .layer_menu_contents {
     position: fixed;
+    top: 45px;
     left: -50vw;
     width: 370px;
     -webkit-transition: 0.53s transform;
@@ -112,6 +113,7 @@
     color:#6cc0e5;
 }
 #toolbar {
+    margin-left: 5px;
     padding: 4px;
 }
 #toolbar input {
@@ -122,6 +124,12 @@
 #toolbar table tr {
     transform: translateY(0);
     transition: transform 0.4s ease-out;
+}
+#toolbar table tr select {
+    border-radius: 5px;
+    border-color: white;
+    background-color: black;
+    width: 100%;
 }
 #toolbar table tr.up {
     transform: translateY(33px);
@@ -134,7 +142,11 @@
 #toolbar .trLayer {
     background-color: rgba(255, 255, 255, 0.7);
 }
-#rangeTerrain {
+.switch2 p,
+.rangeTerrain p {
+    color: white;
+}
+.rangeTerrain input {
     background-color: rgba(255, 255, 255, 0.7);
     width: 120px;
 }
