@@ -192,16 +192,28 @@ function obsID_box(data) {
     data_object = JSON.parse(data);
     if (data_object["hit_data"][0][0]["features"].length > 0) {
         IDset.innerHTML = "";
-        if (flagID !== false)
+        if (flagID !== false) {
             inner.innerHTML = "";
+        }
+        
         var ID_from_feature = '';
-
         for (j = 0; j < data_object["hit_data"].length; j++) {
-            ID_from_feature = '<div class="button_obs">' + data_object["hit_data"][j][0]["features"][0]["properties"]["name"].toUpperCase() + '</div><form id="IDproduct'+parseInt(j)+'" name="IDproduct'+parseInt(j)+'" ><input type="button" name="product_ID' + obs_count + '" value="' + data_object["hit_data"][j][0]["features"][0]["properties"]["id"] + '" class="button_tra" >';
+            ID_from_feature = '\
+                <div class="button_obs">' + data_object["hit_data"][j][0]["features"][0]["properties"]["name"].toUpperCase() + '\
+                <button type="button" class="cesium-infoBox-close" onclick="removeElement(this)"}"></button></div>\
+                <form id="IDproduct' + parseInt(j) + '" name="IDproduct' + parseInt(j) + '">\
+                <input type="button" name="product_ID' + obs_count + '" value="' + data_object["hit_data"][j][0]["features"][0]["properties"]["id"] + '" class="button_tra" style="float:left;">\
+                ';
+
             for (i = 1; i < data_object["hit_data"][j][0]["features"].length; i++) {
-                if (i % 2 != 0) IDset.style.height = String(Math.min(((j + 1) * (4 + (i / 2 + 1) * 54)), 300)) + 'px';
+                if (i % 2 != 0) {
+                    IDset.style.height = String(Math.min(((j + 1) * (4 + (i / 2 + 1) * 54)), 300)) + 'px';
+                }
                 console.log(data_object["hit_data"][j][0]["features"][i]["properties"]["id"] );
-                ID_from_feature = ID_from_feature + '<input type="button" name="product_ID' + (parseInt(i) + parseInt(obs_count)) + '" value="' + data_object["hit_data"][j][0]["features"][i]["properties"]["id"] + '" class="button_tra" >';
+                console.log(i);
+                ID_from_feature = ID_from_feature + '\
+                    <input type="button" name="product_ID' + (parseInt(i) + parseInt(obs_count)) + '" value="' + data_object["hit_data"][j][0]["features"][i]["properties"]["id"] + '" class="button_tra">\
+                    ';
             }
             ID_from_feature = ID_from_feature + '</form>';
 
@@ -209,22 +221,28 @@ function obsID_box(data) {
             IDset.style.width = '320px';
             IDset.style.padding = '0px';
             IDset.style.margin = '0px';
-            // IDset.style.border = '0px';
 
             var div_element_to_show_product_ID = document.createElement("div");
             div_element_to_show_product_ID.id = "product_ID";
             div_element_to_show_product_ID.innerHTML = ID_from_feature;
+
             var productSet = IDset;
             productSet.appendChild(div_element_to_show_product_ID);
             flagID = true;
             inner = div_element_to_show_product_ID;
 
-            for (i = 0; i < data_object["hit_data"][j][0]["features"].length; i++){
-                document.querySelector('#IDproduct'+parseInt(j)+' input[name="product_ID' + (parseInt(i) + parseInt(obs_count)) + '"').addEventListener('click', getdatafromdirectory_ancillary.bind(null, data_object["hit_data"][j][0]["features"][i]));
+
+            for (i = 0; i < data_object["hit_data"][j][0]["features"].length; i++) {
+                document.querySelector('#IDproduct' + parseInt(j) + ' input[name="product_ID' + (parseInt(i) + parseInt(obs_count)) + '"').addEventListener('click', getdatafromdirectory_ancillary.bind(null, data_object["hit_data"][j][0]["features"][i]));
             }
             obs_count = parseInt(i) + parseInt(obs_count);
         }
     }
+}
+
+function removeElement(button) {
+    let parent = button.parentNode.parentNode;
+    parent.remove();
 }
 
 
@@ -247,7 +265,13 @@ function getdatafromdirectory_ancillary(data) {
 function thumbnail_box(data) {
     var data_object = JSON.parse(data);
     var palette = 0;
-    var coordinateObs = Array.prototype.concat.apply([], Array.prototype.concat.apply([], data_object["geometry"]["coordinates"]));
+    var coordinateObs = Array.prototype.concat.apply(
+                            [], 
+                            Array.prototype.concat.apply(
+                                [], 
+                                data_object["geometry"]["coordinates"]
+                            )
+                        );
 
     if ((!!(flag_thumbnailX & flag_STATE.None))) {
         flag_thumbnailX = 0;
@@ -276,36 +300,37 @@ function thumbnail_box(data) {
     console.log(palette);
 
     if (palette === 0) {
-        FootprintHist[0]=coordinateObs;
+        FootprintHist[0] = coordinateObs;
         roots.map.entities.remove(wyoming);
         wyoming = roots.map.entities.add({
-            name: 'ORANGE',
-            polygon: {
-                hierarchy: Cesium.Cartesian3.fromDegreesArray(
-                    coordinateObs, roots.map.scene.globe.ellipsoid
-                ),
-                perPositionHeight: true,
-                clampToGround: true,
-                material: Cesium.Color.DARKORANGE.withAlpha(0.5),
-                outline: true,
-                outlineColor: Cesium.Color.Red
-            },
-        });
+                    name: 'ORANGE',
+                    polygon: {
+                        hierarchy: Cesium.Cartesian3.fromDegreesArray(
+                                        coordinateObs,
+                                        roots.map.scene.globe.ellipsoid
+                                    ),
+                        perPositionHeight: true,
+                        clampToGround: true,
+                        material: Cesium.Color.DARKORANGE.withAlpha(0.5),
+                        outline: true,
+                        outlineColor: Cesium.Color.Red
+                    },
+                });
 
-        mouseposition();
+        // いる？パレット2にはない。。
+        // mouseposition();
 
         ancillary_box(data);
 
+        // フローティングウィンドウの生成
         var inner_figure;
         var flag_figure = false;
-        var inner_ref_ID;
-        var flag_ref_ID = false;
+        if (flag_figure !== false) {
+            inner_figure.innerHTML = "";
+        }
 
-        if (flag_figure !== false) inner_figure.innerHTML = "";
         var div_element_figure = document.createElement("div");
-
         var imageAreaSet = document.getElementById("imageArea");
-
         imageAreaSet.innerHTML = "";
         div_element_figure.innerHTML = '<div id="thumbnail" style="width: 510px; height: 440px;z-index: 10;border: 5px solid #ff8c00; position:relative;top:0px;left:-10px">\
                                         <div id="ratio_select" name="ratio_select" style="width: 0px;height:0px; position: absolute; top: 0%;z-index:2000;  left:15%;  background-color: rgba(255,255,255,0.1);"></div>\
@@ -332,56 +357,58 @@ function thumbnail_box(data) {
         imageAreaSet.style.height = "450px";
 
 
-        //四方（うち２点）の座標点を使用してもいいが、その場合クリックした場所の座標点はまずいことになる。
-        //themisの場合sunisoidalとか投影法は違い、クリックした場所がその座標で正しいのかというものがある。
-        //位置ピクセル、〜緯度、〜軽度移動すると決まってないからね。歪みがあるからね。
-        //var extent = [data_object['Mapping']['MinimumLongitude_Left'],data_object['Mapping']['MinimumLatitude_Left'], data_object['Mapping']['MaximumLongitude_Right'], data_object['Mapping']['MaximumLatitude_Right']];
+        // 四方（うち２点）の座標点を使用してもいいが、その場合クリックした場所の座標点はまずいことになる。
+        // themisの場合sunisoidalとか投影法は違い、クリックした場所がその座標で正しいのかというものがある。
+        // 位置ピクセル、〜緯度、〜軽度移動すると決まってないからね。歪みがあるからね。
+        // var extent = [data_object['Mapping']['MinimumLongitude_Left'],data_object['Mapping']['MinimumLatitude_Left'], data_object['Mapping']['MaximumLongitude_Right'], data_object['Mapping']['MaximumLatitude_Right']];
+
+        // ブジェクトはプロパティの集合。プロパティとは名前（キー）と値（バリュー）が対になったもの。
+        var orange = new Object(); // 空のオブジェクトリテラルと同じ意味
         var extent = [0, 0, data_object['Mapping']['Image_size'][0], data_object['Mapping']['Image_size'][1]];
         var projection = new ol.proj.Projection({
-            code: 'pixels',
-            units: 'pixels',
-            extent: extent
-        });
-        var orange = new Object();
-        orange.extent = extent;
+                            code: 'pixels',
+                            units: 'pixels',
+                            extent: extent
+                        });
+        
+
+        orange.extent = extent; // `extent`プロパティを追加して値(extent)を代入
         orange.projection = projection;
         wms_layers.ratio.orange = {};
         wms_layers.ratio.orange = orange;
+        wms_layers.thumbnail = new ol.Map({ // OpenLayersを使用。
+                                    logo: false,
+                                    controls: ol.control.defaults().extend([
+                                                new ol.control.ZoomSlider()
+                                            ]),
+                                    layers: [new ol.layer.Image({
+                                                source: new ol.source.ImageStatic({
+                                                    url: '/collectstatic/' + data_object['Image_path'], //220928
+                                                    // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
+                                                    projection: projection,
+                                                    imageExtent: extent
+                                                })
+                                            })],
+                                    target: 'thumbnail',
+                                    view: new ol.View({
+                                                projection: projection,
+                                                extent: extent,
+                                                center: ol.extent.getCenter(extent),
+                                                zoom: 2,
+                                                maxZoom: 6,
+                                            })
+                                });
 
-        wms_layers.thumbnail = new ol.Map({
-            logo: false,
-            controls: ol.control.defaults().extend([
-                new ol.control.ZoomSlider()
-            ]),
-            layers: [
-                new ol.layer.Image({
-                    source: new ol.source.ImageStatic({
-                        url: '/collectstatic/' + data_object['Image_path'], //220928
-                        // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
-                        projection: projection,
-                        imageExtent: extent
-                    })
-                })
-            ],
-            target: 'thumbnail',
-            view: new ol.View({
-                projection: projection,
-                extent: extent,
-                center: ol.extent.getCenter(extent),
-                zoom: 2,
-                maxZoom: 6,
-            })
-        });
-
-        if (data_object["Ratio_path_json"] != null)
+        if (data_object["Ratio_path_json"] != null) {
             var ratio_count = Object.keys(data_object["Ratio_path_json"]).length;
-        else
+        } else {
             var ratio_count = 0;
+        }
 
         if (ratio_count != 0) {
             var ratio_div = document.createElement("div");
             ratio_div.setAttribute("class", "ratio_band_set")
-            ratio_div.innerHTML = '<select id="ratio_band" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,1);" onchange="ratio_layer1(this);"></select>';
+            ratio_div.innerHTML = '<select id="ratio_band" style="color:rgba(255,255,255,0.5); background:rgba(0,0,0,1);" onchange="ratio_layer1(this);"></select>';
             document.getElementById("ratio_select").appendChild(ratio_div);
 
             let op = document.createElement("option");
@@ -396,42 +423,48 @@ function thumbnail_box(data) {
                 document.getElementById("ratio_band").appendChild(op);
             }
         }
+
         hist0count = 0;
         history_json0.length = 0;
         histTop1 = "";
 
         console.log(data_object['Image_path']);
 
+        // clickしたピクセル位置を取得。サムネイル画像の左下基準、x,y軸で検索している。
         wms_layers.thumbnail.on('click', function(evt) {
+            console.log(evt.coordinate);
             getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
         });
+
     } else if (palette === 1) {
-        FootprintHist[1]=coordinateObs;
+        FootprintHist[1] = coordinateObs;
         roots.map.entities.remove(wyoming2);
         wyoming2 = roots.map.entities.add({
-            name: 'GREEN',
-            polygon: {
-                hierarchy: Cesium.Cartesian3.fromDegreesArray(
-                    coordinateObs, roots.map.scene.globe.ellipsoid
-                ),
-                perPositionHeight: true,
-                clampToGround: true,
-                material: Cesium.Color.MEDIUMSPRINGGREEN.withAlpha(0.5),
-                outline: true,
-                outlineColor: Cesium.Color.GREEN
-            }
-        });
+                        name: 'GREEN',
+                        polygon: {
+                            hierarchy: Cesium.Cartesian3.fromDegreesArray(
+                                            coordinateObs, 
+                                            roots.map.scene.globe.ellipsoid
+                                        ),
+                            perPositionHeight: true,
+                            clampToGround: true,
+                            material: Cesium.Color.MEDIUMSPRINGGREEN.withAlpha(0.5),
+                            outline: true,
+                            outlineColor: Cesium.Color.GREEN
+                        }
+                    });
 
         ancillary_box(data);
+        
         var inner_figure;
         var flag_figure = false;
-        var inner_ref_ID;
-        var flag_ref_ID = false;
-        if (flag_figure !== false) inner_figure.innerHTML = "";
+        if (flag_figure !== false) {
+            inner_figure.innerHTML = "";
+        }
+
         var div_element_figure = document.createElement("div");
         var imageAreaSet = document.getElementById("imageArea2");
         imageAreaSet.innerHTML = "";
-
         div_element_figure.innerHTML = '<div id="thumbnail2" style="width: 510px; height: 440px;z-index: 10;border: 5px solid #00cb72; position:relative;top:0px;left:-10px">\
                                         <div id="ratio_select2" name="ratio_select2" style="width: 0px;height:0px; position: absolute; top: 0%; z-index:2000; left:15%;  background-color: rgba(255,255,255,0.1);"></div> \
                                         <div id="slider2" style="position:absolute; z-index:2000; top:3%; left:10%; "></div>\
@@ -439,6 +472,7 @@ function thumbnail_box(data) {
                                         <input type="button" class="erasing" value="MOVE" style="position: absolute;top:-55.7px;left:85%;" onclick="jumpLocation(2)">\
                                         <div id="click_position2" style="position:absolute;width: 300px;height:40px; top:-50px; left:2px;background-color: rgba(255,255,255,0.1);"></div>\
                                         <div  id="click_history2" style="position:absolute;z-index:2000; width: 100px;height:0px; top:0%; left:80%; overflow-y:scroll;overflow-x:visible; background-color: rgba(255,255,255,0.1);text-align: center;"></div></div>';
+
         var product_figure = imageAreaSet;
         product_figure.appendChild(div_element_figure);
 
@@ -452,53 +486,52 @@ function thumbnail_box(data) {
         imageAreaSet.style.width = "510px";
         imageAreaSet.style.height = "450px";
 
+        var green = new Object();
         var extent = [0, 0, data_object['Mapping']['Image_size'][0], data_object['Mapping']['Image_size'][1]];
         var projection = new ol.proj.Projection({
-            code: 'pixels',
-            units: 'pixels',
-            extent: extent
-        });
+                            code: 'pixels',
+                            units: 'pixels',
+                            extent: extent
+                        });
 
-        var green = new Object();
         green.extent = extent;
         green.projection = projection;
         wms_layers.ratio.green = {};
         wms_layers.ratio.green = green;
-
         wms_layers.thumbnail2 = new ol.Map({
-            logo: false,
-            controls: ol.control.defaults().extend([
-                new ol.control.ZoomSlider()
-            ]),
-            layers: [
-                new ol.layer.Image({
-                    source: new ol.source.ImageStatic({
-                        url: '/collectstatic/' + data_object['Image_path'], //usui220922
-                        // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
-                        projection: projection,
-                        imageExtent: extent
-                    })
-                })
-            ],
-            target: 'thumbnail2',
-            view: new ol.View({
-                projection: projection,
-                extent: extent,
-                center: ol.extent.getCenter(extent),
-                zoom: 2,
-                maxZoom: 6
-            })
-        });
+                                    logo: false,
+                                    controls: ol.control.defaults().extend([
+                                                new ol.control.ZoomSlider()
+                                            ]),
+                                    layers: [new ol.layer.Image({
+                                                source: new ol.source.ImageStatic({
+                                                    url: '/collectstatic/' + data_object['Image_path'], //usui220922
+                                                    // url: "http://localhost:8000" + data_object['Image_path'], //usui220616
+                                                    projection: projection,
+                                                    imageExtent: extent
+                                                })
+                                            })],
+                                    target: 'thumbnail2',
+                                    view: new ol.View({
+                                                projection: projection,
+                                                extent: extent,
+                                                center: ol.extent.getCenter(extent),
+                                                zoom: 2,
+                                                maxZoom: 6
+                                            })
+                                });
+
         console.log(data_object['Image_path']);
 
-        if (data_object["Ratio_path_json"] != null)
+        if (data_object["Ratio_path_json"] != null) {
             var ratio_count = Object.keys(data_object["Ratio_path_json"]).length;
-        else
+        } else {
             var ratio_count = 0;
+        }
 
         if (ratio_count != 0) {
             var ratio_div = document.createElement("div");
-            ratio_div.setAttribute("class", "ratio_band_set2")
+            ratio_div.setAttribute("class", "ratio_band_set2");
             ratio_div.innerHTML = '<select id="ratio_band2" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,1);" onchange="ratio_layer2(this);"></select>';
             document.getElementById("ratio_select2").appendChild(ratio_div);
 
@@ -514,6 +547,7 @@ function thumbnail_box(data) {
                 document.getElementById("ratio_band2").appendChild(op);
             }
         }
+
         hist1count = 0;
         history_json1.length = 0;
         histTop2 = "";
@@ -743,11 +777,13 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
     console.log(obs_ID);
     console.log(path);
     console.log(image_path);
-    if (re_flag === 0) {//umemo thumbnailをclick
+
+    // pixels[0]:x軸、pixels[1]:y軸。だと思う。
+    if (re_flag === 0) { //umemo thumbnailをclick
         Alignment_setting(pixels, Image_size);
         pixels[0] = pixels[0] - 1;
         pixels[1] = Image_size[1] - pixels[1] - 1;
-    } else if (re_flag === 1) {//umemo thumbnailbox内左上または右側部分click
+    } else if (re_flag === 1) { //umemo thumbnailbox内左上または右側部分click
         var re_pixels = pixels.concat();
         re_pixels[0] = pixels[0] + 1;
         re_pixels[1] = Image_size[1] - pixels[1] - 1;
@@ -755,7 +791,8 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
     }
 
     //umemo pixel座標がイメージサイズ(四角形)より内側ならデータ探す
-    if (pixels[0] <= Image_size[0] && pixels[1] <= Image_size[1] && 0 <= pixels[0] && 0 <= pixels[1]) {
+    // ピクセル座標、左下基準。
+    if ((pixels[0] <= Image_size[0]) && (pixels[1] <= Image_size[1]) && (0 <= pixels[0]) && (0 <= pixels[1])) {
         var $loading = $(".cssload-thecube");
         var $loading2 = $(".back-loading");
         $.ajax({
@@ -764,11 +801,11 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
             url: 'reflectance/',
             contentType: 'application/json',
             data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "Image_path": image_path, "wavelength": wavelength, "pixels": pixels }),
-            beforeSend: function() {
+            beforeSend: function() { // Ajax通信を送信する前に任意の処理を実行.
                 $loading.removeClass("is-hide");
                 $loading2.removeClass("is-hide");
             },
-        }).then (function(data) {
+        }).then(function(data) {
             $loading.addClass("is-hide");
             $loading2.addClass("is-hide");
             console.log(image_path);
@@ -778,12 +815,9 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
         });
     }
 }
+
 csv_formatbox = [];
-
 spectral_jagged = new Array(3);
-
-
-
 
 //umemo 引数：プロットするスペクトルデータに関するデータ
 function spectral_box(data) {
@@ -791,7 +825,6 @@ function spectral_box(data) {
     var csv_format = [];
     var data_object = JSON.parse(data);
     graph_list.length = 0;
-    var graph_number = 1;
     var ref_index = 0;
 
     if (data_object["reflectance"] !== -1) {
@@ -799,7 +832,6 @@ function spectral_box(data) {
         var arr1 = data_object["reflectance"].split(',');
         var arr2 = data_object["band_bin_center"].split(',');
         csv_format.length = 0;
-        var check_wave = 0;
 
         if (Number.parseFloat(arr2[spectal_length - 1]) >= Number.parseFloat(arr2[0])) { //umemo Number(),文字列やその他の値をNumber型に変換
             for (var i = 0; i < spectal_length; i++) {
