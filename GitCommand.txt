@@ -1,0 +1,47 @@
+ファイルの登録（コミットするため）
+$ git add <ファイル名>
+
+ファイルの変更や追加をコミット
+$ git commit -m "コミットメッセージ"
+
+ローカルの変更を確認する
+$ git status
+
+commitの変更履歴をみる
+$ git log
+
+リモートにプッシュ
+$ git push origin <ブランチ名>
+
+addの取り消し
+$ git reset HEAD <ファイル名>
+
+commitの取り消し
+$ git reset --hard HEAD^
+    --hard：コミット取り消した上でワークディレクトリの内容も書き換えたい場合
+    --soft：ワークディレクトリの内容はそのままでコミットだけを取り消したい場合
+    HEAD^：直前のコミット
+    HEAD~{n} ：n個前のコミット
+
+コミットメッセージの修正
+$ git commit --amend "新しいコミットメッセージ"
+
+pushの取り消し
+$ git reset --hard <戻したいコミットのハッシュ値>
+$ git push -f
+
+ローカルでブランチを作成
+$ git branch <ブランチ名>
+
+ローカルでブランチを切り替え
+$ git checkout <ブランチ名>
+
+ブランチ作成 & 切り替え
+$ git checkout -b <ブランチ名>
+
+ブランチ名の変更
+$ git branch -m <古いブランチ名> <新しいブランチ名>
+
+全てのブランチを確認する
+$ git branch -a
+
