@@ -1,3 +1,4 @@
+// 下記、グローバル変数
 var graph_list = new Array();
 var entity = new Cesium.Entity();
 var flag_entity = 0;
@@ -266,10 +267,8 @@ function thumbnail_box(data) {
     var data_object = JSON.parse(data);
     var palette = 0;
     var coordinateObs = Array.prototype.concat.apply(
-                            [], 
-                            Array.prototype.concat.apply(
-                                [], 
-                                data_object["geometry"]["coordinates"]
+                            [], Array.prototype.concat.apply(
+                                [], data_object["geometry"]["coordinates"]
                             )
                         );
 
@@ -332,13 +331,14 @@ function thumbnail_box(data) {
         var div_element_figure = document.createElement("div");
         var imageAreaSet = document.getElementById("imageArea");
         imageAreaSet.innerHTML = "";
-        div_element_figure.innerHTML = '<div id="thumbnail" style="width: 510px; height: 440px;z-index: 10;border: 5px solid #ff8c00; position:relative;top:0px;left:-10px">\
-                                        <div id="ratio_select" name="ratio_select" style="width: 0px;height:0px; position: absolute; top: 0%;z-index:2000;  left:15%;  background-color: rgba(255,255,255,0.1);"></div>\
-                                        <div id="slider" style="position:absolute;z-index:2000; top:3%; left:10%; "></div>\
-                                        <input type="button" class="erasing" value="X" style="position: absolute;top:-55.7px;left:96.5%;" onclick="CLOSE(1)">\
-                                        <input type="button" class="erasing" value="MOVE" style="position: absolute;top:-55.7px;left:85%;" onclick="jumpLocation(1)">\
-                                        <div id="click_position" style="position:absolute;width: 300px;height:40px; top:-50px; left:2px;background-color: rgba(255,255,255,0.1);"></div>\
-                                        <div id="click_history" style="position:absolute;z-index:2000; width: 100px;height:0px; top:0%; left:80%; overflow-y:scroll;overflow-x:visible; background-color: rgba(255,255,255,0.1);text-align: center;"></div></div>';
+        div_element_figure.innerHTML = '<div id="thumbnail" style="width:510px; height:440px; z-index:10; border:5px solid #ff8c00; position:relative; top:0px; left:-10px">\
+                                        <div id="ratio_select" name="ratio_select" style="width:0px; height:0px; position:absolute; top:0%; z-index:2000; left:15%; background-color:rgba(255,255,255,0.1);"></div>\
+                                        <div id="slider" style="position:absolute; z-index:2000; top:3%; left:10%; "></div>\
+                                        <input type="button" class="erasing" value="X" style="position: absolute; top:-50px; right:0px;" onclick="CLOSE(1)">\
+                                        <input type="button" class="erasing" value="MOVE" style="position:absolute; top:-50px; right:27px;" onclick="jumpLocation(1)">\
+                                        <input type="button" class="tmp" value="Download CSV" style="position:absolute; top:-50px; right:80px;" onclick="CLOSE(1)">\
+                                        <div id="click_position" style="position:absolute; width:300px; height:40px; top:-50px; left:2px; background-color: rgba(255,255,255,0.1);"></div>\
+                                        <div id="click_history" style="position:absolute; z-index:2000; width:100px; height:0px; top:0%; left:80%; overflow-y:scroll; overflow-x:visible; background-color:rgba(255,255,255,0.1); text-align:center;"></div></div>';
 
         console.log(coordinateObs);
 
@@ -371,6 +371,9 @@ function thumbnail_box(data) {
                             extent: extent
                         });
         
+        
+
+
 
         orange.extent = extent; // `extent`プロパティを追加して値(extent)を代入
         orange.projection = projection;
@@ -465,13 +468,14 @@ function thumbnail_box(data) {
         var div_element_figure = document.createElement("div");
         var imageAreaSet = document.getElementById("imageArea2");
         imageAreaSet.innerHTML = "";
-        div_element_figure.innerHTML = '<div id="thumbnail2" style="width: 510px; height: 440px;z-index: 10;border: 5px solid #00cb72; position:relative;top:0px;left:-10px">\
-                                        <div id="ratio_select2" name="ratio_select2" style="width: 0px;height:0px; position: absolute; top: 0%; z-index:2000; left:15%;  background-color: rgba(255,255,255,0.1);"></div> \
-                                        <div id="slider2" style="position:absolute; z-index:2000; top:3%; left:10%; "></div>\
-                                        <input type="button" class="erasing" value="X" style="position: absolute;top:-55.7px;left:96.5%;"onclick="CLOSE(2)">\
-                                        <input type="button" class="erasing" value="MOVE" style="position: absolute;top:-55.7px;left:85%;" onclick="jumpLocation(2)">\
-                                        <div id="click_position2" style="position:absolute;width: 300px;height:40px; top:-50px; left:2px;background-color: rgba(255,255,255,0.1);"></div>\
-                                        <div  id="click_history2" style="position:absolute;z-index:2000; width: 100px;height:0px; top:0%; left:80%; overflow-y:scroll;overflow-x:visible; background-color: rgba(255,255,255,0.1);text-align: center;"></div></div>';
+        div_element_figure.innerHTML = '<div id="thumbnail2" style="width:510px; height:440px; z-index:10; border:5px solid #00cb72; position:relative; top:0px; left:-10px">\
+                                        <div id="ratio_select2" name="ratio_select2" style="width:0px; height:0px; position:absolute; top:0%; z-index:2000; left:15%; background-color:rgba(255,255,255,0.1);"></div> \
+                                        <div id="slider2" style="position:absolute; z-index:2000; top:3%; left:10%;"></div>\
+                                        <input type="button" class="erasing" value="X" style="position:absolute; top:-50px; right:0px;" onclick="CLOSE(2)">\
+                                        <input type="button" class="erasing" value="MOVE" style="position:absolute; top:-50px; right:27px;" onclick="jumpLocation(2)">\
+                                        <input type="button" class="tmp" value="Download CSV" style="position:absolute; top:-50px; right:80px;" onclick="CLOSE(2)">\
+                                        <div id="click_position2" style="position:absolute; width:300px; height:40px; top:-50px; left:2px; background-color:rgba(255,255,255,0.1);"></div>\
+                                        <div id="click_history2" style="position:absolute; z-index:2000; width:100px; height:0px; top:0%; left:80%; overflow-y:scroll; overflow-x:visible; background-color:rgba(255,255,255,0.1); text-align:center;"></div></div>';
 
         var product_figure = imageAreaSet;
         product_figure.appendChild(div_element_figure);
@@ -782,7 +786,7 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
     if (re_flag === 0) { //umemo thumbnailをclick
         Alignment_setting(pixels, Image_size);
         pixels[0] = pixels[0] - 1;
-        pixels[1] = Image_size[1] - pixels[1] - 1;
+        pixels[1] = Image_size[1] - pixels[1] - 1; // cubデータが左上基準だから調整しているのだと思う。。
     } else if (re_flag === 1) { //umemo thumbnailbox内左上または右側部分click
         var re_pixels = pixels.concat();
         re_pixels[0] = pixels[0] + 1;
@@ -822,45 +826,50 @@ spectral_jagged = new Array(3);
 //umemo 引数：プロットするスペクトルデータに関するデータ
 function spectral_box(data) {
     console.log(data);
+    
     var csv_format = [];
     var data_object = JSON.parse(data);
-    graph_list.length = 0;
     var ref_index = 0;
+    graph_list.length = 0;
 
     if (data_object["reflectance"] !== -1) {
         var spectal_length = data_object["band_number"].length;
-        var arr1 = data_object["reflectance"].split(',');
-        var arr2 = data_object["band_bin_center"].split(',');
+        var ref_arr = data_object["reflectance"].split(',');
+        var wav_arr = data_object["band_bin_center"].split(','); // Wavelength
+
         csv_format.length = 0;
 
-        if (Number.parseFloat(arr2[spectal_length - 1]) >= Number.parseFloat(arr2[0])) { //umemo Number(),文字列やその他の値をNumber型に変換
+        // 文字列から数値に変換、かつ x,y,x,y...の順番で配列に格納。
+        // if: 格納されている波長が昇順と降順の場合があるからだと思う。
+        if (Number.parseFloat(wav_arr[spectal_length - 1]) >= Number.parseFloat(wav_arr[0])) { //umemo Number(),文字列やその他の値をNumber型に変換
             for (var i = 0; i < spectal_length; i++) {
-                if (Number(arr1[i]) != -1) {
+                if (Number(ref_arr[i]) != -1) {
                     graph_list[ref_index] = new Array();
-                    graph_list[ref_index][1] = Number(arr1[i]);
-                    graph_list[ref_index][0] = Number(arr2[i]);
-                    csv_format = csv_format + Number(arr2[i]) + ',';
-                    csv_format = csv_format + Number(arr1[i]) + ',';
+                    graph_list[ref_index][1] = Number(ref_arr[i]);
+                    graph_list[ref_index][0] = Number(wav_arr[i]);
+                    csv_format += Number(wav_arr[i]) + ',';
+                    csv_format += Number(ref_arr[i]) + ',';
                     ref_index += 1;
                 }
             }
         } else {
             for (var i = 0; i < spectal_length; i++) {
-                if (Number(arr1[spectal_length - i - 1]) != -1) {
+                if (Number(ref_arr[spectal_length - i - 1]) != -1) {
                     graph_list[ref_index] = new Array();
-                    graph_list[ref_index][1] = Number(arr1[spectal_length - i - 1]);
-                    graph_list[ref_index][0] = Number(arr2[spectal_length - i - 1]);
-                    csv_format = csv_format + Number(arr2[spectal_length - i - 1]) + ',';
-                    csv_format = csv_format + Number(arr1[spectal_length - i - 1]) + ',';
+                    graph_list[ref_index][1] = Number(ref_arr[spectal_length - i - 1]);
+                    graph_list[ref_index][0] = Number(wav_arr[spectal_length - i - 1]);
+                    csv_format += Number(wav_arr[spectal_length - i - 1]) + ',';
+                    csv_format += Number(ref_arr[spectal_length - i - 1]) + ',';
                     ref_index += 1;
                 }
             }
         }
-        csv_formatbox[graph_counter-1] = csv_format;
+
+        csv_formatbox[graph_counter - 1] = csv_format;
         graph_list = graph_list.filter(n => n.length > 0);
 
         if (flag_ref_position) {
-            $("html,body").animate({ scrollTop: $('#graph_move').offset().top - 100 });
+            $("html,body").animate({ scrollTop: $('#graph_move').offset().top - 100});
             flag_ref_position = false;
         }
 
@@ -868,12 +877,13 @@ function spectral_box(data) {
         e_graph.style.width = "600px";
         e_graph.style.height = "530px";
         e_graph.style.background = "rgba(5,5,5,0.6)";
+
         console.log(Chart_list.length);
 
         if (Chart_list.length == 0) {
             var down_ref_div2 = document.createElement("div");
 
-            down_ref_div2.innerHTML='<div style="position:absolute;top:450px;left:300px;color:rgba(255,255,255,0.5);">\
+            down_ref_div2.innerHTML = '<div style="position:absolute;top:450px;left:300px;color:rgba(255,255,255,0.5);">\
                                     <label><input type="radio" id="Lock1"  value=1  name="Lock" >Lock 1</label>\
                                     <label><input type="radio" id="Lock2" value=2 name="Lock"  disabled="disabled">Lock 2</label>\
                                     <label><input type="radio" id="Lock3" value=3 name="Lock"  disabled="disabled">Lock 3</label>\
@@ -885,51 +895,61 @@ function spectral_box(data) {
         } else if (Chart_list.length == 2) {
             document.getElementById("Lock3").disabled = false;
         }
+
         lock_check = $('input[name=Lock]:checked').val(); //umemo val(),value取得
 
         if (lock_check != -1) {
             graph_counter = Number(lock_check);
             Lock_num = Number(lock_check);
             data_save_num = Number(lock_check);
-            data_save[data_save_num-1].push(JSON.parse(data));
-        }
-        if (lock_check == -1) {
+            data_save[data_save_num - 1].push(JSON.parse(data));
+        } else {
             Lock_num = -1;
-            data_save_num = data_save_num + 1;
-            if (data_save_num >= 4) data_save_num = 1;
-            if (data_save[data_save_num-1].length >= 1){
-                data_save[data_save_num-1] = [];
+            data_save_num += 1;
+            if (data_save_num >= 4) {
+                data_save_num = 1;
             }
-            data_save[data_save_num-1].push(JSON.parse(data));
+            if (data_save[data_save_num - 1].length >= 1) {
+                data_save[data_save_num - 1] = [];
+            }
+            data_save[data_save_num - 1].push(JSON.parse(data));
         }
 
         var classTabName = "graph" + graph_counter;
         var ee_graph = document.getElementsByClassName(classTabName.toString())[0];
+
         console.log(classTabName);
+
         if (Chart_list.length != 3) {
-            if(downcheck_list.indexOf(Number(graph_counter)) == -1){
+            if(downcheck_list.indexOf(Number(graph_counter)) == -1) {
                 downcheck_list.push(Number(graph_counter));
 
                 //umemo スペクトルプロットの下部ダウンロードボタン生成
                 var down_ref_div = document.createElement("div"); //umemo HTML生成、 構文 >> var element = document.createElement(tagName[, options]);
-                down_ref_div.innerHTML = '<button type="button" id="down_csv_spectral_'+graph_counter+'" class="squareA" style="position:absolute;top:450px;left:20px; width:70px" onclick="download_csv_spectral('+Number(graph_counter-1)+');">&nbsp;&nbsp;Download</buttton>';
-                var idTabName = "graph_"+graph_counter+"_content";
+                down_ref_div.innerHTML = '<button type="button" id="down_csv_spectral_' + graph_counter + '" \
+                                        class="squareA" style="position:absolute; top:450px; left:20px; width:70px" \
+                                        onclick="download_csv_spectral(' + Number(graph_counter - 1) + ');">&nbsp;&nbsp;Download</buttton>';
+                var idTabName = "graph_" + graph_counter + "_content";
                 document.getElementById(idTabName).appendChild(down_ref_div);
 
                 //umemo スペクトルプロットの下部メモ欄生成
                 save_memo_div = document.createElement("div");
-                save_memo_div.innerHTML = '<input type="text" id="save_memo_'+graph_counter+'" value="" placeholder="Jot your note down here." style="position:absolute;top:485px;left:20px; width:450px; font-size:17px"></input>';
-                var idTabName = "graph_"+graph_counter+"_content";
+                save_memo_div.innerHTML = '<input type="text" id="save_memo_' + graph_counter + '" value="" placeholder="Jot your note down here." \
+                                        style="position:absolute; top:485px; left:20px; width:450px; font-size:17px"></input>';
+                var idTabName = "graph_" + graph_counter + "_content";
                 document.getElementById(idTabName).appendChild(save_memo_div);
 
                 //umemo スペクトルプロットのリスト保存ボタン生成                
                 save_ref_div = document.createElement("div");
-                save_ref_div.innerHTML = '<button type="button" id="save_spectral_'+graph_counter+'" class="squareA" style="position:absolute;top:485px;left:500px; width:75px" onclick="save_spectral('+Number(graph_counter-1)+');">&nbsp;&nbsp;Save to list</buttton>';
-                var idTabName = "graph_"+graph_counter+"_content";
+                save_ref_div.innerHTML = '<button type="button" id="save_spectral_' + graph_counter + '" class="squareA" \
+                                        style="position:absolute; top:485px; left:500px; width:75px" \
+                                        onclick="save_spectral(' + Number(graph_counter - 1) + ');">&nbsp;&nbsp;Save to list</buttton>';
+                var idTabName = "graph_" + graph_counter + "_content";
                 document.getElementById(idTabName).appendChild(save_ref_div);
             }
         }   
-        ee_graph.style.background = "rgba(255,255,255,0.7)";
+
+        ee_graph.style.background = "rgba(255, 255, 255, 0.7)";
         ee_graph.style.position = "absolute";
         ee_graph.style.left = "20px";
         ee_graph.style.width = "560px";
@@ -937,13 +957,14 @@ function spectral_box(data) {
 
         var title_lon = data_object["coordinate"][0].toFixed(5);
         var title_lat = data_object["coordinate"][1].toFixed(5);
-        var graph_labels=["band", data_object["obs_ID"]+":" + " E:" + title_lon + "  N:" + title_lat];
-        var graph_color=["#000080","#8b0000","#32cd32","#ff00ff","#f4a460"];
+        var graph_labels = ["band", data_object["obs_ID"] + ":" + " E:" + title_lon + "  N:" + title_lat];
+        var graph_color = ["#000080", "#8b0000", "#32cd32", "#ff00ff", "#f4a460"];
 
-        if (Chart_list.length!=0 && ( Lock_num==1 || ( Lock_num==2 && Chart_list.length>=2) || ( Lock_num==3 && Chart_list.length>=3) )) {
-            var previous_spectral_arr = Chart_list[Lock_num-1].file_.concat();
-            var previous_spectral_id = Chart_list[Lock_num-1].user_attrs_.labels.concat();
-            console.log("Chart_list.length!=0 && (Lock_num==1 || (Lock_num==2 && Chart_list.length>=2)|| (Lock_num==3&&Chart_list.length>=3))")
+        if (Chart_list.length != 0 && (Lock_num == 1 || (Lock_num == 2 && Chart_list.length >= 2) || (Lock_num == 3 && Chart_list.length >= 3) )) {
+            var previous_spectral_arr = Chart_list[Lock_num - 1].file_.concat(); // concat(): 複製
+            var previous_spectral_id = Chart_list[Lock_num - 1].user_attrs_.labels.concat();
+
+            // console.log("Chart_list.length != 0 && (Lock_num == 1 || (Lock_num == 2 && Chart_list.length >= 2)|| (Lock_num == 3 && Chart_list.length >= 3))")
 
             var swap_spectral_info = graph_list;
             graph_list = previous_spectral_arr;
@@ -958,17 +979,18 @@ function spectral_box(data) {
             var graph_list3 = previous_spectral_arr.concat();
             var list_i = 0;
             var list_i2 = 0;
-            var stan_list = 0;
-            var numberOfgraphData = graph_list2[0].length-1;
+            var numberOfgraphData = graph_list2[0].length - 1;
 
-            for (var list_i=0; list_i<graph_list2.length; list_i++) {
+            for (var list_i = 0; list_i < graph_list2.length; list_i++) {
                 graph_list_mk.push(graph_list2[list_i].concat());
                 graph_list_mk[list_i].push(null);
             }
-            for (var list_i2=0; list_i2<graph_list3.length; list_i2++) {
-                for (var list_i3=0; list_i3<graph_list_mk.length; list_i3++) {
+
+            for (var list_i2 = 0; list_i2 < graph_list3.length; list_i2++) {
+                for (var list_i3 = 0; list_i3 < graph_list_mk.length; list_i3++) {
                     if (graph_list3[list_i2][0] == graph_list_mk[list_i3][0]) {
                         var last_number = graph_list_mk[list_i3].pop();
+
                         if (last_number == null) {
                             graph_list_mk[list_i3].push(graph_list3[list_i2][1]);
                             break;
@@ -976,16 +998,16 @@ function spectral_box(data) {
                             graph_list_mk[list_i3].push(last_number);
                         }
                     } else {
-                        if (list_i3 == graph_list_mk.length-1) {
-                            var null_arr = Array.apply(null, Array(numberOfgraphData)).map(function () {return null });
-                            Array.prototype.splice.apply(graph_list3[list_i2],[1,0].concat(null_arr));
+                        if (list_i3 == graph_list_mk.length - 1) {
+                            var null_arr = Array.apply(null, Array(numberOfgraphData)).map(function() {return null });
+                            Array.prototype.splice.apply(graph_list3[list_i2], [1, 0].concat(null_arr));
                             graph_list_mk.push(graph_list3[list_i2]);
                             break;
                         }
                     }
                 }
             }
-            graph_list = graph_list_mk.sort(function(a,b){ return (a[0] - b[0]); });
+            graph_list = graph_list_mk.sort(function(a, b) { return (a[0] - b[0]); });
             var swap_labels = graph_labels;
             graph_labels = previous_spectral_id;
             previous_spectral_id = swap_labels;
@@ -993,74 +1015,77 @@ function spectral_box(data) {
         }
 
         if (Chart_list.length >= graph_counter) {
-            Chart_list[graph_counter-1].destroy();
-            console.log(data_save)
+            Chart_list[graph_counter - 1].destroy();
+            console.log(data_save);
         }
 
-        var graphTabId = "graphtab"+graph_counter;
+        var graphTabId = "graphtab" + graph_counter;
         document.getElementById(graphTabId.toString()).innerHTML = data_object["obs_name"] + "::" + data_object["obs_ID"];
-        if ($("#"+graphTabId.toString()).css("background-color") != "rgb(0, 255, 255)" ) {
+        if ($("#" + graphTabId.toString()).css("background-color") != "rgb(0, 255, 255)" ) {
             document.getElementById(graphTabId.toString()).style.backgroundColor = 'goldenrod';
         }
         if (Chart_list.length == 0) {
             document.getElementById(graphTabId.toString()).style.backgroundColor = 'aqua';
         }
+
         if (graph_counter == 1) {
-            var graphTabId_A="graphtab2";
-            var graphTabId_B="graphtab3";
-        }
-        else if (graph_counter == 2) {
-            var graphTabId_A="graphtab1";
-            var graphTabId_B="graphtab3";
-        }
-        else if (graph_counter == 3) {
-            var graphTabId_A="graphtab2";
-            var graphTabId_B="graphtab1";
+            var graphTabId_A = "graphtab2";
+            var graphTabId_B = "graphtab3";
+        } else if (graph_counter == 2) {
+            var graphTabId_A = "graphtab1";
+            var graphTabId_B = "graphtab3";
+        } else if (graph_counter == 3) {
+            var graphTabId_A = "graphtab2";
+            var graphTabId_B = "graphtab1";
         }
 
         if (document.getElementById(graphTabId_A).style.backgroundColor != null) {
-            if ($("#"+graphTabId_A).css("background-color") != "rgb(0, 255, 255)") {
-                $("#"+graphTabId_A).css("background-color", "#d9d9d9");
+            if ($("#" + graphTabId_A).css("background-color") != "rgb(0, 255, 255)") {
+                $("#" + graphTabId_A).css("background-color", "#d9d9d9");
             }
         }
         if (document.getElementById(graphTabId_B).style.backgroundColor != null) {
-            if ($("#"+graphTabId_B).css("background-color") != "rgb(0, 255, 255)") {
-                $("#"+graphTabId_B).css("background-color", "#d9d9d9");
+            if ($("#" + graphTabId_B).css("background-color") != "rgb(0, 255, 255)") {
+                $("#" + graphTabId_B).css("background-color", "#d9d9d9");
             }
         }
 
-        var graph_list_Chart = graph_list.slice();
+        var graph_list_Chart = graph_list.slice(); // なぜスライス？
 
-        Chart_list[graph_counter-1] = new Dygraph(
-            ee_graph,
-            graph_list_Chart, {
-                colors: graph_color,
-                titleHeight: 18,
-                title: data_object["obs_ID"] + ":" + "E:" + title_lon + " N:" + title_lat,
-                ylabel: "Reflectance",
-                xlabel: "Wavelength[μm]",
-                legend: "always",
-                showRoller: true,
-                xAxisHeight: 50,
-                labelsSeparateLines: true,
-                xLabelHeight: 18,
-                axisLabelWidth: 80,
-                highlightSeriesOpts: {
-                    strokeWidth: 3,
-                    strokeBorderWidth: 1,
-                    highlightCircleSize: 5,
-                },
-                connectSeparatedPoints: true,
-                labels: graph_labels
-            }
-        );
+        Chart_list[graph_counter - 1] = new Dygraph(
+                                            ee_graph,
+                                            graph_list_Chart, {
+                                                colors: graph_color,
+                                                titleHeight: 18,
+                                                title: data_object["obs_ID"] + ":" + "E:" + title_lon + " N:" + title_lat,
+                                                ylabel: "Reflectance",
+                                                xlabel: "Wavelength[μm]",
+                                                legend: "always",
+                                                showRoller: true,
+                                                xAxisHeight: 50,
+                                                labelsSeparateLines: true,
+                                                xLabelHeight: 18,
+                                                axisLabelWidth: 80,
+                                                highlightSeriesOpts: {
+                                                    strokeWidth: 3,
+                                                    strokeBorderWidth: 1,
+                                                    highlightCircleSize: 5,
+                                                },
+                                                connectSeparatedPoints: true,
+                                                labels: graph_labels
+                                            }
+                                        );
         
-        graph_counter = graph_counter+1;
+        graph_counter += 1;
 
         if (graph_counter >= 4) {
             graph_counter = 1;
         }
+        
         click_history(data);
+
+    } else {
+        console.log("No data!");
     }
 }
 
