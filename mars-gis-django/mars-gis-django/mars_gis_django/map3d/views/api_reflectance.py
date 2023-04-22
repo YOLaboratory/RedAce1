@@ -93,15 +93,18 @@ def base_json_getRef(params_json):
 
     ######## CRISM #########
     elif params_json["obs_name"] == 'CRISM':
+        # 新しいjson形式fieldを定義, 順番が保持された辞書
         field = cl.OrderedDict()
         field["obs_ID"] = params_json["obs_ID"]
         field["obs_name"] = params_json["obs_name"]
         field["path"] = params_json["path"]
         field["Image_path"] = params_json["Image_path"]
 
+        # cubeファイルを開く, データを読み込み専用で開く, 第一引数：cubeファイル名
         cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly)
-        bandnumber_range = list(range(cube_data.RasterCount))
-        NDV = cube_data.GetRasterBand(1).GetNoDataValue()
+
+        bandnumber_range = list(range(cube_data.RasterCount)) # バンドの数を最初から最後までリストに入れる ex)0,1,2,...
+        NDV = cube_data.GetRasterBand(1).GetNoDataValue()     # バンドのデータ無し値を取得
         ref_arr = []
         no_data_ref = 1
         first = 0
@@ -114,12 +117,15 @@ def base_json_getRef(params_json):
                 if first == 0:
                     first = 1
                     continue
-                ref = cube_data.GetRasterBand(bandnumber_i + 1).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])]
+
+                ref = cube_data.GetRasterBand(bandnumber_i + 1).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])] # 多分 [1]Y,[0]X
+
                 if ref == NDV:
                     ref_arr.append(-1)
                 else:
                     ref_arr.append(ref)
 
+        # 反射率の格納
         if no_data_ref != 1:
             ref_csv = ",".join(list(map(str, ref_arr)))
         else:
@@ -127,11 +133,14 @@ def base_json_getRef(params_json):
 
         field["pixels"] = params_json["pixels"]
         field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
-        field["reflectance"] = ref_csv
+        field["reflectance"] = ref_csv # 反射率
         bandnumber_range.pop(0)
         field["band_number"] = bandnumber_range
         field["band_bin_center"] = params_json["wavelength"]
+
+        # cubeファイルを開く
         cube_data2 = gdal.Open(field["path"]["derived"]["cub"], gdal.GA_ReadOnly)
+
         x = cube_data2.GetRasterBand(5).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])]
         y = cube_data2.GetRasterBand(4).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])]
         field["coordinate"] = [float(x), float(y)]
@@ -149,3 +158,5 @@ def reflectance(request):
     params_json = json.loads(request.body)
     json_data = base_json_getRef(params_json)
     return HttpResponse(json_data)
+
+
