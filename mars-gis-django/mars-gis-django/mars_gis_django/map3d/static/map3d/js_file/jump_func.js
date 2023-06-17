@@ -53,6 +53,6 @@ function jumpLocation (N) {
         var xx = String(x);
         var yy = String(y);
 	} else {
-		alert("input lat/lon value is invarid");
+		alert("input lat/long value is invalid");
 	};
 };
