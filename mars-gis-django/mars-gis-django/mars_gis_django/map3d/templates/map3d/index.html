@@ -13,22 +13,21 @@
   <!-- <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/dygraph/2.1.0/dygraph.min.css" /> -->
 
   <!-- cesium css -->
-  <link rel="stylesheet" href="/collectstatic/map3d/assets_ol4_4.3.1/ol4/css/ol.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/cesium_1.47/cesium/Build/Cesium/Widgets/widgets.css">
+  <link rel="stylesheet" href='{% static "/map3d/assets_ol4_4.3.1/ol4/css/ol.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/cesium_1.47/cesium/Build/Cesium/Widgets/widgets.css" %}'>
 
   <!-- css file (django) -->
-  <link rel="stylesheet" href="/collectstatic/map3d/css/mars_all.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/First_loading.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/Spectral_loading.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/top_menu.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/jump_func.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/layer_menu.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/spectral_list_menu.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/Back_function.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/ObservationID_box.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/Spectral_box.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/Thumbnail_box.css" type="text/css" />
-  <link rel="stylesheet" href="/collectstatic/map3d/css/Information_box.css" type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/mars_all.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "map3d/css/First_loading.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/Spectral_loading.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/top_menu.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/jump_func.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/layer_menu.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/spectral_list_menu.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/ObservationID_box.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/Spectral_box.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/Thumbnail_box.css" %}' type="text/css" />
+  <link rel="stylesheet" href='{% static "/map3d/css/Information_box.css" %}' type="text/css" />
 
 </head>
 
@@ -78,38 +77,34 @@
     <input id="jump-func-toggle" type="checkbox">
     <label id="jump-func-open" for="jump-func-toggle">Jump</label>
     <div class="jump-func-contents">
-      <div>
-        <label id="jump-func-close" for="jump-func-toggle">Close</label>
-      </div>
-      <div>
-        <form class="jump-form" name="locationSetForm">
-          <div class="zoom-func">
-            <p>zoom level</p>
-            <select name="select_zoom">
-              <option value="15000000">0</option>
-              <option value="10000000">1</option>
-              <option value="8000000">2</option>
-              <option value="6000000">3</option>
-              <option value="4000000">4</option>
-              <option value="2000000">5</option>
-              <option value="1500000">6</option>
-              <option value="1000000">7</option>
-              <option value="700000">8</option>
-              <option value="500000">9</option>
-              <option value="420000">10</option>
-            </select>
-          </div>
-          <div class="input-latlon">
-            <input type="text" name="latitude" placeholder="Latitude" ><br>
-            <input type="text" name="longitude" placeholder="Longitude"><br>
-            <button type="submit" id="jumpbtn" value="jump" onclick="jumpLocation(-1)">Jump</button>
-          </div>
-        </form>
-      </div>
-      <!-- <div class="line_lx">
+      <label id="jump-func-close" for="jump-func-toggle">Close</label>
+      <form class="jump-form" name="locationSetForm">
+        <div class="zoom-func">
+          <p>zoom level</p>
+          <select name="select_zoom">
+            <option value="15000000">0</option>
+            <option value="10000000">1</option>
+            <option value="8000000">2</option>
+            <option value="6000000">3</option>
+            <option value="4000000">4</option>
+            <option value="2000000">5</option>
+            <option value="1500000">6</option>
+            <option value="1000000">7</option>
+            <option value="700000">8</option>
+            <option value="500000">9</option>
+            <option value="420000">10</option>
+          </select>
+        </div>
+        <div class="input-latlon">
+          <input type="text" name="latitude" placeholder="Lat" ><br>
+          <input type="text" name="longitude" placeholder="Lon"><br>
+          <button type="submit" id="jumpbtn" value="jump" onclick="jumpLocation(-1)">Jump</button>
+        </div>
+      </form>
+      <div class="mouse">
         <p>Circle radius</p>
-        <input id="circle_mouse" type="number" value="300" style="width: 6em;" min="0" >
-      </div> -->
+        <input id="circle_mouse" type="number" value="300" min="0" >
+      </div>
     </div>
   </div>
   <!-- Jump Function END -->
@@ -205,18 +200,18 @@
 
   <!-- ObservationID box -->
   <table border="1">
-    <tr>
-    </tr>
+    <!-- <tr>
+    </tr> -->
     <tr>
       <td bgcolor="#FFFFFF">    
-        <div  id="IDArea" style="position:fixed; top:130px; left:1px;"></div>
+        <div id="IDArea"></div>
       </td>
     </tr>
   </table>
   <!-- ObservationID box END-->
    
   <!-- Spectral List Menu -->
-  <script type="text/javascript" src="/collectstatic/node_modules/dygraphs/dist/dygraph.js"></script>
+  <script type="text/javascript" src='{% static "node_modules/dygraphs/dist/dygraph.js" %}'></script>
   <div class="spctral_list">
     <input id="spectral_list_toggle" type="checkbox">
     <label id="spectral_list_open" for="spectral_list_toggle"><span>Spectral List</span></label>
@@ -266,57 +261,39 @@
               </select>
               <button type="submit" id="sortbtn" v-on:click="change_order(record_spectra);">Sort</button><br>
 
-
               <div class="search_function_right_menu">
-                <table border="1" style="table-layout:fixed; color: silver; border-style: none; border-collapse: separate; border-spacing: 5px 0px; empty-cells:show;">
-                  <tr align="left" style="font-size: 9pt;">
-                    <th width="100">Obs. ID</th>
-                    <th width="100" colspan="3">Lat (-90, 90)</th>
-                    <th width="100" colspan="3">Lon (-180, 180)</th>
-                    <th width="200">Keyword in Note</th>
-                    <th width="100"></th>
-                  </tr>
-                  <tr>
-                    <td>
-                      <input type="text" id="search_obs_id" value="" style="width:100px; margin-right: 10px;">
-                    </td>
-                    <td>
-                      <input type="text" id="search_lat_min" value="" style="width:50px;">
-                    </td>
-                    <td>
-                      ~
-                    </td>
-                    <td>
-                      <input type="text" id="search_lat_max" value="" style="width:50px; margin-right: 10px;">
-                    </td>
-                    <td>
-                      <input type="text" id="search_lon_min" value="" style="width:50px;">
-                    </td>
-                    <td>
-                      ~
-                    </td>
-                    <td>
-                      <input type="text" id="search_lon_max" value="" style="width:50px; margin-right: 10px;">
-                    </td>
-                    <td>
-                      <input type="text" id="search_note" value="" style="width:200px;">
-                    </td>
-                    <td>
-                      <button type="submit" id="searchbtn" v-on:click="search_from_list();">Search</button>
-                    </td>
-                  </tr>
+                <table>
+                  <tbody>
+                    <tr class="first">
+                      <th width="100">Obs. ID</th>
+                      <th width="100" colspan="3">Lat (-90, 90)</th>
+                      <th width="100" colspan="3">Lon (-180, 180)</th>
+                      <th width="200">Keyword in Note</th>
+                      <th width="100"></th>
+                    </tr>
+                    <tr>
+                      <td><input type="text" id="search_obs_id" value="" style="width:100px; margin-right: 10px;"></td>
+                      <td><input type="text" id="search_lat_min" value="" style="width:50px;"></td>
+                      <td>~</td>
+                      <td><input type="text" id="search_lat_max" value="" style="width:50px; margin-right: 10px;"></td>
+                      <td><input type="text" id="search_lon_min" value="" style="width:50px;"></td>
+                      <td>~</td>
+                      <td><input type="text" id="search_lon_max" value="" style="width:50px; margin-right: 10px;"></td>
+                      <td><input type="text" id="search_note" value="" style="width:200px;"></td>
+                      <td><button type="submit" id="searchbtn" v-on:click="search_from_list();">Search</button></td>
+                    </tr>
+                  </tbody>
                 </table>
               </div>
 
-
-              <table align="center" border="1" style="width:690px; table-layout:fixed; font-size: 11pt; color: silver; margin-top:5px;">
+              <table class="scroll-contents-title" border="1">
                 <tr>
                   <th width="110">ID</th>
                   <th width="60">Lat</th>
                   <th width="60">Lon</th>
-                  <th width="135">Creation-time</th>
-                  <th width="275">Note</th>
-                  <th style="width:50px; font-size: 8pt;">
+                  <th width="140">Creation-time</th>
+                  <th width="270">Note</th>
+                  <th width="50">
                     <button type="submit" id="deletebtn" v-on:click="delete_from_list();">Delete</button>
                   </th>
                 </tr>
@@ -327,13 +304,13 @@
                   <div class="accordion_menu">
                     <div class="nonhidden_contents">
                       <label :for="[[ item.id_accordion ]]">
-                        <table align="center" border="1" style="width:690px; table-layout:fixed; font-size: 10pt;">
+                        <table class="list" border="1">
                           <tr>
                             <td width="110">[[item.data_id]]</td>
                             <td width="60">[[item.latitude]]</td>
                             <td width="60">[[item.longitude]]</td>
-                            <td width="135" style="overflow-x:scroll; white-space:nowrap;">[[item.created_date]]</td>
-                            <td width="275" style="overflow-x:scroll; white-space:nowrap;">[[item.description]]</td>
+                            <td width="140" style="overflow-x:scroll; white-space:nowrap;">[[item.created_date]]</td>
+                            <td width="270" style="overflow-x:scroll; white-space:nowrap;">[[item.description]]</td>
                             <td width="50" style="text-align: center;">
                               <input type="checkbox" id="delete_from_list" :value="[[ item.id_delete ]]"></input>
                             </td>
@@ -352,23 +329,23 @@
                             <table align="center" border="1" style="width:240px; table-layout:fixed; font-size: 10pt; color: black;">
                               <tr>
                                 <td width="70">Instrument</td>
-                                <td widht="130">[[item.instrument]]</td>
+                                <td width="130">[[item.instrument]]</td>
                               </tr>
                               <tr>
                                 <td width="70">X Pixel</td>
-                                <td widht="130">[[item.x_pixel]]</td>
+                                <td width="130">[[item.x_pixel]]</td>
                               </tr>
                               <tr>
                                 <td width="70">Y Pixel</td>
-                                <td widht="130">[[item.y_pixel]]</td>
+                                <td width="130">[[item.y_pixel]]</td>
                               </tr>
                               <tr>
                                 <td width="70">User</td>
-                                <td widht="130">[[item.user]]</td>
+                                <td width="130">[[item.user]]</td>
                               </tr>
                               <tr>
                                 <td width="70">Permission</td>
-                                <td widht="130">[[item.permission]]</td>
+                                <td width="130">[[item.permission]]</td>
                               </tr>
                             </table>
                             <!-- Change permission: -->
@@ -420,16 +397,17 @@
 <script src="https://unpkg.com/vue"></script><!-- Vue.js -->
 <script src="https://unpkg.com/vue@2.6.14/dist/vue.min.js"></script><!-- Vue2.js -->
 <!-- cesium js -->  
-<script src="/collectstatic/map3d/cesium_1.47/cesium/Build/Cesium/Cesium.js"></script>
-<script src="/collectstatic/map3d/assets_ol4_4.3.1/ol4/js/ol.js"></script>
+<script src='{% static "map3d/cesium_1.47/cesium/Build/Cesium/Cesium.js" %}'></script>
+<script src='{% static "map3d/assets_ol4_4.3.1/ol4/js/ol.js" %}'></script>
 <!-- js file (django) -->
-<script src="/collectstatic/map3d/js_file/MapConf.js"></script>
-<script src="/collectstatic/map3d/js_file/Download.js"></script>
-<script src="/collectstatic/map3d/js_file/NetworkSetting.js"></script>
-<script src="/collectstatic/map3d/js_file/GetData_From_Database.js"></script>
-<script src="/collectstatic/map3d/js_file/HeadConf.js"></script>
-<script src="/collectstatic/map3d/js_file/Save.js"></script>
-<script src="/collectstatic/map3d/js_file/First_loading.js"></script>
+<script src='{% static "map3d/js_file/MapConf.js" %}'></script>
+<script src='{% static "map3d/js_file/Download.js" %}'></script>
+<script src='{% static "map3d/js_file/NetworkSetting.js" %}'></script>
+<script src='{% static "map3d/js_file/GetData_From_Database.js" %}'></script>
+<script src='{% static "map3d/js_file/layer_menu.js" %}'></script>
+<script src='{% static "map3d/js_file/Save.js" %}'></script>
+<script src='{% static "map3d/js_file/First_loading.js" %}'></script>
+<script src='{% static "map3d/js_file/jump_func.js" %}'></script>
 
 
 <script>
@@ -442,4 +420,4 @@
     delete_from_list: "{% url 'spectra:delete_from_list' %}"
   }
 </script>
-<script src="/collectstatic/map3d/js_file/SpectralList.js"></script>
+<script src='{% static "map3d/js_file/SpectralList.js" %}'></script>
