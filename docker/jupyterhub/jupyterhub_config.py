@@ -7,6 +7,7 @@ network_name = os.environ['DOCKER_NETWORK_NAME'] # "YOUR_DOCKER_NETWORK_NAME"
 c = get_config()
 
 c.JupyterHub.authenticator_class = 'jupyterhub.auth.PAMAuthenticator'
+# c.JupyterHub.authenticator_class = 'Dummyauthenticator.DummyAuthenticator' # テスト目的用、パスワードなしの任意ユーザ名でログイン可
 
 from jupyter_client.localinterfaces import public_ips
 # c.JupyterHub.hub_ip = public_ips()[0]
