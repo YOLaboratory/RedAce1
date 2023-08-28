@@ -25,7 +25,7 @@ var data_save = [[],[],[]];
 var save_ref_div;
 var baselayers_List = ["MOLA_THEMIS_blend", "MOLA_color", "MDIM21_color", "VIKING", "THEMIS_night", "THEMIS", "MDIM21"];
 var layers_list = ["CRISM", "THEMIS", "Mars500K_Quads", "Mars2M_Quads", "Mars5M_Quads", "NOMENCLATURE"];
-var thumbnail_root="/mnt"
+var thumbnail_root = "/mnt"
 
 
 Object.defineProperty(Object.prototype, "forIn", {
@@ -74,13 +74,6 @@ function getCookie(name) {
 var csrftoken = getCookie('csrftoken');
 
 
-
-
-
-
-
-
-
 //umemo 地図上でクリックされた緯度経度を受け取る 
 function getdatafromdb(lon, lat) {
     var rad_cir = Math.abs(document.getElementById("circle_mouse").value);
@@ -115,12 +108,11 @@ function getdatafromdb(lon, lat) {
 
     lon = lon % 360;
     if (lon > 180) {
-        lon = lon - 360;
+        lon -= 360;
     } else if (lon < -180) {
-        lon = 360 + lon;
+        lon += 360;
     }
 
-    var ajax_json;
     var layer_list = [];
     var Nowbaselayer;
     var itest;
@@ -132,7 +124,9 @@ function getdatafromdb(lon, lat) {
         if (layer_check.layers[itest]._show === true) {
             wlayer1 = layer_check.layers[itest]._isBaseLayer;
             wlayer2 = layer_check.layers[itest]._imageryProvider._layers;
-            if (baselayers_List.indexOf(wlayer2) >= 0) where_baselayer = itest;
+            if (baselayers_List.indexOf(wlayer2) >= 0) {
+                where_baselayer = itest;
+            }
             if (baselayers_List.indexOf(wlayer2) < 0 && layers_list.indexOf(wlayer2) < 0 && wlayer2 != void 0 && wlayer2 != "test") {
                 if (where_baselayer == void 0) {
                     layer_list.push(wlayer2);
@@ -167,14 +161,12 @@ function getdatafromdb(lon, lat) {
         contentType: 'application/json',
         data: JSON.stringify(Remodeling_getfeatureinfo)
     }).then(function(data) {
-        console.log('nnnnn');
+        console.log("成功(getdatafromdb)");
         obsID_box(data);
     }, function() {
         alert("読み込み失敗");
     });
 }
-
-
 
 //////後々、ID_Boxと入れ替え/////???
 
@@ -336,16 +328,22 @@ function thumbnail_box(data) {
                                         <div id="slider" style="position:absolute; z-index:2000; top:3%; left:10%; "></div>\
                                         <input type="button" class="erasing" value="X" style="position: absolute; top:-50px; right:0px;" onclick="CLOSE(1)">\
                                         <input type="button" class="erasing" value="MOVE" style="position:absolute; top:-50px; right:27px;" onclick="jumpLocation(1)">\
-                                        <input type="button" class="tmp" value="Download CSV" style="position:absolute; top:-50px; right:80px;" onclick="CLOSE(1)">\
+                                        <input type="button" id="get-all-ref-btn" value="Download CSV" style="position:absolute; top:-50px; right:80px;">\
                                         <div id="click_position" style="position:absolute; width:300px; height:40px; top:-50px; left:2px; background-color: rgba(255,255,255,0.1);"></div>\
                                         <div id="click_history" style="position:absolute; z-index:2000; width:100px; height:0px; top:0%; left:80%; overflow-y:scroll; overflow-x:visible; background-color:rgba(255,255,255,0.1); text-align:center;"></div></div>';
 
         console.log(coordinateObs);
-
+        
+        // innerHTMLで生成したボタンにクリックイベント付与（親要素は既に存在してることが条件）
+        $("#imageArea").on("click", "#get-all-ref-btn", function() {
+            console.log('click');
+            get_reflectance_for_download(data_object['obs_name'], data_object['obs_ID'], data_object['path'], data_object["ancillary"]["band_bin_center"], 1);
+        });
+        
         var product_figure = imageAreaSet;
         product_figure.appendChild(div_element_figure);
 
-        var e_image = document.getElementById("image_move");
+        var e_image = document.getElementById('image_move');
         e_image.style.width = "520px";
         e_image.style.height = "500px";
         e_image.style.top = "300px";
@@ -370,10 +368,6 @@ function thumbnail_box(data) {
                             units: 'pixels',
                             extent: extent
                         });
-        
-        
-
-
 
         orange.extent = extent; // `extent`プロパティを追加して値(extent)を代入
         orange.projection = projection;
@@ -436,7 +430,7 @@ function thumbnail_box(data) {
         // clickしたピクセル位置を取得。サムネイル画像の左下基準、x,y軸で検索している。
         wms_layers.thumbnail.on('click', function(evt) {
             console.log(evt.coordinate);
-            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
+            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0, 0);
         });
 
     } else if (palette === 1) {
@@ -536,7 +530,7 @@ function thumbnail_box(data) {
         if (ratio_count != 0) {
             var ratio_div = document.createElement("div");
             ratio_div.setAttribute("class", "ratio_band_set2");
-            ratio_div.innerHTML = '<select id="ratio_band2" style="color:rgba(255,255,255,0.5);background:rgba(0,0,0,1);" onchange="ratio_layer2(this);"></select>';
+            ratio_div.innerHTML = '<select id="ratio_band2" style="color:rgba(255,255,255,0.5); background:rgba(0,0,0,1);" onchange="ratio_layer2(this);"></select>';
             document.getElementById("ratio_select2").appendChild(ratio_div);
 
             let op = document.createElement("option");
@@ -559,7 +553,7 @@ function thumbnail_box(data) {
         console.log(data_object['Image_path']);
 
         wms_layers.thumbnail2.on('click', function(evt) {
-            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0);
+            getdatafromdirectory_reflectance(evt.coordinate, data_object['Mapping']['Image_size'], data_object['obs_ID'], data_object['path'], data_object['Image_path'], data_object['obs_name'], data_object["ancillary"]["band_bin_center"], 0, 0);
         });
     }
 }
@@ -772,10 +766,39 @@ function ancillary_box(data) {
     };
 }
 
+/**
+ * 
+ * @param {*} obs_name 
+ * @param {*} obs_ID 
+ * @param {*} path 
+ * @param {*} wavelength 
+ * @param {*} flag 
+ */
+function get_reflectance_for_download(obs_name, obs_ID, path, wavelength, flag) {
+    console.log("get_reflectance_for_download");
+    console.log(obs_name);
+    console.log(obs_ID);
+    console.log(path);
+    console.log(flag);
+
+    $.ajax({
+        type: 'POST',
+        headers: { "X-CSRFToken": csrftoken },
+        url: 'reflectance/',
+        contentType: 'application/json',
+        data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "wavelength": wavelength, "flag": flag })
+    }).then(function(data) {
+        console.log("成功(get_reflectance_for_download)");
+        download_csv_spectral_allpixel(data);
+    }, function() {
+        console.log("失敗(get_reflectance_for_download)");
+        alert("読み込み失敗");
+    });
+}
 
 //umemo 引数：クリックされた点(ピクセル)のデータ等     
 //umemo クリックされた点(ピクセル)にデータがあれば取り出す 
-function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, image_path, obs_name, wavelength, re_flag) {
+function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, image_path, obs_name, wavelength, re_flag, flag) {
     console.log(pixels);
     console.log(Image_size);
     console.log(obs_ID);
@@ -797,14 +820,14 @@ function getdatafromdirectory_reflectance(pixels, Image_size, obs_ID, path, imag
     //umemo pixel座標がイメージサイズ(四角形)より内側ならデータ探す
     // ピクセル座標、左下基準。
     if ((pixels[0] <= Image_size[0]) && (pixels[1] <= Image_size[1]) && (0 <= pixels[0]) && (0 <= pixels[1])) {
-        var $loading = $(".cssload-thecube");
+        var $loading = $(".cssload-thecube"); // loading時のエフェクト？
         var $loading2 = $(".back-loading");
         $.ajax({
             type: 'POST',
             headers: { "X-CSRFToken": csrftoken },
             url: 'reflectance/',
             contentType: 'application/json',
-            data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "Image_path": image_path, "wavelength": wavelength, "pixels": pixels }),
+            data: JSON.stringify({ "obs_name": obs_name, "obs_ID": obs_ID, "path": path, "Image_path": image_path, "wavelength": wavelength, "pixels": pixels, "flag": flag }),
             beforeSend: function() { // Ajax通信を送信する前に任意の処理を実行.
                 $loading.removeClass("is-hide");
                 $loading2.removeClass("is-hide");
@@ -865,7 +888,7 @@ function spectral_box(data) {
             }
         }
 
-        csv_formatbox[graph_counter - 1] = csv_format;
+        csv_formatbox[graph_counter - 1] = csv_format; // 使ってない？
         graph_list = graph_list.filter(n => n.length > 0);
 
         if (flag_ref_position) {
@@ -883,11 +906,11 @@ function spectral_box(data) {
         if (Chart_list.length == 0) {
             var down_ref_div2 = document.createElement("div");
 
-            down_ref_div2.innerHTML = '<div style="position:absolute;top:450px;left:300px;color:rgba(255,255,255,0.5);">\
-                                    <label><input type="radio" id="Lock1"  value=1  name="Lock" >Lock 1</label>\
-                                    <label><input type="radio" id="Lock2" value=2 name="Lock"  disabled="disabled">Lock 2</label>\
-                                    <label><input type="radio" id="Lock3" value=3 name="Lock"  disabled="disabled">Lock 3</label>\
-                                    <label><input type="radio" id="graph_FIFO" name="Lock" value=-1 checked>FIFO</label></div>'
+            down_ref_div2.innerHTML = '<div style="position:absolute; top:450px; left:300px; color:rgba(255,255,255,0.5);">\
+                                    <label><input type="radio" id="Lock1" value=1 name="Lock" >Lock 1</label>\
+                                    <label><input type="radio" id="Lock2" value=2 name="Lock" disabled="disabled">Lock 2</label>\
+                                    <label><input type="radio" id="Lock3" value=3 name="Lock" disabled="disabled">Lock 3</label>\
+                                    <label><input type="radio" id="graph_FIFO" name="Lock" value=-1 checked>FIFO</label></div>';
 
             e_graph.appendChild(down_ref_div2);
         } else if (Chart_list.length == 1) {
@@ -1053,8 +1076,9 @@ function spectral_box(data) {
         var graph_list_Chart = graph_list.slice(); // なぜスライス？
 
         Chart_list[graph_counter - 1] = new Dygraph(
-                                            ee_graph,
-                                            graph_list_Chart, {
+                                            ee_graph,         // 表示ID名
+                                            graph_list_Chart, // グラフデータ
+                                            {                 // オプション
                                                 colors: graph_color,
                                                 titleHeight: 18,
                                                 title: data_object["obs_ID"] + ":" + "E:" + title_lon + " N:" + title_lat,
@@ -1081,7 +1105,7 @@ function spectral_box(data) {
         if (graph_counter >= 4) {
             graph_counter = 1;
         }
-        
+
         click_history(data);
 
     } else {
