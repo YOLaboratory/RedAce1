@@ -105,7 +105,7 @@ function download_pvl_anc() {
 }
 
 
-//umemo スペクトルプロットの下部ダウンロードボタン、CSVダウンロード
+// スペクトルプロットの下部ダウンロードボタン、CSVダウンロード
 function download_csv_spectral(value) {
     // console.log(Chart_list[value].file_[0]);              　// 最初の[x,y]
     // console.log(Chart_list[value].file_[0].length);       // 2
@@ -114,41 +114,27 @@ function download_csv_spectral(value) {
     // console.log(Chart_list[value].file_);                　// [[x,y],[x,y],...] (430)、データが少ない場合もある。
     // console.log(Chart_list[value].user_attrs_);           // Dygraphの設定
 
-    for ( var csv_i = 1; csv_i < Chart_list[value].file_[0].length; csv_i++ ) { // crismに関してはループ1回、他は分からん、残す必要あり。
+    // crismに関してはループ1回、他は分からん、残す必要あり。
+    for ( var csv_i = 1; csv_i < Chart_list[value].file_[0].length; csv_i++ ) {
         // ダウンロード時のcsvファイル名作成
         // 例） Chart_list[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E:-97.65137  N:24.90353"
         var filename_spectral = Chart_list[value].user_attrs_.labels[csv_i] + ".csv";
         filename_spectral = filename_spectral.replace(/\s\s/g, "_"); // コロンの変換はしてないけど問題ないみたい。
         filename_spectral = filename_spectral.replace(/\s+/g, "");
 
+        // x（波長）とy（反射率）をワンペア、データ構造は縦持ち
         var sp_csv = "";
-        // for (var csv_i2 in Chart_list[value].file_) { // x、yのペア、430回
-        //     if (Chart_list[value].file_[csv_i2][csv_i] != null) { // y座標、反射率、elseがない
-        //         //umemo XとYを交互に一列で入れている
-        //         sp_csv += Chart_list[value].file_[csv_i2][0] + "," + Chart_list[value].file_[csv_i2][csv_i] + ",";
-        //     }
-        // }
-
-        // x座標(波長)
-        for (var csv_i2 in Chart_list[value].file_) { // バンド数(x、yのペア)
-            sp_csv += Chart_list[value].file_[csv_i2][0] + ",";
-        }
-        sp_csv = sp_csv.slice(0, -1); // 最後のコンマ除去
-        sp_csv += "\n";
-
-        // y座標(反射率)
-        for (var csv_i2 in Chart_list[value].file_) { // バンド数(x、yのペア)
+        for (var csv_i2 in Chart_list[value].file_) { // x、yのペア、430回
             if (Chart_list[value].file_[csv_i2][csv_i] != null) {
-                sp_csv += Chart_list[value].file_[csv_i2][csv_i] + ",";
-            } else {
-                sp_csv += "-9999" + ",";
+                sp_csv += Chart_list[value].file_[csv_i2][0].toFixed(5) + "," + Chart_list[value].file_[csv_i2][csv_i] + "\n";
             }
         }
-        sp_csv = sp_csv.slice(0, -1); // 最後のコンマ除去
-        console.log(sp_csv);
 
-        var buf = new Uint8Array([0xEF, 0xBB, 0xBF]); //umemo 型付き配列で、8ビット符号なし整数値の配列を表します, [0xEF,0xBB,0xBF]はバイトオーダマーク
-        saveAs(new Blob([ buf, sp_csv], { "type" : "text/csv" }), filename_spectral); //umemo Binary Large OBject, バイナリデータを表すオブジェクト
+        // 型付き配列で、8ビット符号なし整数値の配列を表します, [0xEF,0xBB,0xBF]はバイトオーダマーク
+        var buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
+
+        // Binary Large OBject, バイナリデータを表すオブジェクト
+        saveAs(new Blob([ buf, sp_csv], { "type" : "text/csv" }), filename_spectral);
     }
 }
 
