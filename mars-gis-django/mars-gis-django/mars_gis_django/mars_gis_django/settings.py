@@ -130,11 +130,17 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/2.1/howto/static-files/
 
+# テンプレート側でSTATICを呼び出す時のURL設定
+STATIC_URL = '/collect_static/'
 
-STATIC_URL = '/static/'
-STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, 'static'), #プロジェクトディレクトリ直下のstaticファイル
-]
+# プロジェクト全体に適用したいSTATICファイルがあれば活用する
+# STATICFILES_DIRS = [
+#     os.path.join(BASE_DIR, 'static'), #プロジェクトディレクトリ直下のstaticファイル
+# ]
+
+# 変更しない
+# STATIC_ROOT: CSSファイルを1箇所に集める時、Webサーバ上でCSSを読み込みたい時に設定する
+# collectstaticコマンド時にSTATIC_ROOTで指定したフォルダに全てのCSSファイルが集まる
 STATIC_ROOT = os.path.join(BASE_DIR, 'collect_static/') #230617
 
 LOGIN_URL = 'accounts:login/'
