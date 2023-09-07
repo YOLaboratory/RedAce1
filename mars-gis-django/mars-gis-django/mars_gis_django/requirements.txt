@@ -39,3 +39,8 @@ pycparser==2.19
 # jupyter ###usui
 # notebook ###usui
 uwsgi==2.0.18 #220922
+# django-oauth-toolkit==1.2.0 #230617
+# django-cors-middleware==1.4.0 #230617
+# jupyter==1.0.0 #230618
+# jupyterhub==1.0.0 #230618
+# oauthenticator==0.9.0 #230618

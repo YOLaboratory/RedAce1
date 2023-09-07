@@ -1,4 +1,4 @@
-function move_map (record_id, record) {
+function move_map(record_id, record) {
     for ( var num in record) {
         if (record[num]["id"] == record_id) {
             jump_point = record[num];
@@ -12,7 +12,7 @@ function move_map (record_id, record) {
     jumpLocation(jump_point['N'])
 }
 
-function jumpLocation (N) {
+function jumpLocation(N) {
 	var zoomLevel;
 	N = Number(N);
     //**********jump to coordinate which is input by user on GIS**********

@@ -135,7 +135,8 @@ STATIC_URL = '/collect_static/'
 
 # プロジェクト全体に適用したいSTATICファイルがあれば活用する
 # STATICFILES_DIRS = [
-#     os.path.join(BASE_DIR, 'static'), #プロジェクトディレクトリ直下のstaticファイル
+#     # os.path.join(BASE_DIR, 'static'), #プロジェクトディレクトリ直下のstaticファイル
+#     os.path.join(BASE_DIR, 'collect_static'), #プロジェクトディレクトリ直下のstaticファイル
 # ]
 
 # 変更しない

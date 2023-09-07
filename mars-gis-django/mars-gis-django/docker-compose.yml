@@ -7,6 +7,7 @@ services:
     ports:
       - "80:80"
     volumes:
+      # - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf:/etc/nginx/conf.d
       - ./nginx/uwsgi_params:/etc/nginx/uwsgi_params
       - ./mars_gis_django/collect_static:/collect_static
@@ -15,7 +16,9 @@ services:
     networks:
       redace_network:
         ipv4_address: 172.16.238.6
-
+      # jupyterhub_network:
+      #   aliases:
+      #     - nginx
 
   ### Django ###
   django:
@@ -38,12 +41,46 @@ services:
       redace_network:
         ipv4_address: 172.16.238.24
 
+  ### JupyterHub ###
+  # jupyterhub:
+  #   env_file: .env
+  #   build: jupyterhub
+  #   image: jupyterhub_customized
+  #   hostname: jupyterhub
+  #   volumes:
+  #     - "./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro"
+  #     - "/var/run/docker.sock:/var/run/docker.sock"
+  #   ports:
+  #     - 8000:8000
+  #   networks:
+  #     redace_network:
+  #       ipv4_address: 172.16.238.7
+  #     jupyterhub_network:
+  #       aliases:
+  #         - jupyterhub
+  #   environment:
+  #     # Name of the Docker image for the single-user servers
+  #     DOCKER_JUPYTER_IMAGE: ${DOCKER_JUPYTER_IMAGE}
+  #     # The name of the Docker network used by the services
+  #     DOCKER_NETWORK_NAME: ${COMPOSE_PROJECT_NAME}_jupyterhub_network
+  #     # The IP address of the Hub service within the docker network
+  #   deploy:
+  #     replicas: 1
+  #     placement:
+  #       constraints:
+  #         - node.role == manager
+
+  # # Configuration for the single-user servers
+  # jupyterlab:
+  #   image: ${DOCKER_JUPYTER_IMAGE}
+  #   command: echo
+
   ### Mapserver ###
   mapserver:
     image: mapserver_nginx_20190222/redace:1.0
     container_name: mapserver
     volumes:
-      - ../App/Vol_mapserver:/maps
+      - ./Vol_mapserver:/maps
     depends_on:
       - postgis
     expose:
@@ -52,7 +89,6 @@ services:
       redace_network:
         ipv4_address: 172.16.238.3
 
-
   ### Terrainserver ###
   terrainserver:
     image: terrainserver_nginx_20190222/redace:1.0
@@ -60,13 +96,12 @@ services:
     environment:
       - SERVE_STATIC=0
     volumes:
-      - ../App/terrain/tilesets/terrain:/data/tilesets/terrain
+      - ./terrain/tilesets/terrain:/data/tilesets/terrain
     expose:
       - "8000"
     networks:
       redace_network:
         ipv4_address: 172.16.238.4
-
 
   ### Postgis ###
   postgis:
@@ -84,8 +119,6 @@ services:
       redace_network:
         ipv4_address: 172.16.238.5
 
-
-
 networks:
   redace_network:
     name: redace_network
@@ -94,3 +127,8 @@ networks:
      driver: default
      config:
        - subnet: 172.16.238.0/24
+#   jupyterhub_network:
+#     driver: overlay
+
+# volumes:
+#   jupyterhub_data:

@@ -6,19 +6,19 @@ import cgitb
 cgitb.enable()
 
 # import logging
-import cgi
-import os
-import sys
-import glob
-import psycopg2
+# import cgi
+# import os
+# import sys
+# import glob
+# import psycopg2
 
 import pvl
 import json
 import numpy as np
 import collections as cl
 from osgeo import gdal,osr
-from itertools import product
-from pyproj import Proj, transform
+# from itertools import product
+# from pyproj import Proj, transform
 
 
 ##############     THEMIS    ############################
@@ -46,7 +46,7 @@ def ReprojectCoords(coords, src_srs, tgt_srs):
 
 
 ###################################################################################
-from paramiko import SSHClient, AutoAddPolicy
+# from paramiko import SSHClient, AutoAddPolicy
 def base_json(params):
     params_json = params["properties"]
     geometry = params["geometry"]
@@ -125,7 +125,7 @@ def base_json(params):
         field["Ratio_path_json"] = params_json["path"]["image"].get('ratio')
         field["geometry"] = geometry
     else:
-        return "NOdata"
+        return "NoData"
 
     data["StartTime"] = str(lbl_data["Caminfo"]["Geometry"]["StartTime"])
     data["EndTime"] = str(lbl_data["Caminfo"]["Geometry"]["EndTime"])
@@ -167,7 +167,8 @@ def base_json(params):
     data["ParallaxX"] = str(lbl_data["Caminfo"]["Geometry"]["ParallaxX"])
     data["ParallaxY"] = str(lbl_data["Caminfo"]["Geometry"]["ParallaxY"])
     data["ShadowX"] = str(lbl_data["Caminfo"]["Geometry"]["ShadowX"])
-    data["ShadowY"] = str(lbl_data["Caminfo"]["Geometry"]["ShadowY"])
+    data["ShadowY"] = lbl_data["Caminfo"]["Geometry"]["ShadowY"]
+    # data["ShadowY"] = str(lbl_data["Caminfo"]["Geometry"]["ShadowY"])
 
     field["ancillary"] = data
     json_data = json.dumps(field)
@@ -177,7 +178,7 @@ def base_json(params):
 
 ###########################################################################
 from django.http import HttpResponse
-from django.http import JsonResponse
+# from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 
 @csrf_protect

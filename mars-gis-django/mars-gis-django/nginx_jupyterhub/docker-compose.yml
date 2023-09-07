@@ -1,7 +1,8 @@
-ersion: "3.7"
+version: "3.7"
 services:
   # Configuration for reverse proxy
   nginx:
+    container_name: nginx_of_jupytrhub
     image: nginx:alpine
     volumes:
       - "./nginx/nginx.conf:/etc/nginx/nginx.conf:ro"
@@ -14,6 +15,7 @@ services:
           - nginx
   # Configuration for Hub+Proxy
   jupyterhub:
+    container_name: jupyterhub
     env_file: .env
     build: jupyterhub
     image: jupyterhub_customized
@@ -22,7 +24,8 @@ services:
       - "./jupyterhub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro"
       - "/var/run/docker.sock:/var/run/docker.sock"
     ports:
-      - 8000:8000
+      # - 8000:8000
+      - 8888:8888
     networks:
       default:
       jupyterhub_network:
@@ -39,12 +42,16 @@ services:
       placement:
         constraints:
           - node.role == manager
+
   # Configuration for the single-user servers
   jupyterlab:
+    container_name: jupyterlab
     image: ${DOCKER_JUPYTER_IMAGE}
     command: echo
+
 networks:
   jupyterhub_network:
     driver: overlay
+
 volumes:
   jupyterhub_data:

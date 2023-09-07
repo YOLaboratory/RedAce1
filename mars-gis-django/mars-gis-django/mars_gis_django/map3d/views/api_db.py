@@ -5,22 +5,22 @@
 import cgitb
 cgitb.enable()
 
-import cgi
-import os
-import sys
-import glob
+# import cgi
+# import os
+# import sys
+# import glob
 import psycopg2
 
-import pvl
+# import pvl
 import json
-import numpy as np
+# import numpy as np
 import collections as cl
 # from osgeo import gdal,osr
-from itertools import product
-from pyproj import Proj, transform
+# from itertools import product
+# from pyproj import Proj, transform
 
 #これやれchmod 755 api_json_db.py
-print('FFFF')
+print('api_db')
 
 #========================json用関数=======================================
 def json_construction(result,layer):
@@ -101,7 +101,7 @@ def db_connect(params_json):
 #======================================================================
 
 from django.http import HttpResponse
-from django.http import JsonResponse
+# from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 
 @csrf_protect

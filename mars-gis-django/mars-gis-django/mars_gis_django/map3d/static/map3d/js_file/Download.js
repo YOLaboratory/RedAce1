@@ -114,16 +114,17 @@ function download_csv_spectral(value) {
     // console.log(Chart_list[value].file_);                　// [[x,y],[x,y],...] (430)、データが少ない場合もある。
     // console.log(Chart_list[value].user_attrs_);           // Dygraphの設定
 
-    // crismに関してはループ1回、他は分からん、残す必要あり。
+    // Lockした時のループ
     for ( var csv_i = 1; csv_i < Chart_list[value].file_[0].length; csv_i++ ) {
         // ダウンロード時のcsvファイル名作成
-        // 例） Chart_list[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E:-97.65137  N:24.90353"
+        // 例） Chart_list[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E_-97.65137 N_24.90353"
         var filename_spectral = Chart_list[value].user_attrs_.labels[csv_i] + ".csv";
-        filename_spectral = filename_spectral.replace(/\s\s/g, "_"); // コロンの変換はしてないけど問題ないみたい。
-        filename_spectral = filename_spectral.replace(/\s+/g, "");
+        filename_spectral = filename_spectral.replace(' ', '_'); // コロンの変換はしてないけど問題ないみたい。
+        filename_spectral = filename_spectral.replace(':', '');
 
         // x（波長）とy（反射率）をワンペア、データ構造は縦持ち
         var sp_csv = "";
+        sp_csv += 'wavelength[μm],' + 'reflectance\n';
         for (var csv_i2 in Chart_list[value].file_) { // x、yのペア、430回
             if (Chart_list[value].file_[csv_i2][csv_i] != null) {
                 sp_csv += Chart_list[value].file_[csv_i2][0].toFixed(5) + "," + Chart_list[value].file_[csv_i2][csv_i] + "\n";
@@ -136,6 +137,43 @@ function download_csv_spectral(value) {
         // Binary Large OBject, バイナリデータを表すオブジェクト
         saveAs(new Blob([ buf, sp_csv], { "type" : "text/csv" }), filename_spectral);
     }
+}
+
+function download_csv_roi_area(data) {
+    let data_object = JSON.parse(data);
+    let wav_array = data_object["band_bin_center"];
+    let ref_array = data_object["reflectance"];
+    let band_size = wav_array.length;
+    let px_size = ref_array.length;
+    let obs_id = data_object["obs_ID"];
+    let coordinate = data_object["coordinate"];
+    let filename = obs_id + '_E_' + coordinate[0] + '_N_' + coordinate[1] + '.csv';
+
+    console.log('download_csv_roi_area');
+    console.log(data_object);
+
+    // Header
+    let csv = 'wavelength[μm]';
+    for (let j = 1; j <= px_size; j++) { 
+        csv += ',reflectance' + j; 
+    }
+    csv += '\n';
+
+    // Spectral Data
+    for (let i = 0; i < band_size; i++) { 
+        csv += wav_array[i];
+        for (let j = 0; j < px_size; j++) {
+            if (ref_array[j][i] !== -1) {
+                csv += ',' + ref_array[j][i];
+            } else {
+                csv +=',' + NaN;
+            }
+        }
+        csv += '\n';
+    }
+
+    let buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
+    saveAs(new Blob([buf, csv], { "type" : "text/csv" }), filename);
 }
 
 /**

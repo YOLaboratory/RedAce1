@@ -108,3 +108,33 @@
     z-index: 1002;
     background:rgba(0,0,0,0.7);
 }
+.switch_outer {
+    top: -27px;
+    right: 30px;
+    width: 40px;
+    height: 20px;
+    background-color: lightgray;
+    border-radius: 30px;
+    position: absolute;
+    cursor: pointer;
+    transition: background-color .2s ease-in-out;
+}
+.switch_outer.active {
+    background-color: #51E373;
+}
+.toggle_switch {
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    position: absolute;
+    background-color: white;
+    top: 0;
+    bottom: 0;
+    left: 0px;
+    margin: auto;
+    box-shadow: 1px 1px 7px #B7B7B7, -1px -1px 4px #CECECE inset;
+    transition: left .3s ease-in-out;
+}
+.toggle_switch.active {
+    left: 20px;
+}
