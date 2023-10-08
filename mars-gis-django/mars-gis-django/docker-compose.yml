@@ -1,11 +1,11 @@
-version: '3'
-services: 
+version: "3"
+services:
   ### Reverseproxy server ###
   nginx:
     image: nginx:latest
     container_name: nginx
     ports:
-      - "80:80"
+      - "88:80"
     volumes:
       # - ./nginx/nginx.conf:/etc/nginx/nginx.conf:ro
       - ./nginx/conf:/etc/nginx/conf.d
@@ -24,19 +24,21 @@ services:
   django:
     build: ./mars_gis_django
     container_name: django
+    restart: always
     # entrypoint: ["bash","./wait-for-postgis.sh"]
     volumes:
       - ./mars_gis_django:/code
       - ./mars_gis_django/mars_data:/mars_data
       # - ./todatabase_test_usui_v1:/mnt ###test
-      - ../../git/mars_data_distributed:/mars_data_distributed 
+      # - ../../git/mars_data_distributed:/mars_data_distributed
     depends_on:
       - postgis
       - mapserver
       - terrainserver
     expose:
       - "8001"
-    command: uwsgi --socket :8001 --module mars_gis_django.wsgi
+    command: sh /code/start.sh
+    # command: uwsgi --socket :8001 --module mars_gis_django.wsgi
     networks:
       redace_network:
         ipv4_address: 172.16.238.24
@@ -80,7 +82,7 @@ services:
     image: mapserver_nginx_20190222/redace:1.0
     container_name: mapserver
     volumes:
-      - ./Vol_mapserver:/maps
+      - ./mapserver:/maps
     depends_on:
       - postgis
     expose:
@@ -124,9 +126,9 @@ networks:
     name: redace_network
     driver: bridge
     ipam:
-     driver: default
-     config:
-       - subnet: 172.16.238.0/24
+      driver: default
+      config:
+        - subnet: 172.16.238.0/24
 #   jupyterhub_network:
 #     driver: overlay
 

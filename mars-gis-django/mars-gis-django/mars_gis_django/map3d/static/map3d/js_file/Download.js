@@ -1,225 +1,217 @@
-//umemo 補助情報のダウンロードボタン、4つ
-function download_xlsx_anc() {
-    var options = {
-        bookType: 'xlsx',
-        bookSST: false,
-        type: 'binary'
-    };
-    var workbook = {SheetNames: [], Sheets: {}};
+// 補助情報のダウンロードボタン、4つ
+function createAncillaryArray() {
+    let data = [];
+    let tr = $('iframe').contents().find('table.ancillary tr'); //全行を取得
+    for (let i = 0, l = tr.length; i < l; i++) {
+        let cells = tr.eq(i).children(); //1行目から順にth、td問わず列を取得
+        for (let j = 0, m = cells.length; j < m; j++) {
+            if (typeof data[i] == 'undefined') data[i] = [];
+            data[i][j] = cells.eq(j).text(); //i行目j列の文字列を取得
+        }
+    }
 
-    $('iframe').contents().find('table.ancillary').each(function (current, index) {
-        var sheet_name = $('iframe').contents().find("div.infobox_name").prevObject.prevObject[0].offsetParent.textContent.slice(0, -1);
-        workbook.SheetNames.push(sheet_name);
-        workbook.Sheets[sheet_name] = XLSX.utils.table_to_sheet(index, options);
-    });
+    let dataNew = [];
+    for (let i = 0; i < data.length; i = i + 2) {
+        for (let j = 0; j < 3; j++) {
+            if (data[i][j] != 'NULL') {
+                dataNew.push([data[i][j], data[i + 1][j]]);
+            }
+        }
+    }
 
-    var filename_ancillary = $('iframe').contents().find("div.infobox_name")[0].textContent + "_" + $('iframe').contents().find("div.infobox_name").prevObject.prevObject[0].offsetParent.textContent.slice(0, -1) + ".xlsx";
-    var wbout = XLSX.write(workbook, options);
-    function make_xlsx(s) {
+    return dataNew;
+}
+
+function downloadAncXLSX() {
+    let data = createAncillaryArray();
+    let obsID = $('.cesium-infoBox-title').text();
+    let filename = `${obsID}_AncInfo.xlsx`;
+
+    function sheet_to_workbook(sheet, opts) {
+        var n = opts && opts.sheet ? opts.sheet : 'Sheet1';
+        var sheets = {};
+        sheets[n] = sheet;
+        return { SheetNames: [n], Sheets: sheets };
+    }
+
+    function aoa_to_workbook(data, opts) {
+        return sheet_to_workbook(XLSX.utils.aoa_to_sheet(data, opts), opts);
+    }
+
+    function s2ab(s) {
         var buf = new ArrayBuffer(s.length);
         var view = new Uint8Array(buf);
-        for (var i = 0; i != s.length; ++i) {
-            view[i] = s.charCodeAt(i) & 0xFF;
-        }
+        for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xff;
         return buf;
     }
-    saveAs(new Blob([make_xlsx(wbout)], {type: 'application/octet-stream'}), filename_ancillary);
+
+    var wb_out = XLSX.write(aoa_to_workbook(data), { type: 'binary' });
+
+    saveAs(new Blob([s2ab(wb_out)], { type: 'application/octet-stream' }), filename);
 }
 
-function download_csv_anc() {
-    var anc_csv = "";
-    $('iframe').contents().find('table.ancillary').each(function (current, index) {
-        for (var i_down = 0; i_down < index.rows.length; i_down = i_down+2) {
-            for (var j_down = 0; j_down < index.rows[i_down].cells.length; j_down++) {
-                var index_t = index.rows[i_down+1].cells[j_down].innerText;
-                var index_t2 = index.rows[i_down].cells[j_down].innerText;
-                if (index_t != "NULL") {
-                    if ( index_t.match(/,/))
-                        index_t = '"' + index_t + '"';
-                    anc_csv += index_t2.replace(/\r?\n/g, '') + "," + index_t.replace(/\r?\n/g, '') + ",";
-                }
-            }
-        }
-        anc_csv = anc_csv.slice(0, -1);
-    });
-    var filename_ancillary = $('iframe').contents().find("div.infobox_name")[0].textContent + "_" + $('iframe').contents().find("div.infobox_name").prevObject.prevObject[0].offsetParent.textContent.slice(0, -1) + ".csv";
-    var buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    saveAs(new Blob([ buf, anc_csv], { "type" : "text/csv" }), filename_ancillary);
+function downloadAncJSON() {
+    let data = createAncillaryArray();
+    var json = {};
+    for (let i = 0; i < data.length; i++) {
+        json[data[i][0]] = isNaN(data[i][1]) ? data[i][1] : Number(data[i][1]);
+    }
+    json = JSON.stringify(json, undefined, 1);
+
+    let obsID = $('.cesium-infoBox-title').text();
+    let filename = `${obsID}_AncInfo.json`;
+    saveAs(new Blob([json], { type: 'application/json' }), filename);
 }
 
-function download_json_anc() {
-    var anc_json = "{";
-    $('iframe').contents().find('table.ancillary').each(function (current, index) {
-        for (var i_down = 0; i_down < index.rows.length; i_down = i_down+2) {
-            for (var j_down = 0; j_down < index.rows[i_down].cells.length; j_down++) {
-                var index_t = index.rows[i_down+1].cells[j_down].innerText;
-                var index_t2 = index.rows[i_down].cells[j_down].innerText;
-                if (index_t != "NULL") {
-                    index_t2 = '"' + index_t2 + '"';
-                    if (isNaN(index_t)) {
-                        index_t = '"' + index_t + '"';
-                        anc_json += index_t2.replace(/\r?\n/g, '') + ":" + index_t.replace(/\r?\n/g, '') + ",";
-                    } else {
-                        index_t = Number(index_t);
-                        anc_json += index_t2.replace(/\r?\n/g, '') + ":" + index_t + ",";
-                    }
-                }
-            }
-        }
-        anc_json = anc_json.slice(0, -1);
-        anc_json += "}"
-    });
-    var filename_ancillary = $('iframe').contents().find("div.infobox_name")[0].textContent + "_" + $('iframe').contents().find("div.infobox_name").prevObject.prevObject[0].offsetParent.textContent.slice(0, -1) + ".json";
-    saveAs(new Blob([anc_json], {type : 'application/json'}), filename_ancillary);
+function downloadAncCSV() {
+    let data = createAncillaryArray();
+    let csv = '';
+    for (let i = 0; i < data.length; i++) {
+        csv += `${data[i][0]},${data[i][1]}\n`;
+    }
+
+    let obsID = $('.cesium-infoBox-title').text();
+    let filename = `${obsID}_AncInfo.csv`;
+    let buf = new Uint8Array([0xef, 0xbb, 0xbf]);
+    saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
 }
 
+function downloadAncPVL() {
+    let data = createAncillaryArray();
+    let pvl = [];
+    let str = '';
 
-function download_pvl_anc() {
-    var anc_pvl = [];
-    anc_pvl.push(['SERVICE = "RED_ACE"\n']);
-    anc_pvl.push(['OBJECT = ancillary\n']);
-    $('iframe').contents().find('table.ancillary').each(function (current, index) {
-        for (var i_down = 0; i_down < index.rows.length; i_down = i_down+2) {
-            for (var j_down = 0; j_down < index.rows[i_down].cells.length; j_down++) {
-                var index_t = index.rows[i_down+1].cells[j_down].innerText;
-                var index_t2 = index.rows[i_down].cells[j_down].innerText;
-                if (index_t != "NULL") {
-                    var string_pvl = "";
-                    if (isNaN(index_t)) {
-                        index_t = '"' + index_t + '"';
-                        string_pvl += "\t" + index_t2.replace(/\r?\n/g, '') + ' = ' + index_t.replace(/\r?\n/g, '') + '\n';
-                        anc_pvl.push([string_pvl]);
-                    } else {
-                        index_t = Number(index_t);
-                        string_pvl += '\t' + index_t2.replace(/\r?\n/g, '') + ' = ' + index_t + '\n';
-                        anc_pvl.push([string_pvl]);
-                    }
-                }
-            }
-        }
-        anc_pvl.push(['END_OBJECT = ancillary\n']);
-        anc_pvl.push(['END\n']);
-    });
-    var filename_ancillary = $('iframe').contents().find("div.infobox_name")[0].textContent + "_" + $('iframe').contents().find("div.infobox_name").prevObject.prevObject[0].offsetParent.textContent.slice(0, -1) + ".pvl";
-    saveAs(new Blob(anc_pvl, {type : 'text/plain;charset=UTF-8'}), filename_ancillary);
+    pvl.push(['SERVICE = "RED_ACE"\n']);
+    pvl.push(['OBJECT = ancillary\n']);
+    for (let i = 0; i < data.length; i++) {
+        str = isNaN(data[i][1]) ? `\t${data[i][0]} = ${data[i][1]}\n` : `\t${data[i][0]} = ${Number(data[i][1])}\n`;
+        pvl.push([str]);
+    }
+    pvl.push(['END_OBJECT = ancillary\n']);
+    pvl.push(['END\n']);
+
+    let obsID = $('.cesium-infoBox-title').text();
+    let filename = `${obsID}_AncInfo.pvl`;
+    saveAs(new Blob(pvl, { type: 'text/plain;charset=UTF-8' }), filename);
 }
-
 
 // スペクトルプロットの下部ダウンロードボタン、CSVダウンロード
 function download_csv_spectral(value) {
-    // console.log(Chart_list[value].file_[0]);              　// 最初の[x,y]
-    // console.log(Chart_list[value].file_[0].length);       // 2
-    // console.log(Chart_list[value].user_attrs_.labels[0]); // band
-    // console.log(Chart_list[value].user_attrs_.labels[1]); // frt00003621_07_if166l: E:-97.65137  N:24.90353
-    // console.log(Chart_list[value].file_);                　// [[x,y],[x,y],...] (430)、データが少ない場合もある。
-    // console.log(Chart_list[value].user_attrs_);           // Dygraphの設定
+    // console.log(chartList[value].file_[0]);              　// 最初の[x,y]
+    // console.log(chartList[value].file_[0].length);       // 2
+    // console.log(chartList[value].user_attrs_.labels[0]); // band
+    // console.log(chartList[value].user_attrs_.labels[1]); // frt00003621_07_if166l: E:-97.65137  N:24.90353
+    // console.log(chartList[value].file_);                　// [[x,y],[x,y],...] (430)、データが少ない場合もある。
+    // console.log(chartList[value].user_attrs_);           // Dygraphの設定
 
     // Lockした時のループ
-    for ( var csv_i = 1; csv_i < Chart_list[value].file_[0].length; csv_i++ ) {
+    for (var csv_i = 1; csv_i < chartList[value].file_[0].length; csv_i++) {
         // ダウンロード時のcsvファイル名作成
-        // 例） Chart_list[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E_-97.65137 N_24.90353"
-        var filename_spectral = Chart_list[value].user_attrs_.labels[csv_i] + ".csv";
+        // 例） chartList[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E_-97.65137 N_24.90353"
+        var filename_spectral = chartList[value].user_attrs_.labels[csv_i] + '.csv';
         filename_spectral = filename_spectral.replace(' ', '_'); // コロンの変換はしてないけど問題ないみたい。
         filename_spectral = filename_spectral.replace(':', '');
 
         // x（波長）とy（反射率）をワンペア、データ構造は縦持ち
-        var sp_csv = "";
+        var sp_csv = '';
         sp_csv += 'wavelength[μm],' + 'reflectance\n';
-        for (var csv_i2 in Chart_list[value].file_) { // x、yのペア、430回
-            if (Chart_list[value].file_[csv_i2][csv_i] != null) {
-                sp_csv += Chart_list[value].file_[csv_i2][0].toFixed(5) + "," + Chart_list[value].file_[csv_i2][csv_i] + "\n";
+        for (var csv_i2 in chartList[value].file_) {
+            // x、yのペア、430回
+            if (chartList[value].file_[csv_i2][csv_i] != null) {
+                sp_csv +=
+                    chartList[value].file_[csv_i2][0].toFixed(5) + ',' + chartList[value].file_[csv_i2][csv_i] + '\n';
             }
         }
 
         // 型付き配列で、8ビット符号なし整数値の配列を表します, [0xEF,0xBB,0xBF]はバイトオーダマーク
-        var buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
+        var buf = new Uint8Array([0xef, 0xbb, 0xbf]);
 
         // Binary Large OBject, バイナリデータを表すオブジェクト
-        saveAs(new Blob([ buf, sp_csv], { "type" : "text/csv" }), filename_spectral);
+        saveAs(new Blob([buf, sp_csv], { type: 'text/csv' }), filename_spectral);
     }
 }
 
 function download_csv_roi_area(data) {
-    let data_object = JSON.parse(data);
-    let wav_array = data_object["band_bin_center"];
-    let ref_array = data_object["reflectance"];
+    let dataObj = JSON.parse(data);
+    let wav_array = dataObj['band_bin_center'];
+    let ref_array = dataObj['reflectance'];
     let band_size = wav_array.length;
     let px_size = ref_array.length;
-    let obs_id = data_object["obs_ID"];
-    let coordinate = data_object["coordinate"];
-    let filename = obs_id + '_E_' + coordinate[0] + '_N_' + coordinate[1] + '.csv';
+    let obs_id = dataObj['obs_ID'];
+    let coordinate = dataObj['coordinate'];
+    let filename = `${obs_id}_E_${coordinate[0]}_N_${coordinate[1]}.csv`;
 
     console.log('download_csv_roi_area');
-    console.log(data_object);
+    console.log(dataObj);
 
     // Header
     let csv = 'wavelength[μm]';
-    for (let j = 1; j <= px_size; j++) { 
-        csv += ',reflectance' + j; 
+    for (let j = 1; j <= px_size; j++) {
+        csv += `,reflectance${j}`;
     }
     csv += '\n';
 
     // Spectral Data
-    for (let i = 0; i < band_size; i++) { 
+    for (let i = 0; i < band_size; i++) {
         csv += wav_array[i];
         for (let j = 0; j < px_size; j++) {
             if (ref_array[j][i] !== -1) {
-                csv += ',' + ref_array[j][i];
+                csv += `,${ref_array[j][i]}`;
             } else {
-                csv +=',' + NaN;
+                csv += ',' + NaN;
             }
         }
         csv += '\n';
     }
 
-    let buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    saveAs(new Blob([buf, csv], { "type" : "text/csv" }), filename);
+    let buf = new Uint8Array([0xef, 0xbb, 0xbf]);
+    saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
 }
 
 /**
  * サムネイル画像ウィンドウのダウンロードボタン、csvダウンロード（全ピクセル）。
- * @param {*} data 
+ * @param {*} data
  */
 function download_csv_spectral_allpixel(data) {
-    var data_object = JSON.parse(data);
-    console.log(data_object);
+    var dataObj = JSON.parse(data);
+    console.log(dataObj);
 
-    var filename = data_object["obs_ID"] + ".csv";
-    var sp_csv = "";
+    var filename = dataObj['obs_ID'] + '.csv';
+    var sp_csv = '';
 
     // イメージサイズ[X, Y], バンド数
-    sp_csv += data_object["Image_size"][0] + ",";
-    sp_csv += data_object["Image_size"][1] + ",";
-    sp_csv += data_object["band_number"] + "\n";
-    // sp_csv += data_object["band_number"].length + "\n";
+    sp_csv += dataObj['Image_size'][0] + ',';
+    sp_csv += dataObj['Image_size'][1] + ',';
+    sp_csv += dataObj['band_number'] + '\n';
+    // sp_csv += dataObj["band_number"].length + "\n";
 
     // x座標(波長)
-    wavelength_list = data_object["band_bin_center"].split(',');
+    wavelength_list = dataObj['band_bin_center'].split(',');
     wavelength_list.map(Number);
     if (wavelength_list[0] > wavelength_list[wavelength_list.length - 1]) {
         wavelength_list.reverse();
     }
-    for (var i = 0; i < data_object["band_number"]; i++) {
-        sp_csv += wavelength_list[i] + ",";
+    for (var i = 0; i < dataObj['band_number']; i++) {
+        sp_csv += wavelength_list[i] + ',';
     }
     sp_csv = sp_csv.slice(0, -1); // 最後のコンマ除去
-    sp_csv += "\n";
+    sp_csv += '\n';
 
     // y座標(反射率)
-    // if (data_object["reflectance"] !== -1) {
-    //     for (var i = 0; i < data_object["reflectance"].length; i++) { // バンド数(x、yのペア)
+    // if (dataObj["reflectance"] !== -1) {
+    //     for (var i = 0; i < dataObj["reflectance"].length; i++) { // バンド数(x、yのペア)
     //         sp_csv += wavelength_list[i] + ",";
     //     }
     // }
-    // for (var i = 0; i < data_object["band_number"]; i++) {
-    //     sp_csv += data_object["reflectance"][i] + "\n";
+    // for (var i = 0; i < dataObj["band_number"]; i++) {
+    //     sp_csv += dataObj["reflectance"][i] + "\n";
     // }
 
     // y座標(反射率)、1バンドのrefを全て取れる。
-    for (var i = 0; i < data_object["Image_size"][1]; i++) {
-        sp_csv += data_object["reflectance"][i] + "\n";
+    for (var i = 0; i < dataObj['Image_size'][1]; i++) {
+        sp_csv += dataObj['reflectance'][i] + '\n';
     }
 
-    var buf = new Uint8Array([0xEF, 0xBB, 0xBF]);
-    saveAs(new Blob([ buf, sp_csv], { "type" : "text/csv" }), filename);
+    var buf = new Uint8Array([0xef, 0xbb, 0xbf]);
+    saveAs(new Blob([buf, sp_csv], { type: 'text/csv' }), filename);
 }

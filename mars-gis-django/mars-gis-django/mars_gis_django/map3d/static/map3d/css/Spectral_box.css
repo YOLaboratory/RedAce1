@@ -1,7 +1,7 @@
 #graph_move {
     width: 0px;
     height: 0px;
-    background: #FFF;
+    background: #fff;
     position: absolute;
     top: 100%;
     left: 0px;
@@ -18,7 +18,7 @@
     margin: 0 auto;
 }
 .tab_item {
-    width: calc(100%/3);
+    width: calc(100% / 3);
     height: 20px;
     border-bottom: 3px solid #5ab4bd;
     background-color: #d9d9d9;
@@ -37,11 +37,11 @@
     /* background-color:goldenrod; */
 }
 input[name="tab_item"] {
-    display: none;  
+    display: none;
 }
 .tab_content {
     display: none;
-    padding: 40px 40px 0;
+    padding-top: 5px;
     clear: both;
     overflow: hidden;
 }
@@ -53,20 +53,38 @@ input[name="tab_item"] {
 #graph {
     width: 0px;
     height: 0px;
-    background: #FFF;
+    background: #fff;
     position: absolute;
-    top: 30px;
+    /* top: 30px; */
     left: 0px;
     z-index: 1001;
 }
-.graph1, .graph2, .graph3 {
-    width: 0px;
-    height: 0px;
-    background: #FFF;
+.graph1,
+.graph2,
+.graph3 {
+    /* width: 0px;
+    height: 0px; */
+    background: #fff;
     position: absolute;
 }
-
-
+.graph_area {
+    background-color: rgb(232, 231, 231);
+    position: absolute;
+    left: 5px;
+    width: 990px;
+    height: 495px;
+}
+.graph_area #labels1,
+.graph_area #labels2,
+.graph_area #labels3 {
+    position: absolute;
+    top: 5px;
+    left: 650px;
+    font-size: 13px;
+    height: 300px;
+    width: 340px;
+    overflow-y: scroll;
+}
 
 /* ??? */
 /* .switch__label {
@@ -144,160 +162,130 @@ overflow: hidden;
 	height: 100%;
 } */
 .switch2__label {
-	width: 44px;
-	position: relative;
+    width: 44px;
+    position: relative;
     margin-left: 5px;
-	display: inline-block;
-    vertical-align:middle;
+    display: inline-block;
+    vertical-align: middle;
 }
 .switch2__content {
-	display: block;
+    display: block;
     cursor: pointer;
     position: relative;
     border-radius: 30px;
     height: 20px;
-    -webkit-transition: all .1s .4s;
-	   -moz-transition: all .1s .4s;
-	    -ms-transition: all .1s .4s;
-	     -o-transition: all .1s .4s;
-	        transition: all .1s .4s;
-	overflow: hidden;
+    -webkit-transition: all 0.1s 0.4s;
+    -moz-transition: all 0.1s 0.4s;
+    -ms-transition: all 0.1s 0.4s;
+    -o-transition: all 0.1s 0.4s;
+    transition: all 0.1s 0.4s;
+    overflow: hidden;
 }
 .switch2__content:before {
-	content: "";
-	display: block;
-	position: absolute;
-	width: calc(100% - 4px);
-	height: calc(100% - 4px);
-	top: 0;
-	left: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    width: calc(100% - 4px);
+    height: calc(100% - 4px);
+    top: 0;
+    left: 0;
     border: 0.5px solid #000000;
-	border-radius: 20px;
-	background-color: #fff;
+    border-radius: 20px;
+    background-color: #fff;
 }
 .switch2__content:after {
-	content: "";
-	display: block;
-	position: absolute;
-	background-color: transparent;
-	width: 0;
+    content: "";
+    display: block;
+    position: absolute;
+    background-color: transparent;
+    width: 0;
     height: calc(100% - 4px);
-	top: 0;
-	left: 0;
-	border-radius: 20px;
-	-webkit-transition: all .5s;
-	   -moz-transition: all .5s;
-	    -ms-transition: all .5s;
-	     -o-transition: all .5s;
-	        transition: all .5s;
+    top: 0;
+    left: 0;
+    border-radius: 20px;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -ms-transition: all 0.5s;
+    -o-transition: all 0.5s;
+    transition: all 0.5s;
 }
 .switch2__input {
-	display: none;
+    display: none;
 }
 .switch2__circle {
-	display: block;
-	top: 3.8px;
-	left: 3px;
-	position: absolute;
-	width: 10px;
-	height: 10px;
-	-webkit-border-radius: 10px;
-	        border-radius: 10px;
-	background-color: #000000;
-	-webkit-transition: all .5s;
-	   -moz-transition: all .5s;
-	    -ms-transition: all .5s;
-	     -o-transition: all .5s;
-	        transition: all .5s;
+    display: block;
+    top: 3.8px;
+    left: 3px;
+    position: absolute;
+    width: 10px;
+    height: 10px;
+    -webkit-border-radius: 10px;
+    border-radius: 10px;
+    background-color: #000000;
+    -webkit-transition: all 0.5s;
+    -moz-transition: all 0.5s;
+    -ms-transition: all 0.5s;
+    -o-transition: all 0.5s;
+    transition: all 0.5s;
 }
 .switch2__input:checked ~ .switch2__circle {
-	left: 27.5px;
-	background-color: #fff;
+    left: 27.5px;
+    background-color: #fff;
 }
 .switch2__input:checked ~ .switch2__content {
-	border-color: transparent;
-	-webkit-transition: all 0s;
-	   -moz-transition: all 0s;
-	    -ms-transition: all 0s;
-	     -o-transition: all 0s;
-	        transition: all 0s;
+    border-color: transparent;
+    -webkit-transition: all 0s;
+    -moz-transition: all 0s;
+    -ms-transition: all 0s;
+    -o-transition: all 0s;
+    transition: all 0s;
 }
 .switch2__input:checked ~ .switch2__content:after {
-	background-color: #0078D7;
-    width: calc(100% - 3.0px);
+    background-color: #0078d7;
+    width: calc(100% - 3px);
 }
 
-
-
-.squareA{
-    pointer-events:auto;
-    top: 5px;
-    text-align:left;
-    width: 300px;
-    height: 30px;
-    position: relative;
-    display: inline-block;
-    font-weight: bold;
-    padding: 0px;
-    margin: 0px;
-    border: 1px solid #808080;
-    text-decoration: none;
-    color: #00BCD4;
-    background-color: rgba(0,0,255,0.2);
-    transition: .4s;
+.download_button,
+.save_button {
+    width: 90px;
+    height: 26px;
+    background-color: white;
+    border-radius: 5px;
+    position: absolute;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 15px;
+    display: grid;
+    place-items: center;
+    box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
-.squareA:hover {
-    background: #00bcd4;
-    color: white;
+.download_button {
+    left: 200px;
+    top: 530px;
 }
-.squareB{
-    pointer-events:auto;
-    top: 5px;
-    text-align:left;
-    width: 100%;
-    height: 30px;
-    position: relative;
-    display: inline-block;
-    font-weight: bold;
-    padding: 0px;
-    margin: 0px;
-    border: 1px solid #808080;
-    text-decoration: none;
-    color: #00BCD4;
-    background-color: rgba(0,0,255,0.2);
-    transition: .4s;
+.save_button {
+    left: 480px;
+    top: 560px;
 }
-.squareB:hover {
-    background: #00bcd4;
-    color: white;
+.download_type,
+.lock_type {
+    position: absolute;
+    top: 535px;
+    color: rgba(255, 255, 255, 0.5);
+}
+.download_type {
+    left: 10px;
+}
+.lock_type {
+    left: 300px;
 }
 
-.balloonoya {
-    position   : relative;
-    pointer-events:auto;
-}
-.balloonoya:hover .balloon {
-    display: inline;
-}
-.balloon {
-    position   : relative;
-    pointer-events:auto;
-    display: none;
-    padding: 2px;
-    background-color: rgba(102, 102, 255, 0.50);
-    width:180px;
-    right : -50%;
-    font-size: 80%;
-    overflow: visible;
-}
-.balloon:after{
-    border-right: 12px solid rgba(102, 102, 255, 0.50);
-    pointer-events:auto;
-    border-top: 10px solid transparent;
-    border-bottom: 10px solid transparent;
-    left: -12px;
-    top: 5%;
-    content: "";
-    position: relative;
-    overflow: visible;
+#save_memo_1,
+#save_memo_2,
+#save_memo_3 {
+    position: absolute;
+    top: 560px;
+    left: 10px;
+    width: 450px;
+    font-size: 17px;
 }

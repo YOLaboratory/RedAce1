@@ -1,13 +1,12 @@
 FROM ubuntu:18.04
 
-## Dockerfile of cesium sample 
 FROM python:3.6
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-RUN apt-get -y update
-RUN apt-get -y upgrade
-RUN apt-get install -y locales curl python3-distutils
+RUN apt-get -y update && apt-get -y upgrade && apt-get install -y \
+    locales\
+    curl
 # RUN curl https://bootstrap.pypa.io/get-pip.py -o get-pip.py #python3.7以上
 RUN curl https://bootstrap.pypa.io/pip/3.6/get-pip.py -o get-pip.py
 RUN python3 get-pip.py
@@ -21,19 +20,20 @@ WORKDIR /code
 COPY requirements.txt /code/
 
 ## Dockerfile of cesium sample + new pip install...
-RUN pip install pipenv
-RUN pip install numpy
 RUN apt-get update && apt-get install -y \
     python3-gdal \
 	binutils \
     gdal-bin \
     libproj-dev \
-    libgdal-dev    
+    libgdal-dev   
+# RUN pip install pipenv
+RUN pip install numpy
+RUN pip install setuptools==57.4.0
 RUN pip install -r requirements.txt
 RUN export CPLUS_INCLUDE_PATH=/usr/bin/gdal
 RUN export C_INCLUDE_PATH=/usr/bin/gdal
-   
+
 RUN apt-get install -y postgresql-client
 COPY ./Pipfile /code/Pipfile
 RUN pipenv install --system --skip-lock
-COPY . /code/
+# COPY . /code/

@@ -44,7 +44,7 @@ REST_FRAMEWORK = {
 
 SERIALIZATION_MODULES = {
     "geojson": "django.contrib.gis.serializers.geojson", 
- }
+}
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

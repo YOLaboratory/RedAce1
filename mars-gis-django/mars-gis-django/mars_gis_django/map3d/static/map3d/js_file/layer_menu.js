@@ -19,3 +19,15 @@ function loadgeojson (record_json, bool_checked) {
         // console.log(bool_checked);
     }
 }
+
+function terrain_magni(value) {
+    var Terrain_reset = function() {
+        roots.map.terrainProvider = terrainProvider_elli;
+        setTimeout(Terrain_adjust, 100);
+    }
+    var Terrain_adjust = function() {
+        roots.map.terrainProvider = terrainProvider_set;
+        roots.map.scene._terrainExaggeration = value;
+    }
+    Terrain_reset();
+}

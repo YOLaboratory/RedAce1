@@ -1,9 +1,11 @@
-#!/usr/bin/env python
-# -*- coding: utf-8 -*-
-# 松原さんRed AceのCGIから転載
-
 import cgitb
 cgitb.enable()
+
+import pvl
+import json
+import numpy as np
+import collections as cl
+from osgeo import gdal, osr
 
 # import logging
 # import cgi
@@ -12,11 +14,6 @@ cgitb.enable()
 # import glob
 # import psycopg2
 
-import pvl
-import json
-import numpy as np
-import collections as cl
-from osgeo import gdal,osr
 # from itertools import product
 # from pyproj import Proj, transform
 
@@ -178,7 +175,6 @@ def base_json(params):
 
 ###########################################################################
 from django.http import HttpResponse
-# from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 
 @csrf_protect

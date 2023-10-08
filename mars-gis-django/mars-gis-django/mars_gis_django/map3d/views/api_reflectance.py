@@ -24,19 +24,19 @@ def support_map_default(o):
 
 def base_json_getRef(params_json):
     ######### THEMIS #########
-    # umemo 引数 >> obs_name,obs_ID,path,wavelength,pixels 
-    if params_json["obs_name"] == 'THEMIS' and params_json["flag"] == 0:
-        field = cl.OrderedDict() # umemo 順番が保持された辞書
+    # 引数 >> obs_name,obs_ID,path,wavelength,pixels 
+    if params_json["obs_name"] == 'THEMIS' and params_json["type"] == 'DIRECT':
+        field = cl.OrderedDict() # 順番が保持された辞書
         field["obs_ID"] = params_json["obs_ID"]
         field["obs_name"] = params_json["obs_name"]
         field["path"] = params_json["path"]
         field["Image_path"] = params_json["Image_path"]
 
-        cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly) # umemo データを読み込み専用で開きます
+        cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly) # データを読み込み専用で開きます
         header = pvl.load(field["path"]["main"]["cub"])
         lbl_data = pvl.load(field["path"]["main"]["lbl"])
-        bandnumber_range = list(range(cube_data.RasterCount)) # umemo バンドの数を最初から最後までリストに入れる ex)0,1,2,...
-        NDV = cube_data.GetRasterBand(1).GetNoDataValue() # umemo バンドのデータ無し値を取得
+        bandnumber_range = list(range(cube_data.RasterCount)) # バンドの数を最初から最後までリストに入れる ex)0,1,2,...
+        NDV = cube_data.GetRasterBand(1).GetNoDataValue() # バンドのデータ無し値を取得
         ref_list = []
         no_data_ref = 1
 
@@ -46,7 +46,7 @@ def base_json_getRef(params_json):
             Lref = Em * (math.cos(math.radians(float(lbl_data["Caminfo"]["Geometry"]["IncidenceAngle"]))) / math.pi) * 0.0001
         else:
             Lref = 1
-            if cube_data.GetRasterBand(cube_data.RasterCount).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])] == NDV: # umemo データあるか無いか判断
+            if cube_data.GetRasterBand(cube_data.RasterCount).ReadAsArray()[int(params_json["pixels"][1])][int(params_json["pixels"][0])] == NDV: # データあるか無いか判断
                 no_data_ref = 1
             else:
                 no_data_ref = 0
@@ -64,7 +64,7 @@ def base_json_getRef(params_json):
 
         if no_data_ref != 1:
             ref_str = ",".join(map(str, ref_list))
-        else: # umemo spectralを表示しない
+        else: # spectralを表示しない
             ref_str = -1
 
         field["pixels"] = params_json["pixels"]
@@ -79,7 +79,7 @@ def base_json_getRef(params_json):
         y = gt[3] + (params_json["pixels"][0] * gt[4]) + (params_json["pixels"][1] * gt[5])
         x,y,z = trans.TransformPoint(x, y)
 
-        field["coordinate"] = [x, y] # umemo pixel座標
+        field["coordinate"] = [x, y] # pixel座標
         field["reflectance"] = ref_str
         field["band_number"] = bandnumber_range
         band_bin_width = header['IsisCube']['BandBin']['Width']
@@ -90,24 +90,33 @@ def base_json_getRef(params_json):
         return json_data
 
     ######## CRISM #########
-    elif params_json["obs_name"] == 'CRISM' and params_json["flag"] == 0:
+    elif params_json["obs_name"] == 'CRISM' and params_json["type"] == 'DIRECT':
         # 新しいjson形式fieldを定義, 順番が保持された辞書
         field = cl.OrderedDict()
         field["path"] = params_json["path"]
         field["obs_ID"] = params_json["obs_ID"]
         field["obs_name"] = params_json["obs_name"]
-        field["path"] = params_json["path"]
         field["Image_path"] = params_json["Image_path"]
         field["pixels"] = params_json["pixels"]
+        field["type"] = params_json["type"]
 
         # cubeファイルを開く, データを読み込み専用で開く, 第一引数：cubeファイル名
         cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly)
-
         # 属性の変数格納
         get_raster_band = cube_data.GetRasterBand
-
         # バンドのデータ無し値を取得
         NDV = get_raster_band(1).GetNoDataValue()
+
+        # 波長の順番が昇順と降順の時がある >> 昇順にする
+        wav_list = params_json["wavelength"].split(',')
+        wav_list = [f'{float(s):.5f}' for s in wav_list]
+        if wav_list[0] > wav_list[1]:
+            wav_list.reverse()
+            wav_str = ",".join(list(map(str, wav_list)))
+            is_reverse = True
+        else:
+            wav_str = params_json["wavelength"]
+            is_reverse = False
 
         y1, x1 = int(params_json["pixels"][1]), int(params_json["pixels"][0])
 
@@ -119,7 +128,6 @@ def base_json_getRef(params_json):
             ref_append = ref_list.append
             bandnumber_range = list(range(cube_data.RasterCount)) # バンドの数を最初から最後までリストに入れる ex)0,1,2,...
             bandnumber_range.pop(0)
-
             # 反射率をリストに格納
             for bandnumber_i in bandnumber_range:
                 ref = get_raster_band(bandnumber_i + 1).ReadAsArray()[y1][x1] # 多分 [1]Y,[0]X
@@ -129,18 +137,10 @@ def base_json_getRef(params_json):
                 else:
                     ref_append(-1)
             
-            # 波長の順番が昇順と降順の時がある >> 昇順にする
-            wav_list = params_json["wavelength"].split(',')
-            wav_list = [float(s) for s in wav_list]
-            if wav_list[0] > wav_list[1]:
-                # 逆順に変換
-                wav_list.reverse()
+            if is_reverse == True:
                 ref_list.reverse()
-                # json文字列化
-                wav_str = ",".join(list(map(str, wav_list)))
                 ref_str = ",".join(list(map(str, ref_list)))
             else:
-                wav_str = params_json["wavelength"]
                 ref_str = ",".join(list(map(str, ref_list)))
 
         field["band_number"] = bandnumber_range # ex) 1,2,...,437
@@ -157,7 +157,7 @@ def base_json_getRef(params_json):
         json_data = json.dumps(field)
         return json_data
     
-    elif params_json["obs_name"] == 'CRISM' and params_json["flag"] == 1:
+    elif params_json["obs_name"] == 'CRISM' and params_json["type"] == 'ALL':
         # 新しいjson形式fieldを定義, 順番が保持された辞書
         field = cl.OrderedDict()
         field["obs_ID"] = params_json["obs_ID"]
@@ -246,7 +246,7 @@ def base_json_getRef(params_json):
         return json_data
         # return response
 
-    elif params_json["obs_name"] == 'CRISM' and params_json["flag"] == 2:
+    elif params_json["obs_name"] == 'CRISM' and params_json["type"] == 'ROI':
         # 新しいjson形式fieldを定義, 順番が保持された辞書
         field = cl.OrderedDict()
         field["path"] = params_json["path"]
@@ -254,101 +254,58 @@ def base_json_getRef(params_json):
         field["obs_name"] = params_json["obs_name"]
         field["path"] = params_json["path"]
         field["Image_path"] = params_json["Image_path"]
-        # field["pixels"] = params_json["pixels"]
+        field["type"] = params_json["type"]
         # cubeファイルを開く, データを読み込み専用で開く, 第一引数：cubeファイル名
         cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly)
         # 属性の変数格納
         # get_raster_band = cube_data.GetRasterBand
         # バンドのデータ無し値を取得
         NDV = cube_data.GetRasterBand(1).GetNoDataValue()
-
         # 全バンドのラスターデータ読み込み
         ref_all_band = cube_data.ReadAsArray()
-
-
-
-        px_y, px_x = int(params_json["pixels"][1]), int(params_json["pixels"][0])
-        # y = y - 1
-        # x = x - 1
-        ref_array = []
+        band_num = cube_data.RasterCount
 
         # 波長の順番が昇順と降順の時がある >> 昇順にする
         wav_list = params_json["wavelength"].split(',')
         wav_list = [f'{float(s):.5f}' for s in wav_list]
-        reverse = 0
         if wav_list[0] > wav_list[1]:
-            reverse = 1
             wav_list.reverse()
+            is_reverse = True
+        else:
+            is_reverse = False
 
         # 反射率をリストに格納
-        for y in range(px_y - 1, px_y + 2):
-            for x in range(px_x - 1, px_x + 2):
-                ref_list = []
+        px_array = params_json["pixels"]
+        ref_array = []
+        for i in range(len(px_array)):
+            ref_list = []
+            for z in range(1, band_num):
+                ref = ref_all_band[z, px_array[i][1], px_array[i][0]]
+                if ref != NDV:
+                    ref_list.append(f'{ref:.5f}')
+                else:
+                    ref_list.append(-1)
+            
+            # 昇順にする
+            if is_reverse == True:
+                ref_list.reverse()
 
-                for z in range(1, cube_data.RasterCount):
-                    ref = ref_all_band[z, y, x]
-                    if ref != NDV:
-                        ref_list.append(f'{ref:.5f}')
-                    else:
-                        ref_list.append(-1)
-                
-                # 昇順にする
-                if reverse == 1:
-                    ref_list.reverse()
+            ref_array.append(ref_list) # list結合（二次元配列）
 
-                ref_array.append(ref_list) # list結合（二次元配列）
-
-
-
-        # for i in range(3):
-        #     y1 = y1 + i
-        #     for j in range(3):
-        #         x1 = x1 + j 
-        #         # # 反射率が取得可能かどうか
-        #         # if cube_data.GetRasterBand(30).ReadAsArray()[y1][x1] == NDV:
-        #         #     ref_str = -1
-        #         # else:
-        #         ref_list = []
-        #         ref_append = ref_list.append
-        #         bandnumber_range = list(range(cube_data.RasterCount)) # バンドの数を最初から最後までリストに入れる ex)0,1,2,...
-        #         bandnumber_range.pop(0)
-
-        #         # 反射率をリストに格納
-        #         for bandnumber_i in bandnumber_range:
-        #             ref = cube_data.GetRasterBand(bandnumber_i + 1).ReadAsArray()[y1][x1] # 多分 [1]Y,[0]X
-        #             if ref != NDV:
-        #                 ref_append(f'{ref:.5f}')
-        #             else:
-        #                 ref_append(-1)
-                
-        #         if reverse == 1:
-        #             ref_list.reverse()
-
-        #         # list結合（二次元配列）
-        #         ref_array.append(ref_list)
-
-        #     x1 = x1 - j
-
-        field["pixels"] = [px_x, px_y]
-        field["band_number"] = cube_data.RasterCount # ex) 1,2,...,437
-        # field["band_number"] = bandnumber_range # ex) 1,2,...,437
+        field["band_number"] = band_num # ex) 1,2,...,437
         field["band_bin_center"] = wav_list     # 波長
         field["reflectance"] = ref_array        # 反射率
         field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
 
-        # cubeファイルを開く
         cube_data2 = gdal.Open(field["path"]["derived"]["cub"], gdal.GA_ReadOnly)
-        x2 = cube_data2.GetRasterBand(5).ReadAsArray()[px_y][px_x]
-        # x2 = cube_data2.GetRasterBand(5).ReadAsArray()[y1][x1]
-        y2 = cube_data2.GetRasterBand(4).ReadAsArray()[px_y][px_x]
-        # y2 = cube_data2.GetRasterBand(4).ReadAsArray()[y1][x1]
+        x2 = cube_data2.GetRasterBand(5).ReadAsArray()[int(px_array[0][1])][int(px_array[0][0])]
+        y2 = cube_data2.GetRasterBand(4).ReadAsArray()[int(px_array[0][1])][int(px_array[0][0])]
         field["coordinate"] = [f'{float(x2):.5f}', f'{float(y2):.5f}']
 
         json_data = json.dumps(field)
         return json_data
 
 from django.http import HttpResponse
-from django.http import JsonResponse
 from django.views.decorators.csrf import csrf_protect
 
 @csrf_protect

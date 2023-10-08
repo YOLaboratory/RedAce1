@@ -12,7 +12,8 @@
     position: absolute;
     text-decoration: none;
     display: block;
-    padding: 5px 0;
+    padding: 6px 0;
+    height: 18px;
     width: 88px;
     right: 0px;
     background: rgba(135,5,34,0.5);
@@ -27,8 +28,8 @@
 }
 .top_menu_contents {
     position: absolute;
-    right: 90px;
-    top: -20vw;
+    right: 89.5px;
+    top: -60px;
     -webkit-transition: 0.53s transform;
             transition: 0.53s transform;
     -webkit-transition-timing-function: cubic-bezier(.38,.52,.23,.99);
@@ -36,7 +37,7 @@
 }
 #top_menu_toggle:checked ~ .top_menu_contents {
     -webkit-transform: translateY(20vw);
-            transform: translateY(20vw);
+            transform: translateY(60px);
 }
 .nav {
     margin: 0 auto;

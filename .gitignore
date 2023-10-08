@@ -8,6 +8,9 @@ mars-gis-django/mars-gis-django/mars_gis_django/static/node_modules/
 mars-gis-django/mars-gis-django/mars_gis_django/collect_static/
 mars-gis-django/mars-gis-django/mapserver
 mars-gis-django/mars-gis-django/terrain
+mars-gis-django/mars-gis-django/nginx_jupyterhub
+mars-gis-django/mars-gis-django/todatabase_test_usui_v1
+
 
 .DS_Store
 
