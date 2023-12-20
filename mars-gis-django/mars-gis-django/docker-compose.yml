@@ -22,21 +22,27 @@ services:
 
   ### Django ###
   django:
-    build: ./mars_gis_django
+    # build: ./mars_gis_django
+    image: redace_django_gdal:20231028v3.1
     container_name: django
     restart: always
     # entrypoint: ["bash","./wait-for-postgis.sh"]
+    working_dir: /code
     volumes:
       - ./mars_gis_django:/code
       - ./mars_gis_django/mars_data:/mars_data
       # - ./todatabase_test_usui_v1:/mnt ###test
       # - ../../git/mars_data_distributed:/mars_data_distributed
+      - ./jupyterhub/data:/code/data
+    environment:
+      - DJANGO_SETTINGS_MODULE=mars_gis_django.settings
     depends_on:
       - postgis
       - mapserver
       - terrainserver
     expose:
       - "8001"
+    privileged: true
     command: sh /code/start.sh
     # command: uwsgi --socket :8001 --module mars_gis_django.wsgi
     networks:
@@ -120,6 +126,36 @@ services:
     networks:
       redace_network:
         ipv4_address: 172.16.238.5
+
+  ### JupyterHub ###
+  jupyterhub:
+    image: redace_jupyterhub:v1.3
+    # build:
+    #   context: ./jupyterhub
+    #   dockerfile: Dockerfile
+    container_name: jupyterhub
+    depends_on:
+      - postgis
+    ports:
+      - 8000:8000
+    environment:
+      - POSTGRES_HOST:postgis
+      - POSTGRES_PORT:5432
+      - POSTGRES_USER:m5211164
+      - POSTGRES_PASSWORD:anpanman
+      - DJANGO_SETTINGS_MODULE=mars_gis_django.settings
+    links: 
+      - postgis:postgis
+    volumes:
+      - ./mars_gis_django:/code
+      - ./jupyterhub/config:/srv/jupyterhub/config
+      - ./jupyterhub/bootstrap-script:/srv/jupyterhub/bootstrap-script
+      - ./jupyterhub/data:/data
+    # command: jupyterhub --config /srv/jupyterhub/config/jupyterhub_config.py
+    tty: true
+    networks:
+      redace_network:
+        ipv4_address: 172.16.238.10
 
 networks:
   redace_network:
