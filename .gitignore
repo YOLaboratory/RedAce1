@@ -7,16 +7,20 @@ mars-gis-django/mars-gis-django/mars_gis_django/mars_data/
 mars-gis-django/mars-gis-django/mars_gis_django/static/node_modules/
 mars-gis-django/mars-gis-django/mars_gis_django/collect_static/
 mars-gis-django/mars-gis-django/mapserver
+mars-gis-django/mars-gis-django/mapserver.zip
 mars-gis-django/mars-gis-django/terrain
+mars-gis-django/mars-gis-django/terrain.zip
 mars-gis-django/mars-gis-django/nginx_jupyterhub
 mars-gis-django/mars-gis-django/todatabase_test_usui_v1
-
 
 .DS_Store
 
 mars-gis-django/mars-gis-django/jupyter_notebook_config.py
 test_dockerspawner/
 test_dockerspawner2/
+test_jupyterhub_google/
 test_nginx_hub/
 test_nginx_hub2/
 test_rattydave-jupyterhub/
+
+tmp/
