@@ -1,6 +1,8 @@
 function save_spectral(counter) {
     console.log('save_spectral here!!');
     console.log(dataSave[counter]);
+    console.log(dataSave);
+    console.log(counter);
 
     let graphCounter = counter + 1;
     let description = document.getElementById(`save_memo_${graphCounter}`).value;

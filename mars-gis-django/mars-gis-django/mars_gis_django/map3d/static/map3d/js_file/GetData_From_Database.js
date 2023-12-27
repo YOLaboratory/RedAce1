@@ -1,5 +1,4 @@
 // 下記、グローバル変数
-var graphList = [];
 var entity = new Cesium.Entity();
 var flagEntity = 0;
 var ratio_flag = false;
@@ -215,6 +214,7 @@ function getAncillaryData(data) {
     }).then(
         function (data) {
             console.log('SUCCESS >> getAncillaryData');
+            // console.log(data);
             displayThumbnailWindow(data);
         },
         function () {
@@ -236,6 +236,7 @@ function getSpectralDataAll(obs_name, obs_ID, path, wavelength, flag) {
         url: 'reflectance/',
         contentType: 'application/json',
         data: JSON.stringify({
+            operation: 'get',
             obs_name: obs_name,
             obs_ID: obs_ID,
             path: path,
@@ -276,7 +277,7 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
     //     rePx[0] = px[0] + 1;
     //     rePx[1] = imgSize[1] - px[1] - 1;
     // }
-    px[1] = imgSize[1] - px[1];
+    px[1] = imgSize[1] - px[1] - 1; //画像とずれる？
 
     // pixel座標がイメージサイズ(四角形)より内側ならデータ探す
     // ピクセル座標、左下基準。
@@ -287,6 +288,7 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
             url: 'reflectance/',
             contentType: 'application/json',
             data: JSON.stringify({
+                operation: 'get',
                 obs_name: obsName,
                 obs_ID: obsID,
                 path: path,
@@ -304,7 +306,7 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
                 $loading.addClass('is-hide');
                 $loading2.addClass('is-hide');
                 console.log('SUCCESS >> getSpectralDataClickedPixel');
-                console.log(data);
+                // console.log(data);
                 displaySpectralBox(data);
             },
             function () {
@@ -327,8 +329,11 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
     // pxArray[0][1] = imgSize[1] - pxArray[0][1] - 1;
     // pxArray[1][1] = imgSize[1] - pxArray[1][1] - 1;
 
+    let newPxArr = [];
     for (let i = 0; i < pxArray.length; i++) {
-        pxArray[i][1] = imgSize[1] - pxArray[i][1] - 1;
+        newPxArr[i] = [];
+        newPxArr[i].push(pxArray[i][0]);
+        newPxArr[i].push(imgSize[1] - pxArray[i][1] - 1);
     }
 
     $.ajax({
@@ -337,7 +342,8 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
         url: 'reflectance/',
         contentType: 'application/json',
         data: JSON.stringify({
-            pixels: pxArray,
+            operation: 'get',
+            pixels: newPxArr,
             obs_name: obsName,
             obs_ID: obsID,
             path: path,
@@ -354,7 +360,9 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
             $loading.addClass('is-hide');
             $loading2.addClass('is-hide');
             console.log('SUCCESS >> getSpectralDataRoiArea');
-            download_csv_roi_area(data);
+            // console.log(data);
+            displaySpectralBox(data);
+            // download_csv_roi_area(data);
         },
         function () {
             $loading.addClass('is-hide');

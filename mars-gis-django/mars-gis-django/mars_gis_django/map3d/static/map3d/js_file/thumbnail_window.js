@@ -76,13 +76,21 @@ function createThumbnailFrame(frameNum, dataObj, color, footprintLayer, data) {
             html: `
                 <div id="${frameName}">
                     <div id="click_position${frameNum}"></div>
-                    <div class="get_switch${frameNum}" onclick="">get</div>
+                    <div class="get_button${frameNum}">get</div>
                     <div class="remove_switch${frameNum}">remove mode</div>
                     <div class="select_switch${frameNum}">select mode</div>
+                    <div class="clear_button${frameNum}">clear</div>
+                    <div class="search_area">
+                        <input type="text" id="search_px_input${frameNum}" value="" placeholder=" x_y (pixel)"/>
+                        <div class="search_px_button${frameNum}">search</div>
+                    </div>
                     <div id="thumbnail_window${frameNum}" style="border-color:${color};">
                         <div id="ratio_select${frameNum}" name="ratio_select${frameNum}"></div>
                         <div id="slider${frameNum}"></div>
                         <div id="click_history${frameNum}"></div>
+                        <div class="coords_type_switch${frameNum}">
+                            <label><i class="fa fa-retweet" style="font-size:13px;"></i></label>
+                        </div>
                     </div>
                 </div>`,
         })
@@ -190,8 +198,15 @@ function displayThumbnail(targetElement, dataObj) {
             new ol.control.OverviewMap(),
             new ol.control.FullScreen(),
             new ol.control.MousePosition({
-                coordinateFormat: function (coordinate) {
-                    return ol.coordinate.format(coordinate, 'Pixel [ x: {x}, y: {y} ]', 2);
+                coordinateFormat: function (pxCoord) {
+                    if (document.querySelector('.coords_type_switch1').classList.contains('active')) {
+                        let pxY = dataObj['Mapping']['Image_size'][1] - Math.floor(pxCoord[1]) - 1;
+                        let lon = dataObj['coords_lon'][pxY][Math.floor(pxCoord[0])];
+                        let lat = dataObj['coords_lat'][pxY][Math.floor(pxCoord[1])];
+                        return ol.coordinate.format([lon, lat], 'Lon: {x}, Lat: {y}', 5);
+                    } else {
+                        return ol.coordinate.format(pxCoord, 'Pixel [ x: {x}, y: {y} ]', 2);
+                    }
                 },
                 projection: 'EPSG:4326',
                 undefinedHTML: 'Outside',
@@ -206,6 +221,7 @@ let thumbnailNum = 0;
 let storeClickedPx = [];
 // ObsIdBoxで選択されたデータのサムネイル画像を表示
 function displayThumbnailWindow(data) {
+    // console.log(data);
     let selectedWindow = 'None';
     // prettier-ignore
     [selectedWindow, existThumbnailWindow] = 
@@ -233,12 +249,13 @@ function displayThumbnailWindow(data) {
         createThumbnailFrame(1, dataObj, 'orange', footprintLayer, data);
         wms_layers.thumbnail = displayThumbnail('thumbnail_window1', dataObj);
 
-        document.querySelector('.get_switch1').addEventListener('click', () => {
+        document.querySelector('.get_button1').addEventListener('click', () => {
             thumbnailNum = 0;
             // 赤いピクセルレイヤーを取得
             let pxArray = getSelectedPixels();
             getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName, wav);
             // 赤いピクセルレイヤーをオレンジに変える
+            changePixelsColor(pxArray);
         });
         document.querySelector('.remove_switch1').addEventListener('click', () => {
             document.querySelector('.remove_switch1').classList.toggle('active');
@@ -251,6 +268,31 @@ function displayThumbnailWindow(data) {
             if (document.querySelector('.remove_switch1').classList.contains('active')) {
                 document.querySelector('.remove_switch1').classList.toggle('active');
             }
+        });
+        document.querySelector('.clear_button1').addEventListener('click', () => {
+            thumbnailNum = 0;
+            setAlignment([-1, -1], 'clear');
+        });
+        document.querySelector('.search_px_button1').addEventListener('click', () => {
+            const searchInput = document.getElementById('search_px_input1');
+            const searchPx = searchInput.value.split('_');
+            if (document.querySelector('.select_switch1').classList.contains('active')) {
+                storeClickedPx.push(searchPx);
+                if (storeClickedPx.length === 1) {
+                    setAlignment(searchPx, 1);
+                } else {
+                    setAlignment(searchPx, 2);
+                    storeClickedPx.length = 0;
+                }
+            } else {
+                setAlignment(searchPx, 'search');
+            }
+        });
+        document.querySelector('.coords_type_switch1').addEventListener('click', () => {
+            document.querySelector('.coords_type_switch1').classList.toggle('active');
+            // if (document.querySelector('.coords_type_switch1').classList.contains('active')) {
+            //     document.querySelector('.coords_type_switch1').classList.toggle('active');
+            // }
         });
 
         // if (dataObj["Ratio_path_json"] != null) {
@@ -307,8 +349,13 @@ function displayThumbnailWindow(data) {
         createThumbnailFrame(2, dataObj, 'green', footprintLayer, data);
         wms_layers.thumbnail2 = displayThumbnail('thumbnail_window2', dataObj);
 
-        document.querySelector('.get_switch2').addEventListener('click', () => {
-            getSpectralDataRoiArea(storeClickedPx, imgSize, obsID, path, imgPath, obsName, wav);
+        document.querySelector('.get_button2').addEventListener('click', () => {
+            thumbnailNum = 1;
+            // 赤いピクセルレイヤーを取得
+            let pxArray = getSelectedPixels();
+            getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName, wav);
+            // 赤いピクセルレイヤーをオレンジに変える
+            changePixelsColor(pxArray);
         });
         document.querySelector('.remove_switch2').addEventListener('click', () => {
             document.querySelector('.remove_switch2').classList.toggle('active');
@@ -367,6 +414,50 @@ function displayThumbnailWindow(data) {
     }
 }
 
+function setDrawLayerLines(coordinates, color) {
+    // prettier-ignore
+    let fillColor = 
+        color === 'red' ? 'rgba(255, 0, 0, 0.08)' :
+        color === 'orange' ? 'rgba(0, 0, 255, 0.06)' :
+        color === 'green' ? 'rgba(0, 255, 0, 0.3)' :
+        color === 'blue' ? 'rgba(0, 0, 255, 0.3)' : false;
+
+    let layerLines = new ol.layer.Vector({
+        source: new ol.source.Vector({
+            features: [
+                new ol.Feature({
+                    geometry: new ol.geom.Polygon(coordinates),
+                }),
+            ],
+        }),
+        style: new ol.style.Style({
+            stroke: new ol.style.Stroke({ color: color, width: 0.5 }),
+            fill: new ol.style.Fill({
+                color: fillColor,
+            }),
+        }),
+    });
+    return layerLines;
+}
+function setLayerCoordinates(x, y) {
+    // prettier-ignore
+    coordinates = [[[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y], [x, y]]]
+    return coordinates;
+}
+function drawLayer(x, y, color, squareObj, thumbnailObj) {
+    let key = `${x}-${y}`;
+    if (!(key in squareObj[color])) {
+        line = setDrawLayerLines(setLayerCoordinates(x, y), color);
+        thumbnailObj.getLayers().push(line);
+        squareObj[color][key] = [x, y, line];
+    }
+}
+function removeSquareLayer(x, y, color, squareObj, thumbnailObj) {
+    key = `${x}-${y}`;
+    thumbnailObj.getLayers().remove(squareObj[color][key][2]);
+    delete squareObj[color][key];
+}
+
 let roiAreaCoord = [];
 let drawnLayers = {
     square1: { red: {}, orange: {} },
@@ -376,7 +467,7 @@ let drawnLayers = {
 };
 // thumbnailWindow内で座標クリックした時の座標点から上下左右に伸びる直線描画
 function setAlignment(click_point, flag) {
-    let key, coordinates, color, layerLines, layerLocation, thumbnailObj;
+    let color, layerLines, thumbnailObj;
     let x = Math.trunc(click_point[0]);
     let y = Math.trunc(click_point[1]);
 
@@ -390,62 +481,7 @@ function setAlignment(click_point, flag) {
 
     // 前回のバツマークを削除
     thumbnailObj.removeLayer(crossObj[0]);
-    thumbnailObj.removeLayer(crossObj[1]);
     delete crossObj;
-
-    // 描画するレイヤーを設定
-    function setLayerLines(coordinates, color) {
-        let layerLines = new ol.layer.Vector({
-            source: new ol.source.Vector({
-                features: [
-                    new ol.Feature({
-                        geometry: new ol.geom.LineString(coordinates),
-                    }),
-                ],
-            }),
-            style: new ol.style.Style({
-                stroke: new ol.style.Stroke({ color: color, width: 1 }),
-            }),
-        });
-        return layerLines;
-    }
-    function setLayerCoordinates(x, y, i) {
-        // prettier-ignore
-        coordinates =
-            i === 0 ? [[x, y], [x, y + 1]] : 
-            i === 1 ? [[x, y + 1], [x + 1, y + 1]] : 
-            i === 2 ? [[x + 1, y + 1], [x + 1, y]] : 
-            i === 3 ? [[x + 1, y], [x, y]] : [[x, y + 1], [x + 1, y]] ;
-        return coordinates;
-    }
-    function setLayerLocation(i) {
-        // prettier-ignore
-        layerLocation = 
-            i === 0 ? 'right' : 
-            i === 1 ? 'up' : 
-            i === 2 ? 'left' : 
-            i === 3 ? 'down' : 'diagonal';
-        return layerLocation;
-    }
-    function drawLayer(x, y, color) {
-        let l = [];
-        key = `${x}-${y}`;
-        if (!(key in squareObj[color])) {
-            for (let i = 0; i < 5; i++) {
-                line = setLayerLines(setLayerCoordinates(x, y, i), color);
-                l.push(line);
-                thumbnailObj.getLayers().push(line);
-            }
-            squareObj[color][key] = [x, y, l];
-        }
-    }
-    function removeLayer(x, y, color) {
-        key = `${x}-${y}`;
-        for (let i = 0; i < 5; i++) {
-            thumbnailObj.getLayers().remove(squareObj[color][key][2][i]);
-        }
-        delete squareObj[color][key];
-    }
 
     // flag 0: 即取得モードのクリックされたピクセル枠+斜線を描画（１ピクセル）
     // flag 1: 選択モードの始点記憶
@@ -454,7 +490,7 @@ function setAlignment(click_point, flag) {
 
     if (flag === 0) {
         // クリックされたピクセル枠+斜線を描画
-        drawLayer(x, y, 'orange');
+        drawLayer(x, y, 'orange', squareObj, thumbnailObj);
     } else if (flag === 1) {
         roiAreaCoord.push(x);
         roiAreaCoord.push(y);
@@ -468,35 +504,55 @@ function setAlignment(click_point, flag) {
 
         for (let yAxis = yStart; yAxis >= yStart - yWidth; yAxis--) {
             for (let xAxis = xStart; xAxis <= xStart + xWidth; xAxis++) {
-                drawLayer(xAxis, yAxis, 'red');
+                drawLayer(xAxis, yAxis, 'red', squareObj, thumbnailObj);
             }
         }
         roiAreaCoord = [];
     } else if (flag === -1) {
-        removeLayer(x, y, 'red');
+        removeSquareLayer(x, y, 'red', squareObj, thumbnailObj);
+    } else if (flag === 'search') {
+        drawLayer(x, y, 'red', squareObj, thumbnailObj);
+    } else if (flag === 'clear') {
+        let squareRedArray2D = Object.values(squareObj.red);
+        let squareOrangeArray2D = Object.values(squareObj.orange);
+        for (let i = 0; i < squareRedArray2D.length; i++) {
+            [x, y] = [squareRedArray2D[i][0], squareRedArray2D[i][1]];
+            removeSquareLayer(x, y, 'red', squareObj, thumbnailObj);
+        }
+        for (let i = 0; i < squareOrangeArray2D.length; i++) {
+            [x, y] = [squareOrangeArray2D[i][0], squareOrangeArray2D[i][1]];
+            removeSquareLayer(x, y, 'orange', squareObj, thumbnailObj);
+        }
     }
 
     // クリックされたピクセルにバツマークを描画（削除以外の時）
-    if (!(flag === -1)) {
+    if (!(flag === -1 || flag === 'search' || flag === 'clear')) {
         color = flag === 1 ? 'green' : 'blue';
-        for (let i = 0; i < 2; i++) {
-            // prettier-ignore
-            coordinates = i === 0 ? [[x, y + 1], [x + 1, y]] : [[x, y], [x + 1, y + 1]];
-            layerLines = setLayerLines(coordinates, color);
-            thumbnailObj.getLayers().push(layerLines);
-            crossObj[i] = layerLines;
-        }
+        layerLines = setDrawLayerLines(setLayerCoordinates(x, y), color);
+        thumbnailObj.getLayers().push(layerLines);
+        crossObj[0] = layerLines;
     }
 }
 
 function getSelectedPixels() {
     let squareRedObj = thumbnailNum === 0 ? drawnLayers.square1.red : drawnLayers.square2.red;
     let squareRedArray2D = Object.values(squareRedObj);
-    let pixelList = [];
+    let pixelArr = [];
     for (let i = 0; i < squareRedArray2D.length; i++) {
-        pixelList.push([squareRedArray2D[i][0], squareRedArray2D[i][1]]);
+        pixelArr.push([squareRedArray2D[i][0], squareRedArray2D[i][1]]);
     }
-    return pixelList;
+    return pixelArr;
+}
+function changePixelsColor(pixelArr) {
+    let thumbnailObj, squareObj;
+    [thumbnailObj, squareObj] =
+        thumbnailNum === 0 ? [wms_layers.thumbnail, drawnLayers.square1] : [wms_layers.thumbnail2, drawnLayers.square2];
+
+    for (let i = 0; i < pixelArr.length; i++) {
+        let [x, y] = [pixelArr[i][0], pixelArr[i][1]];
+        drawLayer(x, y, 'orange', squareObj, thumbnailObj);
+        removeSquareLayer(x, y, 'red', squareObj, thumbnailObj);
+    }
 }
 
 // 表レイアウト定義
@@ -587,8 +643,8 @@ function click_history(data) {
         document.getElementById(`click_position${num}`).innerHTML = `
             <button type="button" name="chistory0" align="right" value="1,${countHistory}" class="squareA"
             onclick="clickHistory(this);">
-                Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
-                Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
+                Lon : ${dataObj['coordinate'][0]}<br>
+                Lat : ${dataObj['coordinate'][1]}<br>
                 Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
             </button>`;
     }
@@ -606,8 +662,8 @@ function click_history(data) {
         let historyTop = `
             <button type="button" name="chistory0" align="right" 
             value="1,${countHistory}" class="squareB" onclick="clickHistory(this);">
-                Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
-                Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
+                Lon : ${dataObj['coordinate'][0]}<br>
+                Lat : ${dataObj['coordinate'][1]}<br>
                 Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
             </button>`;
 
@@ -622,41 +678,44 @@ function click_history(data) {
         }
     }
 
-    if (thumbnailNum === 0) {
-        createClickPosition(1, countHistory1);
-        createClickHistory(1, countHistory1);
-        // thumbnail boxの左上部分, clickされた座標表示
-        // document.getElementById('click_position1').innerHTML = `
-        //     <button type="button" name="chistory0" align="right"
-        //     value="1,${Math.floor(countHistory1)}" class="squareA" onclick="clickHistory(this);">
-        //         Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
-        //         Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
-        //         Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
-        //     </button>`;
+    let isTypeDIRECT = dataObj['type'] === 'DIRECT' ? true : false;
 
-        // let historyHeight1 = 35 * countHistory1 + 42;
-        // if (historyHeight1 > 440) historyHeight1 = 440;
-        // if (countHistory1 == 0) historyHeight1 = 0;
-        // historyHeight1 += 'px';
-        // document.getElementById('click_history1').style.height = historyHeight1;
+    if (isTypeDIRECT) {
+        if (thumbnailNum === 0) {
+            createClickPosition(1, countHistory1);
+            createClickHistory(1, countHistory1);
+            // thumbnail boxの左上部分, clickされた座標表示
+            // document.getElementById('click_position1').innerHTML = `
+            //     <button type="button" name="chistory0" align="right"
+            //     value="1,${Math.floor(countHistory1)}" class="squareA" onclick="clickHistory(this);">
+            //         Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
+            //         Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
+            //         Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
+            //     </button>`;
 
-        // var element = historyTop1 + document.getElementById('click_history1').innerHTML;
-        // document.getElementById('click_history1').innerHTML = element;
+            // let historyHeight1 = 35 * countHistory1 + 42;
+            // if (historyHeight1 > 440) historyHeight1 = 440;
+            // if (countHistory1 == 0) historyHeight1 = 0;
+            // historyHeight1 += 'px';
+            // document.getElementById('click_history1').style.height = historyHeight1;
 
-        // historyJson1.push(dataObj);
+            // var element = historyTop1 + document.getElementById('click_history1').innerHTML;
+            // document.getElementById('click_history1').innerHTML = element;
 
-        // thumbnail boxの右部分, onclick(this)は押した箇所のhtml文1行取得<div class....></div>など取得
-        // historyTop1 = `
-        //     <button type="button" name="chistory0" align="right"
-        //     value="1,${countHistory1}" class="squareB" onclick="clickHistory(this);">
-        //         Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
-        //         Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
-        //         Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
-        //     </button>`;
+            // historyJson1.push(dataObj);
 
-        // countHistory1++;
-    } else if (thumbnailNum === 1) {
-        document.getElementById('click_position2').innerHTML = `
+            // thumbnail boxの右部分, onclick(this)は押した箇所のhtml文1行取得<div class....></div>など取得
+            // historyTop1 = `
+            //     <button type="button" name="chistory0" align="right"
+            //     value="1,${countHistory1}" class="squareB" onclick="clickHistory(this);">
+            //         Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
+            //         Lat : ${dataObj['coordinate'][1].toFixed(5)}<br>
+            //         Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
+            //     </button>`;
+
+            // countHistory1++;
+        } else if (thumbnailNum === 1) {
+            document.getElementById('click_position2').innerHTML = `
             <button type="button" name="chistory0" align="right" 
             value="2,${countHistory2}" class="squareA" onclick="clickHistory(this);">
                 Lon : ${dataObj['coordinate'][0].toFixed(5)}<br>
@@ -664,18 +723,18 @@ function click_history(data) {
                 Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
             </button>`;
 
-        var historyHeight2 = 35 * countHistory2 + 42;
-        if (historyHeight2 > 440) historyHeight2 = 440;
-        if (countHistory2 == 0) historyHeight2 = 0;
-        historyHeight2 += 'px';
-        document.getElementById('click_history2').style.height = historyHeight2;
+            var historyHeight2 = 35 * countHistory2 + 42;
+            if (historyHeight2 > 440) historyHeight2 = 440;
+            if (countHistory2 == 0) historyHeight2 = 0;
+            historyHeight2 += 'px';
+            document.getElementById('click_history2').style.height = historyHeight2;
 
-        var element = historyTop2 + document.getElementById('click_history2').innerHTML;
-        document.getElementById('click_history2').innerHTML = element;
+            var element = historyTop2 + document.getElementById('click_history2').innerHTML;
+            document.getElementById('click_history2').innerHTML = element;
 
-        historyJson2.push(dataObj);
+            historyJson2.push(dataObj);
 
-        historyTop2 = `
+            historyTop2 = `
             <div class="balloonoya">
             <button type="button" name="chistory0" align="right" 
             value="2,${Math.floor(countHistory2)}" class="squareB" onclick="clickHistory(this);">
@@ -684,7 +743,8 @@ function click_history(data) {
                 Pixel [ x: ${Math.floor(dataObj['pixels'][0])}, y: ${Math.floor(dataObj['pixels'][1])}]
             </button>`;
 
-        countHistory2++;
+            countHistory2++;
+        }
     }
 }
 

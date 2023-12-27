@@ -1,114 +1,143 @@
+import os
+import errno
+import requests
+from django.urls import reverse, reverse_lazy
 from django.shortcuts import render, redirect, get_object_or_404
-from django.contrib.auth import login, authenticate
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
-from django.contrib.auth.forms import UserCreationForm
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User
 from spectra.models import Spectrum
-from spectra.views import convert_dygraphs_data
-from django.http import HttpResponseRedirect
-from django.urls import reverse_lazy
-from django.views.generic.edit import CreateView
-from accounts.forms import SignUpForm
+from . import forms
+from .models import Project
+from .forms import ProjectCreationForm, ProjectJoinForm
+from django.views.generic import TemplateView, CreateView
+from django.http import HttpResponseBadRequest, HttpResponseRedirect
+from django.contrib.auth.hashers import make_password, check_password
+from django.contrib import messages
 
+@login_required
+def create_jupyterhub_user(request):
+    # Djangoユーザー情報を取得
+    django_user = request.user
 
+    # JupyterHub APIトークン、本来は秘密にする。
+    jupyterhub_api_token = '2073ade9d907484e959595a601d7fccc'
 
-# class SignUp(CreateView):
-#     form_class = SignUpForm
-#     template_name = "accounts/signup.html" 
-#     success_url = reverse_lazy('accounts/login.html')
+    # JupyterHubに新しいユーザーを作成
+    # jupyterhub_api_url = 'http://0.0.0.0:8000/hub/api/users'
+    jupyterhub_api_url = 'http://192.168.1.53:8000/hub/api/users'
+    headers = {'Authorization': f'token {jupyterhub_api_token}'}
+    
+    response = requests.post(
+        jupyterhub_api_url,
+        json={'name': django_user.username, 'admin': False},
+        headers=headers
+    )
 
-#     def form_valid(request, form):
-#         form.save()
-#         # user = form.save() # formの情報を保存
-#         # login(self.request, user) # 認証
-#         # self.object = user 
-#         # return HttpResponseRedirect(self.get_success_url()) # リダイレクト
-#         return render(request, 'accounts/login.html')
-def SignUp(request):
-    if request.method == 'POST':
-        form = SignUpForm(request.POST)
-        if form.is_valid():
-            form.save()
-            return redirect('login')
+    if response.status_code == 201:
+        print('success --> create_jupyterhub_user')
+        # return render(request, 'success.html', {'message': 'User created successfully'})
     else:
-        form = SignUpForm()
-    return render(request, 'accounts/signup.html', {'form': form})
+        print('fail --> create_jupyterhub_user')
+        # return render(request, 'error.html', {'message': 'Failed to create user'})
+    
+def create_jupyter_dir(parent_dir, dir_name):
+    code_dir = os.getcwd()
+    data_dir = os.path.join(code_dir, 'data')
+    parent_dir = os.path.join(data_dir, parent_dir)
 
-
-@login_required
-def index(request):
-    return render(request, 'accounts/index.html')
-@login_required
-def select_page(request):
-    return render(request, 'accounts/select.html')
-# Create your views here.
-
-
-# def convert_dygraphs_data(rec_spectra):
-#     dygraphs_spectra = []
-#     for j,spectrum in enumerate(rec_spectra):
-#         dygraphs_spectrum = '' #'[["wavelength","reflectance"]]'
-#         wavelengths = spectrum.wavelength.split(",")
-#         reflectances = spectrum.reflectance.split(",")
-#         for i,wavelength in enumerate(wavelengths):
-#             dygraphs_spectrum+='['+wavelength+','+reflectances[i]+'],\n'
-#         dygraphs_spectra.append({"data":dygraphs_spectrum, "id_graph":"graph"+str(j),
-#                                 "id_map":"map"+str(j),"rec":spectrum})
-#
-#     return dygraphs_spectra
-
-
-
-# from spectra.models import Spectrum, Collection, MineralList
+    try:
+        os.makedirs(os.path.join(parent_dir, dir_name))
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            # フォルダがすでに存在する場合は何もしない
+            pass
+        else:
+            # フォルダの作成に失敗した場合はエラーを表示
+            raise
 
 @login_required
 def users_home(request):
-    user_id = request.user.id
-    user = get_object_or_404(User, pk=user_id)
-    spectra = user.spectrum_set.all()
-    dygraphs_spectra = convert_dygraphs_data(spectra)
-    #
-    # ctx = {}
-    qs = Spectrum.objects.all()
-    # ctx = qs
-    #
-    try:
-        group = request.user.groups.filter(user=user_id)[0]#全グループ表示したい、https://teratail.com/questions/166707
-        # rec = group.collection_set.all()
-    #
+    if request.user.is_authenticated:
+        user_id = request.user.id
+        user = get_object_or_404(get_user_model(), pk=user_id)
+        spectra = user.spectrum_set.all()
+        qs = Spectrum.objects.all()
+        # groups = request.user.groups.all()
+        projects = Project.objects.filter(member__in=[user_id])
+        project_ids = [project.id for project in projects]
+        spectra_test = Spectrum.objects.filter(share_project__in=project_ids)
+        # spectra_instrument = [spectrum.instrument for spectrum in spectra_test]
+
+        create_jupyter_dir('users', user.username)
+        # create_jupyterhub_user(request)
+
         settings = {
             'user': user,
             'spectra': spectra,
-            # 'dygraphs_spectra': dygraphs_spectra,
-            'group': group,
-            # 'collections': rec,
-            # 'collection_id': collection_id,
             'qs':qs,
-            # 'ctx':ctx,
+            # 'groups': groups,
+            'projects':projects,
+            'spectra_test':spectra_test,
         }
+        
         return render(request, "accounts/home.html", settings)
-    #
-    except IndexError:
-        settings = {
-            'user': user,
-            'spectra': spectra,
-            # 'dygraphs_spectra': dygraphs_spectra,
-        }
-        return render(request, "accounts/home.html",settings)
-    # settings = {
-    # 'user': user,
-    # }
-    # return render(request, 'accounts/home.html', settings)
-    # return render(request, 'accounts/home.html', {'user': user, 'spectra': spectra})
+    else:
+        return render(request, "accounts/login.html", settings)
 
 
+@login_required
+def create_project(request):
+    if request.method == 'POST':
+        print("POST request received")
+        form = ProjectCreationForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            password = form.cleaned_data['password']
+            password_hash = make_password(password)
+            project = Project(name=name, password=password_hash)
+            project.save()
+            project.admin.add(request.user)
+            project.member.add(request.user)
 
+            # messages.success(request, 'プロジェクトが作成されました。')
+            # user_dir = f"users/{name}"
+            create_jupyter_dir('groups', name)
+            create_jupyter_dir(f"users/{request.user}", name)
+            os.symlink(f"groups/{name}", f"users/{request.user}/{name}")
 
+            return redirect('accounts:home')
+    else:
+        form = ProjectCreationForm()
+        messages.error(request, '修正内容の保存に失敗しました。')
 
-# def spectralListView(request):
-#     template_name = "accounts/home.html"
-#     ctx = {}
-#     qs = Spectrum.objects.all()
-#     ctx["object_list"] = qs
+    return render(request, 'accounts/create_project.html', {'form': form})
 
-#     return render(request, template_name, ctx)
+@login_required
+def join_project(request):
+    if request.method == 'POST':
+        form = ProjectJoinForm(request.POST)
+        if form.is_valid():
+            name = form.cleaned_data['name']
+            password = form.cleaned_data['password']
+
+            try:
+                project = Project.objects.get(name=name)
+
+                if check_password(password, project.password):
+                    project.member.add(request.user)
+                    # messages.success(request, 'プロジェクトに参加しました。')
+                    create_jupyter_dir(f"users/{request.user}", name)
+                    os.symlink(f"groups/{name}", f"users/{request.user}/{name}")
+
+                    return redirect('accounts:home')
+                else:
+                    messages.error(request, 'パスワードが正しくありません。')
+            except Project.DoesNotExist:
+                messages.error(request, '指定されたプロジェクトは存在しません。')
+    else:
+        form = ProjectJoinForm()
+        # messages.error(request, '修正内容の保存に失敗しました。')
+
+    return render(request, 'accounts/join_project.html', {'form': form})
+

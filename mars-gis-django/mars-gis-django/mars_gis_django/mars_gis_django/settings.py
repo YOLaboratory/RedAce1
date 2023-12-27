@@ -1,5 +1,7 @@
 import os
 import configparser
+# from accounts import app
+from pathlib import Path
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
@@ -20,18 +22,24 @@ ALLOWED_HOSTS = ["*"]
 # Application definition
 
 INSTALLED_APPS = [
+    'map3d',
+    'spectra',
+    'accounts',
+
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'django.contrib.sites',
     'django.contrib.gis',
-    'map3d',
-    'spectra',
+
+    'allauth',
+    'allauth.account',
+    'allauth.socialaccount',
+    'rules.apps.AutodiscoverRulesConfig',
     'rest_framework',
-    'accounts.apps.AccountsConfig',
     'widget_tweaks',
     'djgeojson',
     'corsheaders',
@@ -55,6 +63,7 @@ MIDDLEWARE = [
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'allauth.account.middleware.AccountMiddleware',
 ]
 
 ROOT_URLCONF = 'mars_gis_django.urls'
@@ -111,6 +120,18 @@ AUTH_PASSWORD_VALIDATORS = [
     },
 ]
 
+AUTH_USER_MODEL = 'accounts.CustomUser'
+SITE_ID = 1
+AUTHENTICATION_BACKENDS = (
+    'django.contrib.auth.backends.ModelBackend',
+    'allauth.account.auth_backends.AuthenticationBackend',
+    'accounts.auth_backends.DjangoBackend',
+    # 'rules.permissions.ObjectPermissionBackend',
+)
+# # グループを作成する権限を付与
+# GROUP_CREATION_PERMISSION = (
+#     'groups.can_create_group',
+# )
 
 # Internationalization
 # https://docs.djangoproject.com/en/2.1/topics/i18n/
@@ -144,6 +165,17 @@ STATIC_URL = '/collect_static/'
 # collectstaticコマンド時にSTATIC_ROOTで指定したフォルダに全てのCSSファイルが集まる
 STATIC_ROOT = os.path.join(BASE_DIR, 'collect_static/') #230617
 
-LOGIN_URL = 'accounts:login/'
-LOGIN_REDIRECT_URL = 'accounts:home'
-LOGOUT_REDIRECT_URL = 'accounts:login'
+LOGIN_URL = '/accounts/login/'
+LOGIN_REDIRECT_URL = '/accounts/home'
+# LOGIN_REDIRECT_URL = '/accounts/home_tmp'
+LOGOUT_REDIRECT_URL = '/accounts/login'
+
+DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+# 認証方式はユーザー名
+ACCOUNT_AUTHENTICATION_METHOD = 'username'
+ACCOUNT_USERNAME_REQUIRED = True
+
+# サインアップにメールアドレス確認を挟まない
+ACCOUNT_EMAIL_VERIFICATION = 'none'
+ACCOUNT_EMAIL_REQUIRED = False

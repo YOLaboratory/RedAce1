@@ -10,7 +10,7 @@ import csv
 import pvl
 import json
 import math
-# import numpy as np
+import numpy as np
 import collections as cl
 # import itertools
 from osgeo import gdal, osr
@@ -109,13 +109,11 @@ def base_json_getRef(params_json):
 
         # 波長の順番が昇順と降順の時がある >> 昇順にする
         wav_list = params_json["wavelength"].split(',')
-        wav_list = [f'{float(s):.5f}' for s in wav_list]
+        wav_list = [round(float(s), 5) for s in wav_list]
         if wav_list[0] > wav_list[1]:
             wav_list.reverse()
-            wav_str = ",".join(list(map(str, wav_list)))
             is_reverse = True
         else:
-            wav_str = params_json["wavelength"]
             is_reverse = False
 
         y1, x1 = int(params_json["pixels"][1]), int(params_json["pixels"][0])
@@ -125,34 +123,29 @@ def base_json_getRef(params_json):
             ref_str = -1
         else:
             ref_list = []
-            ref_append = ref_list.append
             bandnumber_range = list(range(cube_data.RasterCount)) # バンドの数を最初から最後までリストに入れる ex)0,1,2,...
             bandnumber_range.pop(0)
             # 反射率をリストに格納
             for bandnumber_i in bandnumber_range:
                 ref = get_raster_band(bandnumber_i + 1).ReadAsArray()[y1][x1] # 多分 [1]Y,[0]X
-                
                 if ref != NDV:
-                    ref_append(f'{ref:.5f}')
+                    ref_list.append(round(float(ref), 5))
                 else:
-                    ref_append(-1)
+                    ref_list.append(-1)
             
             if is_reverse == True:
                 ref_list.reverse()
-                ref_str = ",".join(list(map(str, ref_list)))
-            else:
-                ref_str = ",".join(list(map(str, ref_list)))
 
-        field["band_number"] = bandnumber_range # ex) 1,2,...,437
-        field["band_bin_center"] = wav_str      # 波長
-        field["reflectance"] = ref_str          # 反射率
+        field["band_number"] = cube_data.RasterCount - 1 # ex) 1,2,...,437
+        field["band_bin_center"] = wav_list      # 波長
+        field["reflectance"] = ref_list          # 反射率
         field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
 
         # cubeファイルを開く
         cube_data2 = gdal.Open(field["path"]["derived"]["cub"], gdal.GA_ReadOnly)
-        x2 = cube_data2.GetRasterBand(5).ReadAsArray()[y1][x1]
-        y2 = cube_data2.GetRasterBand(4).ReadAsArray()[y1][x1]
-        field["coordinate"] = [float(x2), float(y2)]
+        lon = cube_data2.GetRasterBand(5).ReadAsArray()[y1][x1]
+        lat = cube_data2.GetRasterBand(4).ReadAsArray()[y1][x1]
+        field["coordinate"] = [round(float(lon), 5), round(float(lat), 5)]
 
         json_data = json.dumps(field)
         return json_data
@@ -267,7 +260,7 @@ def base_json_getRef(params_json):
 
         # 波長の順番が昇順と降順の時がある >> 昇順にする
         wav_list = params_json["wavelength"].split(',')
-        wav_list = [f'{float(s):.5f}' for s in wav_list]
+        wav_list = [round(float(s), 5) for s in wav_list]
         if wav_list[0] > wav_list[1]:
             wav_list.reverse()
             is_reverse = True
@@ -282,7 +275,7 @@ def base_json_getRef(params_json):
             for z in range(1, band_num):
                 ref = ref_all_band[z, px_array[i][1], px_array[i][0]]
                 if ref != NDV:
-                    ref_list.append(f'{ref:.5f}')
+                    ref_list.append(round(float(ref), 5))
                 else:
                     ref_list.append(-1)
             
@@ -292,18 +285,103 @@ def base_json_getRef(params_json):
 
             ref_array.append(ref_list) # list結合（二次元配列）
 
-        field["band_number"] = band_num # ex) 1,2,...,437
+        field["band_number"] = band_num - 1 # ex) 1,2,...,437
         field["band_bin_center"] = wav_list     # 波長
         field["reflectance"] = ref_array        # 反射率
         field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
 
         cube_data2 = gdal.Open(field["path"]["derived"]["cub"], gdal.GA_ReadOnly)
-        x2 = cube_data2.GetRasterBand(5).ReadAsArray()[int(px_array[0][1])][int(px_array[0][0])]
-        y2 = cube_data2.GetRasterBand(4).ReadAsArray()[int(px_array[0][1])][int(px_array[0][0])]
-        field["coordinate"] = [f'{float(x2):.5f}', f'{float(y2):.5f}']
+        coord_array = []
+        for i in range(len(px_array)):
+            lon = cube_data2.GetRasterBand(5).ReadAsArray()[int(px_array[i][1])][int(px_array[i][0])]
+            lat = cube_data2.GetRasterBand(4).ReadAsArray()[int(px_array[i][1])][int(px_array[i][0])]
+            coord_array.append([round(float(lon), 5), round(float(lat), 5)])
+
+        field["coordinate"] = coord_array
 
         json_data = json.dumps(field)
         return json_data
+    
+
+def scaling_Reflectance(params_json):
+    if params_json["type"] == 'normalize':
+        data_arr = params_json["dataArr"]
+        data_arr = np.array(data_arr)
+        new_data_arr = data_arr[:, 0].reshape(1, -1)
+        scaler = SpectrumScaling()
+
+        for i in range(1, len(data_arr[0])):
+            ref_1d = np.array([x if x is not None else np.nan for x in data_arr[:, i]])
+            ref_1d = scaler.normalization(ref_1d)
+            new_data_arr = np.append(new_data_arr, ref_1d.reshape(1, -1), axis=0)
+
+        # json.parseがnanを処理出来ないため
+        for i in range(len(new_data_arr)):
+            new_data_arr[i] = [x if not np.isnan(x) else -9999 for x in new_data_arr[i]]
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.T.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+        return json_data
+    
+    elif params_json["type"] == 'standardize':
+        data_arr = params_json["dataArr"]
+        data_arr = np.array(data_arr)
+        new_data_arr = data_arr[:, 0].reshape(1, -1)
+        scaler = SpectrumScaling()
+
+        for i in range(1, len(data_arr[0])):
+            ref_1d = np.array([x if x is not None else np.nan for x in data_arr[:, i]])
+            ref_1d = scaler.standardization(ref_1d)
+            new_data_arr = np.append(new_data_arr, ref_1d.reshape(1, -1), axis=0)
+
+        # json.parseがnanを処理出来ないため
+        for i in range(len(new_data_arr)):
+            new_data_arr[i] = [x if not np.isnan(x) else -9999 for x in new_data_arr[i]]
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.T.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+        return json_data
+    
+
+def smoothing_Reflectance(params_json):
+    if params_json["type"] == 'stacking':
+        data_arr = params_json["dataArr"]
+        data_arr = np.array(data_arr)
+        # wav 2d [[,,,,]]
+        wav = data_arr[:, 0]
+        # ref only
+        ref_2d = np.delete(data_arr, 0, axis=1)
+        ref_2d_rev = np.array([], dtype=np.float64).reshape(0, len(ref_2d[0]))
+
+        # for i, row in enumerate(ref_2d):
+        for row in ref_2d:
+            ref_nonone = np.array([x if x is not None else np.nan for x in row])
+            ref_2d_rev = np.vstack((ref_2d_rev, ref_nonone))
+
+        stacked_ref = SpectrumSmoothing().stacking(ref_2d_rev)
+
+        print("stacked_ref")
+        print(stacked_ref)
+
+        stacked_ref = [x if not np.isnan(x) else -9999 for x in stacked_ref]
+        new_data_arr = np.column_stack((wav, stacked_ref))
+
+        print('new_data_arr')
+        print(new_data_arr)
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+
+        print(json_data)
+        return json_data
+
+    
 
 from django.http import HttpResponse
 from django.views.decorators.csrf import csrf_protect
@@ -312,7 +390,58 @@ from django.views.decorators.csrf import csrf_protect
 def reflectance(request):
     # JSON文字列を辞書に変換: json.loads()
     params_json = json.loads(request.body)
-    json_data = base_json_getRef(params_json)
+
+    if params_json["operation"] == 'get':
+        json_data = base_json_getRef(params_json)
+    elif params_json["operation"] == 'scaling':
+        json_data = scaling_Reflectance(params_json)
+    elif params_json["operation"] == 'smoothing':
+        json_data = smoothing_Reflectance(params_json)
+
     return HttpResponse(json_data)
+
+
+class SpectrumScaling:
+    def normalization(self, ref_1d_arr):
+        if ref_1d_arr.size == 0 or np.all(np.isnan(ref_1d_arr)):
+            return ref_1d_arr
+        return (ref_1d_arr - np.nanmin(ref_1d_arr)) / (np.nanmax(ref_1d_arr) - np.nanmin(ref_1d_arr))
+
+    def standardization(self, ref_1d_arr):
+        if ref_1d_arr.size == 0:
+            return ref_1d_arr
+        return (ref_1d_arr - np.nanmean(ref_1d_arr)) / np.nanstd(ref_1d_arr)
+    
+    # todo
+    def relative_ref(self, target_ref_1d_arr, base_ref_1d_arr):
+        if target_ref_1d_arr.size == 0 or target_ref_1d_arr.size == 0:
+            return target_ref_1d_arr
+        return target_ref_1d_arr / base_ref_1d_arr
+    
+class SpectrumSmoothing:
+    def moving_avg(self, ref, window_size):
+        b = np.ones(window_size) / window_size
+        ref_mean = np.convolve(ref, b, mode="same")
+        n_conv = window_size // 2
+
+        # 補正部分、始めと終わり部分をwindow_sizeの半分で移動平均を取る
+        ref_mean[0] *= window_size / n_conv
+        for i in range(1, n_conv):
+            ref_mean[i] *= window_size / (i + n_conv)
+            ref_mean[-i] *= window_size / (i + n_conv - (window_size % 2)) # size % 2は奇数偶数での違いに対応するため
+
+        return ref_mean
+    
+    def stacking(self, data_arr):
+        new_data_arr = np.empty(len(data_arr))
+
+        for i, row in enumerate(data_arr):
+            is_all_nan = np.all(np.isnan(row))
+            if not is_all_nan:
+                new_data_arr[i] = np.nanmean(row)
+            else:
+                new_data_arr[i] = np.nan
+
+        return new_data_arr
 
 

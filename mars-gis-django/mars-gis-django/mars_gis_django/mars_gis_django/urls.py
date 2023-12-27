@@ -6,10 +6,9 @@ from django.conf.urls.static import static
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('accounts/', include('allauth.urls')),
     path('accounts/', include('accounts.urls')),
-    path('accounts/', include('django.contrib.auth.urls')),
     path('map3d/', include('map3d.urls')),
     path('spectra/', include('spectra.urls')),
-    # url('api/',include(apis.router.urls)),
     path('api/',include('spectra.urls_api')),
 ]+static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)

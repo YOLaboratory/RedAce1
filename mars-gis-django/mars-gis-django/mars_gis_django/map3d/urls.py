@@ -1,7 +1,7 @@
 from django.urls import path
 from . import views
 from djgeojson.views import GeoJSONLayerView
-# from .views import test_gis
+from .views import map, api_db, api_dir, api_reflectance
 from spectra.models import Spectrum
 
 app_name = 'map3d'

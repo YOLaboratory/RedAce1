@@ -246,10 +246,15 @@ overflow: hidden;
 }
 
 .download_button,
-.save_button {
+.save_button,
+.normalize_button,
+.standardize_button,
+.stacking_button,
+.undo_button,
+.redo_button {
     width: 90px;
     height: 26px;
-    background-color: white;
+    background-color: white; /* クリック不可時のスタイルを設定 */
     border-radius: 5px;
     position: absolute;
     cursor: pointer;
@@ -260,24 +265,24 @@ overflow: hidden;
     box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
 .download_button {
-    left: 200px;
-    top: 530px;
-}
-.save_button {
-    left: 480px;
+    left: 165px;
     top: 560px;
 }
-.download_type,
+.save_button {
+    left: 730px;
+    top: 560px;
+}
+.download_type {
+    position: absolute;
+    top: 565px;
+    left: 10px;
+    color: rgba(255, 255, 255, 0.5);
+}
 .lock_type {
     position: absolute;
     top: 535px;
-    color: rgba(255, 255, 255, 0.5);
-}
-.download_type {
     left: 10px;
-}
-.lock_type {
-    left: 300px;
+    color: rgba(255, 255, 255, 0.5);
 }
 
 #save_memo_1,
@@ -285,7 +290,31 @@ overflow: hidden;
 #save_memo_3 {
     position: absolute;
     top: 560px;
-    left: 10px;
+    left: 270px;
     width: 450px;
     font-size: 17px;
+}
+.normalize_button {
+    top: 530px;
+    left: 270px;
+}
+.standardize_button {
+    top: 530px;
+    left: 370px;
+}
+.stacking_button {
+    top: 530px;
+    left: 470px;
+}
+.undo_button {
+    pointer-events: none;
+    background-color: #979797; /* クリック不可時のスタイルを設定 */
+    top: 530px;
+    left: 570px;
+}
+.redo_button {
+    pointer-events: none;
+    background-color: #979797; /* クリック不可時のスタイルを設定 */
+    top: 530px;
+    left: 670px;
 }

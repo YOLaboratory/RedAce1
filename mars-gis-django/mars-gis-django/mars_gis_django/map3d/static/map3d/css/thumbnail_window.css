@@ -218,9 +218,10 @@
 .toggle_switch1.active, .toggle_switch2.active {
     left: 27px;
 } */
-.get_switch1 {
+.get_button1,
+.get_button2 {
     top: 2px;
-    right: 190px;
+    right: 254px;
     width: 60px;
     height: 26px;
     background-color: white;
@@ -233,12 +234,10 @@
     place-items: center;
     box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
-/* .get_switch1.active {
-    background-color: #51E373;
-} */
-.remove_switch1 {
+.remove_switch1,
+.remove_switch2 {
     top: 2px;
-    right: 96px;
+    right: 161px;
     width: 90px;
     height: 26px;
     background-color: white;
@@ -251,12 +250,14 @@
     place-items: center;
     box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
-.remove_switch1.active {
+.remove_switch1.active,
+.remove_switch2.active {
     background-color: #51e373;
 }
-.select_switch1 {
+.select_switch1,
+.select_switch2 {
     top: 2px;
-    right: 2px;
+    right: 68px;
     width: 90px;
     height: 26px;
     background-color: white;
@@ -269,8 +270,56 @@
     place-items: center;
     box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
-.select_switch1.active {
+.select_switch1.active,
+.select_switch2.active {
     background-color: #51e373;
+}
+.clear_button1,
+.clear_button2 {
+    top: 2px;
+    right: 5px;
+    width: 60px;
+    height: 26px;
+    background-color: white;
+    border-radius: 5px;
+    position: absolute;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 15px;
+    display: grid;
+    place-items: center;
+    box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
+}
+.search_area {
+    top: 32px;
+    right: 5px;
+    width: 153px;
+    height: 26px;
+    background-color: rgba(255, 255, 255, 0.65);
+    border-radius: 5px;
+    position: absolute;
+    display: flex;
+}
+.search_px_button1,
+.search_px_button2 {
+    width: 58px;
+    margin: 2px 1px;
+    background-color: white;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    font-size: 15px;
+    display: grid;
+    place-items: center;
+    box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
+}
+#search_px_input1 {
+    width: 80px;
+    margin: 1px 5px 1px 1px;
+    background-color: white;
+    border-radius: 5px;
+    font-size: 15px;
+    display: flex;
 }
 
 #thumbnail_window1,
@@ -306,4 +355,25 @@
     overflow-y: scroll;
     background-color: rgba(255, 255, 255, 0.1);
     text-align: center;
+}
+.coords_type_switch1 {
+    width: 15px;
+    height: 17px;
+    bottom: 5px;
+    left: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease-in-out;
+    display: grid;
+    place-items: center;
+    font-size: 15px;
+    color: white;
+    position: absolute;
+    background-color: rgba(0, 60, 136, 0.5);
+    border-radius: 4px;
+    padding: 2px 5px;
+    border: 3px solid rgba(255, 255, 255, 0.4);
+    z-index: 10;
+}
+.coords_type_switch1.active {
+    background-color: #008ad6;
 }

@@ -2,13 +2,13 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from datetime import datetime,date
 from . import forms, models
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core import serializers
 from django.core.serializers.json import DjangoJSONEncoder
 from decimal import Decimal
 import json
-
 
 @login_required
 def index(request):
@@ -24,34 +24,55 @@ def convert_dygraphs_data(rec_spectra):
         wavelengths = spectrum.wavelength.split(",")
         reflectances = spectrum.reflectance.split(",")
         band_num = len(wavelengths)
+
+        # TODO:配列が逆順になったりするのを直す
         if spectrum.instrument == "CRISM":
-            for i,reflectance in enumerate(reflectances):
+            for i, reflectance in enumerate(reflectances):
                 in_array = []
-                if reflectances[band_num-i-1] == "-1":
+                if reflectances[band_num - i - 1] == "-1":
                     pass
                 else:
-                    in_array.append(float(wavelengths[band_num-i-1]))
-                    in_array.append(float(reflectances[band_num-i-1]))
-                    data.append(in_array)
-                    dygraphs_spectrum += '['+wavelengths[band_num-i-1]+','+reflectances[band_num-i-1]+'],\n'
+                    # 余分な空白と ']' を取り除いてから浮動小数点数に変換
+                    wavelength_str = wavelengths[band_num - i - 1].strip().lstrip('[').rstrip(']')
+                    reflectance_value_str = reflectances[band_num - i - 1].strip().lstrip('[').rstrip(']')
+
+                    try:
+                        wavelength = float(wavelength_str)
+                        reflectance_value = float(reflectance_value_str)
+
+                        in_array.append(wavelength)
+                        in_array.append(reflectance_value)
+                        data.append(in_array)
+                        dygraphs_spectrum += '[' + str(wavelength) + ',' + str(reflectance_value) + '],\n'
+                    except ValueError as e:
+                        # もし浮動小数点数に変換できない場合は例外を処理
+                        print(f"Error converting to float: {e}")
+                        # 何らかのエラー処理を行うか、例外を上位に投げるか、適切な対応を行う
+                        pass
 
             dygraphs_spectra.append({
-                "data":data, 
-                "id_graph":"graph"+str(j),
-                "id_map":"map"+str(j),"rec":spectrum
+                "data": data,
+                "id_graph": "graph" + str(j),
+                "id_map": "map" + str(j),
+                "rec": spectrum
             })
         else:
-            for i,wavelength in enumerate(wavelengths):
+            for i, wavelength in enumerate(wavelengths):
                 in_array = []
-                in_array.append(float(wavelength))
-                in_array.append(float(reflectances[i]))
+                # 余分な空白と ']' を取り除いてから浮動小数点数に変換
+                cleaned_wavelength = wavelength.strip().lstrip('[').rstrip(']')
+                cleaned_reflectance = reflectances[i].strip().lstrip('[').rstrip(']')
+
+                in_array.append(float(cleaned_wavelength))
+                in_array.append(float(cleaned_reflectance))
                 data.append(in_array)
-                dygraphs_spectrum += '['+wavelength+','+reflectances[i]+'],\n'
+                dygraphs_spectrum += '[' + cleaned_wavelength + ',' + cleaned_reflectance + '],\n'
 
             dygraphs_spectra.append({
-                "data":data, 
-                "id_graph":"graph"+str(j),
-                "id_map":"map"+str(j),"rec":spectrum
+                "data": data,
+                "id_graph": "graph" + str(j),
+                "id_map": "map" + str(j),
+                "rec": spectrum
             })
 
     return dygraphs_spectra
@@ -61,7 +82,8 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import get_object_or_404
 def spectra(request):
     user_id = request.user.id
-    user = get_object_or_404(User, pk=user_id)
+    # user = get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(get_user_model(), pk=user_id)
     spectra = user.spectrum_set.all()
 
 
@@ -79,7 +101,7 @@ from decimal import Decimal
 def get_spectra(request):
     if request.method == "GET":
         user_id = request.user.id
-        user = get_object_or_404(User, pk=user_id)
+        user = get_object_or_404(get_user_model(), pk=user_id)
         spectra = request.user.spectrum_set.all()
         dygraphs_spectra = convert_dygraphs_data(spectra)
         settings = {
@@ -98,7 +120,8 @@ class LazyEncoder(DjangoJSONEncoder):
             return float(obj)
         elif isinstance(obj, (datetime, date)):
             return str(obj)
-        elif isinstance(obj, User):
+        # elif isinstance(obj, User):
+        elif isinstance(obj, get_user_model()):
             return str(obj)
         else:
             raise TypeError(
@@ -333,7 +356,8 @@ def spectrum_new(request):
             latitude = params_json["coordinate"][1]
             longitude = params_json["coordinate"][0]
             user_id = request.user.id
-            user = get_object_or_404(User, pk=user_id)
+            user = get_object_or_404(get_user_model(), pk=user_id)
+            # user = get_object_or_404(User, pk=user_id)
             point = GEOSGeometry('Point(%s %s)' %(longitude, latitude))
 
             description = params_list["description"]
