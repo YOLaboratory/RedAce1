@@ -14,6 +14,7 @@ var graphCounter = 1;
  */
 function displaySpectralBox(data) {
     let dataObj = JSON.parse(data);
+    console.log("==========");
     console.log(dataObj);
 
     let funcArea, graphArea;
@@ -199,6 +200,8 @@ function displaySpectralBox(data) {
         createFuncArea();
         setLockElement();
 
+        console.log("+++++++");
+
         /**
          * Lock判定
          */
@@ -232,6 +235,8 @@ function displaySpectralBox(data) {
 
         createArea(`graph${graphCounter}`);
         createFuncElement();
+
+        console.log("-------");
 
         /**
          * グラフタイトル設定
@@ -309,7 +314,14 @@ function displaySpectralBox(data) {
             }
         }
 
+        console.log("-=-=-=-=-");
+
         let graphArrChart = graphArr.slice(); // スライスでコピーしている
+
+        console.log(graphArrChart);
+        console.log(chartList);
+        console.log(graphArea);
+        console.log(graphArrChart);
 
         /**
          * プロットする
@@ -344,6 +356,9 @@ function displaySpectralBox(data) {
                 labels: graphLabel,
             }
         );
+
+        console.log("==============");
+        console.log(chartList);
 
         // dygraph生成時divが非表示だと生成されないため、タブ切り替え時にリサイズで生成する。
         document.querySelector('#graph_1').addEventListener('click', () => {

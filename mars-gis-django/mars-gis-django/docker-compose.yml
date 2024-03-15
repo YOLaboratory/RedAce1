@@ -2,7 +2,8 @@ version: "3"
 services:
   ### Reverseproxy server ###
   nginx:
-    image: nginx:latest
+    # image: nginx:latest
+    image: redace1/nginx:5.0
     container_name: redace1_nginx
     ports:
       - "88:80"
@@ -23,7 +24,8 @@ services:
   ### Django ###
   django:
     # build: ./mars_gis_django
-    image: redace_django_gdal:20231028v3.1
+    # image: redace_django_gdal:20231028v3.1
+    image: redace1/django:5.0
     container_name: redace1_django
     restart: always
     # entrypoint: ["bash","./wait-for-postgis.sh"]
@@ -85,7 +87,8 @@ services:
 
   ### Mapserver ###
   mapserver:
-    image: mapserver_nginx_20190222/redace:1.0
+    # image: mapserver_nginx_20190222/redace:1.0
+    image: redace1/mapserver:5.0
     container_name: redace1_mapserver
     volumes:
       - ./mapserver:/maps
@@ -99,7 +102,8 @@ services:
 
   ### Terrainserver ###
   terrainserver:
-    image: terrainserver_nginx_20190222/redace:1.0
+    # image: terrainserver_nginx_20190222/redace:1.0
+    image: redace1/terrainserver:5.0
     container_name: redace1_terrainserver
     environment:
       - SERVE_STATIC=0
@@ -113,7 +117,8 @@ services:
 
   ### Postgis ###
   postgis:
-    image: database_postgis_20190222/redace:1.0
+    # image: database_postgis_20190222/redace:1.0
+    image: redace1/postgis:5.0
     container_name: redace1_postgis
     environment:
       POSTGRES_PASSWORD: anpanman
@@ -129,7 +134,8 @@ services:
 
   ### JupyterHub ###
   jupyterhub:
-    image: redace_jupyterhub:v1.3
+    # image: redace_jupyterhub:v1.3
+    image: redace1/jupyterhub:5.0
     # build:
     #   context: ./jupyterhub
     #   dockerfile: Dockerfile

@@ -29,10 +29,12 @@ def base_json_getRef(params_json):
     # 引数 >> obs_name,obs_ID,path,wavelength,pixels 
     if params_json["obs_name"] == 'THEMIS' and params_json["type"] == 'DIRECT':
         field = cl.OrderedDict() # 順番が保持された辞書
+        field["path"] = params_json["path"]
         field["obs_ID"] = params_json["obs_ID"]
         field["obs_name"] = params_json["obs_name"]
-        field["path"] = params_json["path"]
         field["Image_path"] = params_json["Image_path"]
+        field["pixels"] = params_json["pixels"]
+        field["type"] = params_json["type"]
 
         cube_data = gdal.Open(field["path"]["main"]["cub"], gdal.GA_ReadOnly) # データを読み込み専用で開きます
         header = pvl.load(field["path"]["main"]["cub"])
@@ -41,6 +43,15 @@ def base_json_getRef(params_json):
         NDV = cube_data.GetRasterBand(1).GetNoDataValue() # バンドのデータ無し値を取得
         ref_list = []
         no_data_ref = 1
+
+        # 波長の順番が昇順と降順の時がある >> 昇順にする
+        wav_list = params_json["wavelength"].split(',')
+        wav_list = [round(float(s), 5) for s in wav_list]
+        if wav_list[0] > wav_list[1]:
+            wav_list.reverse()
+            is_reverse = True
+        else:
+            is_reverse = False
 
         if lbl_data["Caminfo"]["Geometry"]["IncidenceAngle"] != None :
             E1 = (3.846 * (10 ** 26)) / (4 * math.pi)
@@ -62,15 +73,18 @@ def base_json_getRef(params_json):
                 if ref == NDV:
                     ref_list.append(-1)
                 else:
-                    ref_list.append(ref)
+                    ref_list.append(round(float(ref), 5))
+                    # ref_list.append(ref)
 
         if no_data_ref != 1:
-            ref_str = ",".join(map(str, ref_list))
+            if is_reverse == True:
+                ref_list.reverse()
+            # ref_str = ",".join(map(str, ref_list))
+            pass
         else: # spectralを表示しない
-            ref_str = -1
+            ref_list = -1
+            # ref_str = -1
 
-        field["pixels"] = params_json["pixels"]
-        field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
         gt = cube_data.GetGeoTransform()
         srs = osr.SpatialReference()
         srs.ImportFromWkt(cube_data.GetProjection())
@@ -81,12 +95,13 @@ def base_json_getRef(params_json):
         y = gt[3] + (params_json["pixels"][0] * gt[4]) + (params_json["pixels"][1] * gt[5])
         x,y,z = trans.TransformPoint(x, y)
 
+        field["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
         field["coordinate"] = [x, y] # pixel座標
-        field["reflectance"] = ref_str
-        field["band_number"] = bandnumber_range
+        field["reflectance"] = ref_list # ref_str
+        field["band_number"] = cube_data.RasterCount  # bandnumber_range
         band_bin_width = header['IsisCube']['BandBin']['Width']
         field["band_bin_width"] = ",".join(map(str, band_bin_width))
-        field["band_bin_center"] = params_json["wavelength"]
+        field["band_bin_center"] = wav_list # params_json["wavelength"]
 
         json_data = json.dumps(field)
         return json_data
