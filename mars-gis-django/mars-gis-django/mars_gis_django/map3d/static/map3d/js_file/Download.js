@@ -258,7 +258,7 @@ function download_csv_roi_area(data) {
     saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
 }
 
-TODO
+// TODO
 /**
  * サムネイル画像ウィンドウのダウンロードボタン、csvダウンロード（全ピクセル）。
  * 機能してない。

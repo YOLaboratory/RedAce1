@@ -236,7 +236,7 @@ button#updatebtn:hover, button#sortbtn:hover, button#searchbtn:hover, button#del
     overflow: hidden;
 }
 .accordion_menu input[type="checkbox"].on-off:checked + div {
-    height: 440px;
+    height: 450px;
 }
 .hidden_contents {
     background: #CCCCCC;

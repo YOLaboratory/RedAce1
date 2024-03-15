@@ -197,9 +197,9 @@ function displayThumbnail(targetElement, dataObj) {
     let object = new Object();
     object.extent = [0, 0, dataObj['Mapping']['Image_size'][0], dataObj['Mapping']['Image_size'][1]];
     object.projection = new ol.proj.Projection({
-        code: 'pixels',
+        code: 'EPSG:3857',//'EPSG:4326', // 'pixels',
         units: 'pixels',
-        extent: object.extent,
+        extent: object.extent, // 範囲を表す数値の配列: [minx, miny, maxx, maxy]
     });
 
     wms_layers.ratio.object = {};
@@ -210,7 +210,6 @@ function displayThumbnail(targetElement, dataObj) {
             new ol.layer.Image({
                 source: new ol.source.ImageStatic({
                     url: `/collect_static/${dataObj['Image_path']}`, //220928
-                    // url: "http://localhost:8000" + dataObj['Image_path'], //usui220616
                     projection: object.projection,
                     imageExtent: object.extent,
                 }),
@@ -238,7 +237,7 @@ function displayThumbnail(targetElement, dataObj) {
                         return ol.coordinate.format(pxCoord, 'Pixel [ x: {x}, y: {y} ]', 2);
                     }
                 },
-                projection: 'EPSG:4326',
+                projection: 'EPSG:3857',//'EPSG:4326',
                 undefinedHTML: 'Outside',
             }),
         ]),
