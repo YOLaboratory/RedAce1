@@ -1,3 +1,8 @@
+/**
+ * これは、何だろうか？確認して。
+ * @param {*} record_json 
+ * @param {*} bool_checked 
+ */
 function loadgeojson (record_json, bool_checked) {
     console.log(bool_checked);
     geojson = record_json['geojson'];
@@ -20,6 +25,10 @@ function loadgeojson (record_json, bool_checked) {
     }
 }
 
+/**
+ * 起伏レベルの操作
+ * @param {*} value 
+ */
 function terrain_magni(value) {
     var Terrain_reset = function() {
         roots.map.terrainProvider = terrainProvider_elli;

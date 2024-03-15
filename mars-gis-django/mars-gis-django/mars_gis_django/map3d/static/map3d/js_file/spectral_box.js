@@ -1,20 +1,36 @@
+/**
+ * グラフエリアに関する関数群
+ */
+
 var saveNum = 0;
 var lockNum = -1;
 var chartList = [];
 var dataSave = [[], [], []];
 var graphCounter = 1;
 
+/**
+ * グラフエリア表示
+ * @param {*} data 
+ */
 function displaySpectralBox(data) {
     let dataObj = JSON.parse(data);
     console.log(dataObj);
 
     let funcArea, graphArea;
+    /**
+     * グラフエリアの背景部分
+     */
     function createFuncArea() {
         funcArea = document.getElementById('graph_move');
         funcArea.style.width = '100%';
         funcArea.style.height = '600px';
         funcArea.style.background = 'rgba(5,5,5,0.6)';
     }
+
+    /**
+     * グラフエリアのプロット部分
+     * @param {*} classTabName 
+     */
     function createArea(classTabName) {
         graphArea = document.getElementsByClassName(classTabName.toString())[0];
         graphArea.style.background = 'rgb(232, 231, 231)';
@@ -22,6 +38,11 @@ function displaySpectralBox(data) {
         graphArea.style.width = '650px';
         graphArea.style.height = '490px';
     }
+
+    /**
+     * Lockに関する部分
+     * htmlの直書きはやめたいね
+     */
     function setLockElement() {
         if (chartList.length == 0) {
             let down_ref_div2 = document.createElement('div');
@@ -39,6 +60,11 @@ function displaySpectralBox(data) {
             document.getElementById('Lock3').disabled = false;
         }
     }
+
+    /**
+     * グラフエリア下部の解析機能部分
+     * htmlの直書きはやめたいね
+     */
     function createFuncElement() {
         if (chartList.length != 3 && downCheckList.indexOf(graphCounter) == -1) {
             let counter = graphCounter - 1;
@@ -47,7 +73,7 @@ function displaySpectralBox(data) {
             let scalingButton = document.createElement('div');
             scalingButton.innerHTML = `
                 <div class="normalize_button" onclick="scaling(${counter}, 'normalize');">Normalize</div>
-                <div class="standardize_button" onclick="scaling(${counter}, 'standardize');">Normalize</div>
+                <div class="standardize_button" onclick="scaling(${counter}, 'standardize');">Standardize</div>
                 <div class="stacking_button" onclick="smoothing(${counter}, 'stacking');">Stacking</div>
                 <div class="undo_button" onclick="undoCurrentChart(${counter});">Undo</div>
                 <div class="redo_button" onclick="redoChartUpdate(${counter});">Redo</div>`;
@@ -56,7 +82,7 @@ function displaySpectralBox(data) {
             let htmlDownloadType = document.createElement('div');
             htmlDownloadType.innerHTML = `
                 <div class="download_type">
-                    <label><input type="radio" id="one_file" value="one" name="download_type" checked> Marged</label>
+                    <label><input type="radio" id="one_file" value="one" name="download_type" checked> Merged</label>
                     <label><input type="radio" id="each_file" value="each" name="download_type"> Separate</label>
                 </div>`;
             funcArea.appendChild(htmlDownloadType);
@@ -89,6 +115,13 @@ function displaySpectralBox(data) {
             document.getElementById(idTabName).appendChild(htmlSaveButton);
         }
     }
+
+    /**
+     * スタッキング
+     * @param {*} preGraphArr 
+     * @param {*} arrToAdd 
+     * @returns 
+     */
     function stackingSpectralData(preGraphArr, arrToAdd) {
         let refColNum = preGraphArr[0].length - 1;
         let tmpGraphArr = [];
@@ -166,6 +199,9 @@ function displaySpectralBox(data) {
         createFuncArea();
         setLockElement();
 
+        /**
+         * Lock判定
+         */
         let lockCheck = Number($('input[name=Lock]:checked').val());
         if (lockCheck != -1) {
             lockNum = lockCheck;
@@ -197,6 +233,9 @@ function displaySpectralBox(data) {
         createArea(`graph${graphCounter}`);
         createFuncElement();
 
+        /**
+         * グラフタイトル設定
+         */
         let titleLon, titleLat, newLabel, graphArr, graphLabel;
         if (isTypeDIRECT) {
             titleLon = dataObj['coordinate'][0];
@@ -211,10 +250,11 @@ function displaySpectralBox(data) {
             }
         }
 
+        /**
+         * ロック時の計算
+         */
         let hasLock2 = lockNum === 2 && chartList.length >= 2 ? true : false;
         let hasLock3 = lockNum === 3 && chartList.length >= 3 ? true : false;
-
-        // ロック時の計算
         if (chartList.length !== 0 && (lockNum === 1 || hasLock2 || hasLock3)) {
             graphLabel = chartList[lockNum - 1].user_attrs_.labels;
             graphLabel = graphLabel.concat(newLabel.slice(1));
@@ -238,6 +278,9 @@ function displaySpectralBox(data) {
             graphLabel = newLabel;
         }
 
+        /**
+         * グラフエリアのタブに関する。思い出せない、確認して。
+         */
         if (chartList.length >= graphCounter) {
             chartList[graphCounter - 1].destroy();
         }
@@ -268,6 +311,10 @@ function displaySpectralBox(data) {
 
         let graphArrChart = graphArr.slice(); // スライスでコピーしている
 
+        /**
+         * プロットする
+         * Dygraph：JSライブラリ
+         */
         chartList[graphCounter - 1] = new Dygraph(
             graphArea, // 表示ID名?
             graphArrChart, // グラフデータ

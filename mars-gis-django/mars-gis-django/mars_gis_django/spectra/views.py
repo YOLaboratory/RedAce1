@@ -2,11 +2,8 @@ from django.shortcuts import render, redirect
 from django.http import HttpResponse
 from datetime import datetime, date
 from . import forms, models
-<<<<<<< HEAD
 from spectra.models import Spectrum
 from accounts.models import CustomUser
-=======
->>>>>>> origin/main
 from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
@@ -28,7 +25,6 @@ def convert_dygraphs_data(record_spectra):
 
     for j,spectrum in enumerate(record_spectra):
         data = []
-<<<<<<< HEAD
         wavelengths = list(map(float, spectrum.wavelength.lstrip('[').rstrip(']').split(', ')))
         reflectances = list(map(float, spectrum.reflectance.lstrip('[').rstrip(']').split(', ')))
 
@@ -47,62 +43,6 @@ def convert_dygraphs_data(record_spectra):
             "id_map": "map" + str(j),
             "rec": spectrum
         })
-=======
-        dygraphs_spectrum = ''
-        wavelengths = spectrum.wavelength.split(",")
-        reflectances = spectrum.reflectance.split(",")
-        band_num = len(wavelengths)
-
-        # TODO:配列が逆順になったりするのを直す
-        if spectrum.instrument == "CRISM":
-            for i, reflectance in enumerate(reflectances):
-                in_array = []
-                if reflectances[band_num - i - 1] == "-1":
-                    pass
-                else:
-                    # 余分な空白と ']' を取り除いてから浮動小数点数に変換
-                    wavelength_str = wavelengths[band_num - i - 1].strip().lstrip('[').rstrip(']')
-                    reflectance_value_str = reflectances[band_num - i - 1].strip().lstrip('[').rstrip(']')
-
-                    try:
-                        wavelength = float(wavelength_str)
-                        reflectance_value = float(reflectance_value_str)
-
-                        in_array.append(wavelength)
-                        in_array.append(reflectance_value)
-                        data.append(in_array)
-                        dygraphs_spectrum += '[' + str(wavelength) + ',' + str(reflectance_value) + '],\n'
-                    except ValueError as e:
-                        # もし浮動小数点数に変換できない場合は例外を処理
-                        print(f"Error converting to float: {e}")
-                        # 何らかのエラー処理を行うか、例外を上位に投げるか、適切な対応を行う
-                        pass
-
-            dygraphs_spectra.append({
-                "data": data,
-                "id_graph": "graph" + str(j),
-                "id_map": "map" + str(j),
-                "rec": spectrum
-            })
-        else:
-            for i, wavelength in enumerate(wavelengths):
-                in_array = []
-                # 余分な空白と ']' を取り除いてから浮動小数点数に変換
-                cleaned_wavelength = wavelength.strip().lstrip('[').rstrip(']')
-                cleaned_reflectance = reflectances[i].strip().lstrip('[').rstrip(']')
-
-                in_array.append(float(cleaned_wavelength))
-                in_array.append(float(cleaned_reflectance))
-                data.append(in_array)
-                dygraphs_spectrum += '[' + cleaned_wavelength + ',' + cleaned_reflectance + '],\n'
-
-            dygraphs_spectra.append({
-                "data": data,
-                "id_graph": "graph" + str(j),
-                "id_map": "map" + str(j),
-                "rec": spectrum
-            })
->>>>>>> origin/main
 
     return dygraphs_spectra
 
@@ -406,13 +346,7 @@ def spectrum_new(request):
             wavelength = params_json["band_bin_center"]
             reflectance = params_json["reflectance"]
             longitude = params_json["coordinate"][0]
-<<<<<<< HEAD
             latitude = params_json["coordinate"][1]
-=======
-            user_id = request.user.id
-            user = get_object_or_404(get_user_model(), pk=user_id)
-            # user = get_object_or_404(User, pk=user_id)
->>>>>>> origin/main
             point = GEOSGeometry('Point(%s %s)' %(longitude, latitude))
             created_date = timezone.datetime.now()
             data_id = f"{user}{instrument}{obs_id}{longitude}{latitude}{created_date.strftime('%Y-%m-%d-%H:%M:%S')}"

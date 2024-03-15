@@ -1,3 +1,12 @@
+/**
+ * ジャンプ機能群
+ */
+
+/**
+ * LatLonから飛ぶ場所取得。多分ね、確認して。
+ * @param {*} record_id 
+ * @param {*} record 
+ */
 function move_map(record_id, record) {
     for ( var num in record) {
         if (record[num]["id"] == record_id) {
@@ -12,6 +21,10 @@ function move_map(record_id, record) {
     jumpLocation(jump_point['N'])
 }
 
+/**
+ * 飛ぶ場所とズームレベルを取得。多分ね、確認して。
+ * @param {*} N 
+ */
 function jumpLocation(N) {
 	var zoomLevel;
 	N = Number(N);

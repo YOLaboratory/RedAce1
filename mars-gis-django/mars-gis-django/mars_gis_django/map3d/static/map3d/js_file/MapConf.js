@@ -1,3 +1,7 @@
+/**
+ * マップに関する関数群
+ */
+
 var map;
 var roots = {};
 var wms_layers = {};
@@ -15,7 +19,10 @@ var firstinfo = false;
 //#d9d9d9　白グレー
 //rgb(0, 128, 0) 緑
 //#00BCD4 水色 ,--> aqua rgb(0, 255, 255)
-// グラフエリア
+
+/**
+ * グラフエリア
+ */
 $(function () {
     let graphTabColor1, graphTabColor2, graphTabColor3;
     let backColor = 'background-color';
@@ -71,6 +78,9 @@ $(function () {
     });
 });
 
+/**
+ * 火星マップに関すること
+ */
 function init_map() {
     var baselayer;
     var userSetbaselayer;
@@ -193,6 +203,9 @@ function init_map() {
 
     layer_check = viewModel;
 
+    /**
+     * レイヤー設定
+     */
     function setupLayers() {
         addBaseLayerOption(
             // the current base layer
@@ -640,6 +653,9 @@ function init_map() {
     }
 }
 
+/**
+ * マウス位置の取得
+ */
 function getMousePosition() {
     var entity = roots.map.entities.add({
         label: {

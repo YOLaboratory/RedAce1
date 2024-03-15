@@ -1,3 +1,7 @@
+/**
+ * データベースやDjangoのPythonファイルと通信する関数群
+ */
+
 // 下記、グローバル変数
 var entity = new Cesium.Entity();
 var flagEntity = 0;
@@ -54,7 +58,12 @@ function getCookie(name) {
 }
 let csrftoken = getCookie('csrftoken');
 
-// 地図上でクリックされた緯度経度のデータを持って来る
+/**
+ * 地図上でクリックされた緯度経度のデータを持って来る
+ * @param {*} lon 
+ * @param {*} lat 
+ * @returns 
+ */
 function fetchDataClickedCoordinates(lon, lat) {
     let radiusCircle = Math.abs(document.getElementById('circle_mouse').value);
     roots.map.entities.remove(clickCircle);
@@ -150,7 +159,10 @@ function fetchDataClickedCoordinates(lon, lat) {
     );
 }
 
-// 関数fetchDataClickedCoordinatesで見つけたデータのリストを受け取る, ID一覧を表示する(ID_box)
+/**
+ * 関数fetchDataClickedCoordinatesで見つけたデータのリストを受け取る, ID一覧を表示する(ID_box)
+ * @param {*} data 
+ */
 function displayObsIdBox(data) {
     console.log('=============-');
     console.log('displayObsIdBox')
@@ -206,12 +218,19 @@ function displayObsIdBox(data) {
     }
 }
 
+/**
+ * xボタン
+ * @param {*} button 
+ */
 function removeElement(button) {
     let parent = button.parentNode.parentNode;
     parent.remove();
 }
 
-// Observation ID Box でクリックされたデータを受け取る
+/**
+ * Observation ID Box でクリックされたデータを受け取る
+ * @param {*} data 
+ */
 function getAncillaryData(data) {
     console.log('getAncillaryData')
     console.log('===========')
@@ -240,7 +259,15 @@ function getAncillaryData(data) {
 let $loading = $('.cssload-thecube');
 let $loading2 = $('.back-loading');
 
-// 全ピクセルのデータを取り出す
+/**
+ * イメージエリアの全ピクセルのスペクトルデータを取り出す
+ * 使用してない
+ * @param {*} obs_name 
+ * @param {*} obs_ID 
+ * @param {*} path 
+ * @param {*} wavelength 
+ * @param {*} flag 
+ */
 function getSpectralDataAll(obs_name, obs_ID, path, wavelength, flag) {
     $.ajax({
         type: 'POST',
@@ -267,7 +294,16 @@ function getSpectralDataAll(obs_name, obs_ID, path, wavelength, flag) {
     );
 }
 
-// クリックされたピクセルにデータがあれば取り出す
+/**
+ * イメージエリアでクリックされたピクセルにデータがあれば取り出す
+ * @param {*} px 
+ * @param {*} imgSize 
+ * @param {*} obsID 
+ * @param {*} path 
+ * @param {*} imgPath 
+ * @param {*} obsName 
+ * @param {*} wav 
+ */
 function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName, wav) {
     // console.log(px);
     // console.log(imgSize);
@@ -277,24 +313,8 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
     // console.log(obsName);
     // console.log(wav);
 
-<<<<<<< HEAD
     // 左下基準の取得ピクセルを左上基準に変更（Cubデータが左上基準より）
     px[1] = imgSize[1] - px[1];
-=======
-    // px[0]:x軸、pixels[1]:y軸。だと思う。
-    // if (reFlag === 0) {
-    //     // thumbnailをclick
-    //     // setAlignment(px, flag);
-    //     // px[0] = px[0] - 1;
-    //     px[1] = imgSize[1] - px[1]; // - 1; // cubデータが左上基準だから調整しているのだと思う。。
-    // } else if (reFlag === 1) {
-    //     // thumbnail box内左上または右側部分click
-    //     var rePx = px.concat();
-    //     rePx[0] = px[0] + 1;
-    //     rePx[1] = imgSize[1] - px[1] - 1;
-    // }
-    px[1] = imgSize[1] - px[1] - 1; //画像とずれる？
->>>>>>> origin/main
 
     // pixel座標がイメージサイズ(四角形)より内側ならデータ探す
     // ピクセル座標、左下基準。
@@ -339,6 +359,16 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
     }
 }
 
+/**
+ * イメージエリアのselectモードで選択した複数ピクセルのスペクトルデータを取得
+ * @param {*} pxArray 
+ * @param {*} imgSize 
+ * @param {*} obsID 
+ * @param {*} path 
+ * @param {*} imgPath 
+ * @param {*} obsName 
+ * @param {*} wav 
+ */
 function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName, wav) {
     // 途中
     // cubデータが左上基準だから調整しているのだと思う。。
@@ -351,11 +381,7 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
     for (let i = 0; i < pxArray.length; i++) {
         newPxArr[i] = [];
         newPxArr[i].push(pxArray[i][0]);
-<<<<<<< HEAD
         newPxArr[i].push(imgSize[1] - pxArray[i][1]);
-=======
-        newPxArr[i].push(imgSize[1] - pxArray[i][1] - 1);
->>>>>>> origin/main
     }
 
     $.ajax({

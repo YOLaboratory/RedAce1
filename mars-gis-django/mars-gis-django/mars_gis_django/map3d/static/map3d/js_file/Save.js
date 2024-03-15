@@ -1,3 +1,12 @@
+/**
+ * セーブに関する関数群
+ */
+
+/**
+ * グラフエリアのセーブボタン
+ * スペクトルデータをスペクトルリストに保存する。
+ * @param {*} counter 
+ */
 function save_spectral(counter) {
     console.log('save_spectral here!!');
     console.log(dataSave[counter]);
@@ -33,6 +42,10 @@ $(function () {
     });
 });
 
+/**
+ * スペクトルリスト内の各データのメモ更新
+ * @param {*} id 
+ */
 function update_description(id) {
     console.log(id);
     console.log(typeof id);

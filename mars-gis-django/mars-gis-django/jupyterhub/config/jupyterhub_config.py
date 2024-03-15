@@ -73,7 +73,7 @@ def pre_spawn_hook(spawner):
         pwd.getpwnam(username)
     except KeyError:
         subprocess.check_call(
-            ['sh', '/srv/jupyterhub/bootstrap-script/bootstrap.sh', username]
+            ['sh', '/srv/jupyterhub/hook-script/make-user-directory.sh', username]
         )
 
     # # ユーザーが所属する全てのグループを取得

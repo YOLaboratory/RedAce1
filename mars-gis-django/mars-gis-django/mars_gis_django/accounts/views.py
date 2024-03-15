@@ -15,12 +15,9 @@ from django.http import HttpResponseBadRequest, HttpResponseRedirect
 from django.contrib.auth.hashers import make_password, check_password
 from django.contrib import messages
 
+# TODO usui ユーザー情報をjupyterhubにも同時作成したい、今は使用していない
 @login_required
 def create_jupyterhub_user(request):
-<<<<<<< HEAD
-    # TODO usui ユーザー情報を同時作成したい
-=======
->>>>>>> origin/main
     # Djangoユーザー情報を取得
     django_user = request.user
 
@@ -46,7 +43,12 @@ def create_jupyterhub_user(request):
         # return render(request, 'error.html', {'message': 'Failed to create user'})
     
 def create_jupyter_dir(parent_dir, dir_name):
-<<<<<<< HEAD
+    """ redace1_v5.0/workspace/mars-gis-django/mars-gis-django/jupyterhub/data/ 配下にディレクトリ作成。
+
+    Args:
+        parent_dir (_type_): groups or users.
+        dir_name (_type_): group or user name.
+    """
     # code_dir = os.getcwd()
     # data_dir = os.path.join(code_dir, 'data')
     # parent_dir = os.path.join('/data/', parent_dir)
@@ -55,14 +57,6 @@ def create_jupyter_dir(parent_dir, dir_name):
     try:
         os.makedirs(f"{parent_dir}/{dir_name}")
         # os.makedirs(os.path.join(parent_dir, dir_name))
-=======
-    code_dir = os.getcwd()
-    data_dir = os.path.join(code_dir, 'data')
-    parent_dir = os.path.join(data_dir, parent_dir)
-
-    try:
-        os.makedirs(os.path.join(parent_dir, dir_name))
->>>>>>> origin/main
     except OSError as e:
         if e.errno == errno.EEXIST:
             # フォルダがすでに存在する場合は何もしない
@@ -103,6 +97,9 @@ def users_home(request):
 
 @login_required
 def create_project(request):
+    """ グループディレクトリ作成（作成者）。
+        グループだとDjangoのデフォルトのグループと混在したため、プロジェクトにしている。
+    """
     if request.method == 'POST':
         print("POST request received")
         form = ProjectCreationForm(request.POST)
@@ -118,14 +115,9 @@ def create_project(request):
             # messages.success(request, 'プロジェクトが作成されました。')
             # user_dir = f"users/{name}"
             create_jupyter_dir('groups', name)
-<<<<<<< HEAD
             # create_jupyter_dir(f"users/{request.user}", name)
             # code_dir = os.getcwd()
             os.symlink(f"/data/groups/{name}/", f"/data/users/{request.user}/{name}")
-=======
-            create_jupyter_dir(f"users/{request.user}", name)
-            os.symlink(f"groups/{name}", f"users/{request.user}/{name}")
->>>>>>> origin/main
 
             return redirect('accounts:home')
     else:
@@ -136,6 +128,9 @@ def create_project(request):
 
 @login_required
 def join_project(request):
+    """ グループディレクトリ作成（参加者）。
+        グループだとDjangoのデフォルトのグループと混在したため、プロジェクトにしている。
+    """
     if request.method == 'POST':
         form = ProjectJoinForm(request.POST)
         if form.is_valid():

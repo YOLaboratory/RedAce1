@@ -23,21 +23,13 @@ class Spectrum(models.Model):
     description = models.TextField(null=True, blank=True)
     permission = models.TextField(default="private")
     share_project = models.ManyToManyField(Project)
-<<<<<<< HEAD
-=======
-    # user = models.ForeignKey(User, on_delete=models.CASCADE) #具体的に、所有者？登録者？
->>>>>>> origin/main
     user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_date = models.DateTimeField()
     # spectra_collection_id = models.IntegerField()
     data_id = models.CharField(max_length=100, blank=True)
 
     def __str__(self):
-<<<<<<< HEAD
         return f"{self.instrument}___{self.obs_id}"
-=======
-        return f"{self.instrument}___{self.data_id}"
->>>>>>> origin/main
         # return "%s_%s(%s)" % (self.instrument, self.id,self.user)
 
 

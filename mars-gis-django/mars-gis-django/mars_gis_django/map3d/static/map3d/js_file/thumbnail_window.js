@@ -1,3 +1,7 @@
+/**
+ * イメージエリアに関する関数群
+ */
+
 var existThumbnailWindow = 'None';
 var historyJson1 = [];
 var historyJson2 = [];
@@ -9,13 +13,25 @@ var historyTop2 = '';
 // window.alert = function (msg) {
 //     jsFrame.showToast({ text: msg, align: 'center' });
 // };
+
+/**
+ * JSFrame:JSライブラリ
+ * フローティングウィンドウ初期化
+ */
 const jsFrame = new JSFrame({
     horizontalAlign: 'left',
     verticalAlign: 'top',
     parentElement: document.querySelector('#image_move'),
 });
 
-// フローティングウィンドウの生成
+/**
+ * フローティングウィンドウの生成
+ * @param {*} frameNum 
+ * @param {*} dataObj 
+ * @param {*} color 
+ * @param {*} footprintLayer 
+ * @param {*} data 
+ */
 function createThumbnailFrame(frameNum, dataObj, color, footprintLayer, data) {
     let frameName = `thumbnail_frame${frameNum}`;
 
@@ -81,15 +97,10 @@ function createThumbnailFrame(frameNum, dataObj, color, footprintLayer, data) {
                     <div class="select_switch${frameNum}">select mode</div>
                     <div class="clear_button${frameNum}">clear</div>
                     <div class="search_area">
-<<<<<<< HEAD
                         <div class="search_switch${frameNum}"><i class="fa fa-retweet" style="font-size:13px;"></i></div>
                         <input id="search_input${frameNum}a" type="number" step="1" placeholder=" x (pixel)"/>
                         <input id="search_input${frameNum}b" type="number" step="1" placeholder=" y (pixel)"/>
                         <div class="search_button${frameNum}"><i class="fas fa-search"></i></div>
-=======
-                        <input type="text" id="search_px_input${frameNum}" value="" placeholder=" x_y (pixel)"/>
-                        <div class="search_px_button${frameNum}">search</div>
->>>>>>> origin/main
                     </div>
                     <div id="thumbnail_window${frameNum}" style="border-color:${color};">
                         <div id="ratio_select${frameNum}" name="ratio_select${frameNum}"></div>
@@ -152,7 +163,14 @@ function createThumbnailFrame(frameNum, dataObj, color, footprintLayer, data) {
     });
 }
 
-// 選択したフットプリントにレイヤー重ねる
+/**
+ * 選択した火星マップ上のフットプリントに選択を示すレイヤー重ねる
+ * @param {*} obsCoord 
+ * @param {*} num 
+ * @param {*} name 
+ * @param {*} materialColor 
+ * @returns 
+ */
 function overlapFootprintLayer(obsCoord, num, name, materialColor) {
     FootprintHist[num] = obsCoord;
     footprintLayer = roots.map.entities.add({
@@ -169,7 +187,12 @@ function overlapFootprintLayer(obsCoord, num, name, materialColor) {
     return footprintLayer;
 }
 
-// Thumbnailを表示する
+/**
+ * 選択したフットプリントのシーンを表示
+ * @param {*} targetElement 
+ * @param {*} dataObj 
+ * @returns 
+ */
 function displayThumbnail(targetElement, dataObj) {
     let object = new Object();
     object.extent = [0, 0, dataObj['Mapping']['Image_size'][0], dataObj['Mapping']['Image_size'][1]];
@@ -205,19 +228,11 @@ function displayThumbnail(targetElement, dataObj) {
             new ol.control.OverviewMap(),
             new ol.control.FullScreen(),
             new ol.control.MousePosition({
-<<<<<<< HEAD
                 coordinateFormat: function (pxCoord) { // pxCoord: mouse position （pixel）
                     if (document.querySelector('.coords_type_switch1').classList.contains('active')) {
                         let pxY = dataObj['Mapping']['Image_size'][1] - Math.floor(pxCoord[1]);
                         let lon = dataObj['cube_coords']['lon'][pxY][Math.floor(pxCoord[0])];
                         let lat = dataObj['cube_coords']['lat'][pxY][Math.floor(pxCoord[0])];
-=======
-                coordinateFormat: function (pxCoord) {
-                    if (document.querySelector('.coords_type_switch1').classList.contains('active')) {
-                        let pxY = dataObj['Mapping']['Image_size'][1] - Math.floor(pxCoord[1]) - 1;
-                        let lon = dataObj['coords_lon'][pxY][Math.floor(pxCoord[0])];
-                        let lat = dataObj['coords_lat'][pxY][Math.floor(pxCoord[1])];
->>>>>>> origin/main
                         return ol.coordinate.format([lon, lat], 'Lon: {x}, Lat: {y}', 5);
                     } else {
                         return ol.coordinate.format(pxCoord, 'Pixel [ x: {x}, y: {y} ]', 2);
@@ -234,13 +249,14 @@ function displayThumbnail(targetElement, dataObj) {
 
 let thumbnailNum = 0;
 let storeClickedPx = [];
-// ObsIdBoxで選択されたデータのサムネイル画像を表示
+
+/**
+ * ObsIdBoxで選択されたデータのシーンを表示
+ * @param {*} data 
+ */
 function displayThumbnailWindow(data) {
     // console.log(data);
-<<<<<<< HEAD
     console.log("displayThumbnailWindow");
-=======
->>>>>>> origin/main
     let selectedWindow = 'None';
 
     // prettier-ignore
@@ -293,7 +309,6 @@ function displayThumbnailWindow(data) {
             thumbnailNum = 0;
             setAlignment([-1, -1], 'clear');
         });
-<<<<<<< HEAD
         document.querySelector('.search_switch1').addEventListener('click', () => {
             if (document.getElementById('search_input1a').placeholder == ' x (pixel)') {
                 document.getElementById('search_input1a').placeholder = ' Lon';
@@ -343,28 +358,6 @@ function displayThumbnailWindow(data) {
         });
         document.querySelector('.coords_type_switch1').addEventListener('click', () => {
             document.querySelector('.coords_type_switch1').classList.toggle('active');
-=======
-        document.querySelector('.search_px_button1').addEventListener('click', () => {
-            const searchInput = document.getElementById('search_px_input1');
-            const searchPx = searchInput.value.split('_');
-            if (document.querySelector('.select_switch1').classList.contains('active')) {
-                storeClickedPx.push(searchPx);
-                if (storeClickedPx.length === 1) {
-                    setAlignment(searchPx, 1);
-                } else {
-                    setAlignment(searchPx, 2);
-                    storeClickedPx.length = 0;
-                }
-            } else {
-                setAlignment(searchPx, 'search');
-            }
-        });
-        document.querySelector('.coords_type_switch1').addEventListener('click', () => {
-            document.querySelector('.coords_type_switch1').classList.toggle('active');
-            // if (document.querySelector('.coords_type_switch1').classList.contains('active')) {
-            //     document.querySelector('.coords_type_switch1').classList.toggle('active');
-            // }
->>>>>>> origin/main
         });
 
         // if (dataObj["Ratio_path_json"] != null) {
@@ -493,7 +486,6 @@ function displayThumbnailWindow(data) {
     }
 }
 
-<<<<<<< HEAD
 function getLatLonFromPixels(pixelArr, cube_coords) {
     let latlon_coords = [];
     for (let i = 0; i < pixelArr.length; i++) {
@@ -502,12 +494,14 @@ function getLatLonFromPixels(pixelArr, cube_coords) {
 
     return latlon_coords
 }
+
 // FIXME usui 検索ピクセルのずれ
 function getPixelsFromLatLon(lon, lat, cube_coords) {
     // 小数点以下の桁数を返す
     function numDigitsUnder(num){
         return num.toString().split('.')[1].length;
     }
+    
     // index検索
     function findIndexX(lon) {
         let endY = cube_coords["lon"].length - 1;
@@ -535,6 +529,7 @@ function getPixelsFromLatLon(lon, lat, cube_coords) {
             }
         }
     }
+
     function findIndexY(lat) {
         let endY = cube_coords["lat"].length - 1;
         let endX = cube_coords["lat"][0].length - 1;
@@ -571,8 +566,6 @@ function getPixelsFromLatLon(lon, lat, cube_coords) {
     }
 }
 
-=======
->>>>>>> origin/main
 function setDrawLayerLines(coordinates, color) {
     // prettier-ignore
     let fillColor = 
@@ -598,11 +591,13 @@ function setDrawLayerLines(coordinates, color) {
     });
     return layerLines;
 }
+
 function setLayerCoordinates(x, y) {
     // prettier-ignore
     coordinates = [[[x, y], [x, y + 1], [x + 1, y + 1], [x + 1, y], [x, y]]]
     return coordinates;
 }
+
 function drawLayer(x, y, color, squareObj, thumbnailObj) {
     let key = `${x}-${y}`;
     if (!(key in squareObj[color])) {
@@ -611,6 +606,7 @@ function drawLayer(x, y, color, squareObj, thumbnailObj) {
         squareObj[color][key] = [x, y, line];
     }
 }
+
 function removeSquareLayer(x, y, color, squareObj, thumbnailObj) {
     key = `${x}-${y}`;
     thumbnailObj.getLayers().remove(squareObj[color][key][2]);
@@ -624,13 +620,11 @@ let drawnLayers = {
     crossLines1: {},
     crossLines2: {},
 };
+
 // thumbnailWindow内で座標クリックした時の座標点から上下左右に伸びる直線描画
 function setAlignment(click_point, flag) {
-<<<<<<< HEAD
     console.log("click_point");
     console.log(click_point);
-=======
->>>>>>> origin/main
     let color, layerLines, thumbnailObj;
     let x = Math.trunc(click_point[0]);
     let y = Math.trunc(click_point[1]);
@@ -707,6 +701,7 @@ function getSelectedPixels() {
     }
     return pixelArr;
 }
+
 function changePixelsColor(pixelArr) {
     let thumbnailObj, squareObj;
     [thumbnailObj, squareObj] =
@@ -798,6 +793,7 @@ function displayAncillaryBox(data) {
 }
 
 let countHistory = 0;
+
 // thumbnail box内, clickした座標を記録して参照出来るようにしてる
 function click_history(data) {
     let dataObj = JSON.parse(data);

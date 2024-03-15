@@ -1,6 +1,11 @@
-// SpectralList menu
+/** 
+ * スペクトルリストに関する関数群
+ */
 
-//from map3d/index.html
+/**
+ * Django URLをJSで使いやすいように。
+ * from map3d/index.html
+ */
 get_spectra_axios = DjangoURL.get_spectra_axios;
 record_spectra_user_id = DjangoURL.record_spectra_user_id;
 record_spectra_user = DjangoURL.record_spectra_user;
@@ -9,8 +14,8 @@ description_update = DjangoURL.description_update;
 export_from_list = DjangoURL.export_from_list;
 delete_from_list = DjangoURL.delete_from_list;
 
-var vm = new Vue({//umemo  use Vue.js (version Vue2)
-    delimiters: ['[[', ']]'], //umemo djangoとvue.jsのカッコが被るため、vue.jsのカッコを定義
+var vm = new Vue({// Use Vue.js (version Vue2)
+    delimiters: ['[[', ']]'], // djangoとvue.jsのカッコが被るため、vue.jsのカッコを定義
     el: '#app_vue',
     data: {
         dygraphs: [],

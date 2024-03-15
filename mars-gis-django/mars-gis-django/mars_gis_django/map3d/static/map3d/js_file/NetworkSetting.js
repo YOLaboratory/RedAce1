@@ -1,3 +1,8 @@
+/**
+ * ネットワーク設定
+ * URLを変数に代入して使いやすくしている。
+ */
+
 // var Network_ajax_db='/map3d/static/map3d/api_db-v01.py';
 // var Network_ajax_db='/views_old/api_db.py'; //usui
 var Network_ajax_db='/views/api_db.py'; ///usui

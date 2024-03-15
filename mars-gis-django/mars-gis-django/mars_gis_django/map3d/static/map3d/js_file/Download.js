@@ -1,3 +1,11 @@
+/**
+ * ダウンロードに関する関数群
+ */
+
+/**
+ * 今現在の日時を取得
+ * @returns today = [year, month, date, hours, minutes, seconds]
+ */
 function getToday() {
     let days = new Date();
     let year = days.getFullYear();
@@ -10,7 +18,10 @@ function getToday() {
     return today;
 }
 
-// 補助情報のダウンロードボタン、4つ
+/**
+ * 補助情報エリアのデータをダウンロード用に配列作成
+ * @returns 
+ */
 function createAncillaryArray() {
     let data = [];
     let tr = $('iframe').contents().find('table.ancillary tr'); //全行を取得
@@ -34,6 +45,9 @@ function createAncillaryArray() {
     return dataNew;
 }
 
+/**
+ * XLSXでダウンロード
+ */
 function downloadAncXLSX() {
     let data = createAncillaryArray();
     let obsID = $('.cesium-infoBox-title').text();
@@ -62,6 +76,9 @@ function downloadAncXLSX() {
     saveAs(new Blob([s2ab(wb_out)], { type: 'application/octet-stream' }), filename);
 }
 
+/**
+ * JSON文字列でダウンロード
+ */
 function downloadAncJSON() {
     let data = createAncillaryArray();
     var json = {};
@@ -75,6 +92,9 @@ function downloadAncJSON() {
     saveAs(new Blob([json], { type: 'application/json' }), filename);
 }
 
+/**
+ * CSVでダウンロード
+ */
 function downloadAncCSV() {
     let data = createAncillaryArray();
     let csv = '';
@@ -88,6 +108,9 @@ function downloadAncCSV() {
     saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
 }
 
+/**
+ * PVLでダウンロード
+ */
 function downloadAncPVL() {
     let data = createAncillaryArray();
     let pvl = [];
@@ -107,7 +130,10 @@ function downloadAncPVL() {
     saveAs(new Blob(pvl, { type: 'text/plain;charset=UTF-8' }), filename);
 }
 
-// スペクトルプロットの下部ダウンロードボタン、CSVダウンロード
+/**
+ * グラフエリア下部のダウンロードボタン、CSV形式
+ * @param {*} value 
+ */
 function downloadGraphCSV(value) {
     let selectedDownloadValue = $('input[name=download_type]:checked').val();
     let labelList = chartList[value].user_attrs_.labels;
@@ -193,6 +219,10 @@ function downloadGraphCSV(value) {
     }
 }
 
+/**
+ * ROI範囲のスペクトルデータをダウンロード、CSV形式
+ * @param {*} data 
+ */
 function download_csv_roi_area(data) {
     let dataObj = JSON.parse(data);
     let wavArr = dataObj['band_bin_center'];
@@ -228,8 +258,10 @@ function download_csv_roi_area(data) {
     saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
 }
 
+TODO
 /**
  * サムネイル画像ウィンドウのダウンロードボタン、csvダウンロード（全ピクセル）。
+ * 機能してない。
  * @param {*} data
  */
 function download_csv_spectral_allpixel(data) {
