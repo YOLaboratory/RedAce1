@@ -1,5 +1,6 @@
 from django.db import models
 
+<<<<<<< HEAD
 class SuperCam(models.Model):
     file_name = models.CharField(max_length=255)
     obs_id = models.TextField()
@@ -21,3 +22,8 @@ class SuperCamMeta(models.Model):
     solar_longitude_unit = models.TextField()
     start_date_time = models.TextField()
     stop_date_time = models.TextField()
+=======
+# Create your models here.
+
+# ここにスーパーカム
+>>>>>>> origin/main

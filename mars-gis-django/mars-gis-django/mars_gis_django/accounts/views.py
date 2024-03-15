@@ -17,7 +17,10 @@ from django.contrib import messages
 
 @login_required
 def create_jupyterhub_user(request):
+<<<<<<< HEAD
     # TODO usui ユーザー情報を同時作成したい
+=======
+>>>>>>> origin/main
     # Djangoユーザー情報を取得
     django_user = request.user
 
@@ -43,6 +46,7 @@ def create_jupyterhub_user(request):
         # return render(request, 'error.html', {'message': 'Failed to create user'})
     
 def create_jupyter_dir(parent_dir, dir_name):
+<<<<<<< HEAD
     # code_dir = os.getcwd()
     # data_dir = os.path.join(code_dir, 'data')
     # parent_dir = os.path.join('/data/', parent_dir)
@@ -51,6 +55,14 @@ def create_jupyter_dir(parent_dir, dir_name):
     try:
         os.makedirs(f"{parent_dir}/{dir_name}")
         # os.makedirs(os.path.join(parent_dir, dir_name))
+=======
+    code_dir = os.getcwd()
+    data_dir = os.path.join(code_dir, 'data')
+    parent_dir = os.path.join(data_dir, parent_dir)
+
+    try:
+        os.makedirs(os.path.join(parent_dir, dir_name))
+>>>>>>> origin/main
     except OSError as e:
         if e.errno == errno.EEXIST:
             # フォルダがすでに存在する場合は何もしない
@@ -106,9 +118,14 @@ def create_project(request):
             # messages.success(request, 'プロジェクトが作成されました。')
             # user_dir = f"users/{name}"
             create_jupyter_dir('groups', name)
+<<<<<<< HEAD
             # create_jupyter_dir(f"users/{request.user}", name)
             # code_dir = os.getcwd()
             os.symlink(f"/data/groups/{name}/", f"/data/users/{request.user}/{name}")
+=======
+            create_jupyter_dir(f"users/{request.user}", name)
+            os.symlink(f"groups/{name}", f"users/{request.user}/{name}")
+>>>>>>> origin/main
 
             return redirect('accounts:home')
     else:

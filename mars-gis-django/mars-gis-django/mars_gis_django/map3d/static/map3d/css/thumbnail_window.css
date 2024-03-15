@@ -293,13 +293,18 @@
 .search_area {
     top: 32px;
     right: 5px;
+<<<<<<< HEAD
     width: 363px;
+=======
+    width: 153px;
+>>>>>>> origin/main
     height: 26px;
     background-color: rgba(255, 255, 255, 0.65);
     border-radius: 5px;
     position: absolute;
     display: flex;
 }
+<<<<<<< HEAD
 .search_switch1,
 .search_switch2 {
     width: 38px;
@@ -321,6 +326,12 @@
 .search_button2 {
     width: 58px;
     margin: 2px 2px 2px 0px;
+=======
+.search_px_button1,
+.search_px_button2 {
+    width: 58px;
+    margin: 2px 1px;
+>>>>>>> origin/main
     background-color: white;
     border-radius: 5px;
     cursor: pointer;
@@ -330,6 +341,7 @@
     place-items: center;
     box-shadow: 1px 1px 7px #b7b7b7, -1px -1px 3px #cecece inset;
 }
+<<<<<<< HEAD
 .search_button1:active,
 .search_button2:active {
     background-color: #51e373;
@@ -343,6 +355,17 @@
     font-size: 14px;
     display: flex;
 }
+=======
+#search_px_input1 {
+    width: 80px;
+    margin: 1px 5px 1px 1px;
+    background-color: white;
+    border-radius: 5px;
+    font-size: 15px;
+    display: flex;
+}
+
+>>>>>>> origin/main
 #thumbnail_window1,
 #thumbnail_window2 {
     width: 515px;

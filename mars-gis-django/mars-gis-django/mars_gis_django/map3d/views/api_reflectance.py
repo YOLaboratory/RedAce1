@@ -313,11 +313,60 @@ def base_json_getRef(params_json):
             coord_array.append([round(float(lon), 5), round(float(lat), 5)])
 
         field["coordinate"] = coord_array
+<<<<<<< HEAD
 
         json_data = json.dumps(field)
         return json_data
     
 
+def scaling_Reflectance(params_json):
+    if params_json["type"] == 'normalize':
+        data_arr = params_json["dataArr"]
+        data_arr = np.array(data_arr)
+        new_data_arr = data_arr[:, 0].reshape(1, -1)
+        scaler = SpectrumScaling()
+=======
+>>>>>>> origin/main
+
+        for i in range(1, len(data_arr[0])):
+            ref_1d = np.array([x if x is not None else np.nan for x in data_arr[:, i]])
+            ref_1d = scaler.normalization(ref_1d)
+            new_data_arr = np.append(new_data_arr, ref_1d.reshape(1, -1), axis=0)
+
+        # json.parseがnanを処理出来ないため
+        for i in range(len(new_data_arr)):
+            new_data_arr[i] = [x if not np.isnan(x) else -9999 for x in new_data_arr[i]]
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.T.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+        return json_data
+    
+    elif params_json["type"] == 'standardize':
+        data_arr = params_json["dataArr"]
+        data_arr = np.array(data_arr)
+        new_data_arr = data_arr[:, 0].reshape(1, -1)
+        scaler = SpectrumScaling()
+
+        for i in range(1, len(data_arr[0])):
+            ref_1d = np.array([x if x is not None else np.nan for x in data_arr[:, i]])
+            ref_1d = scaler.standardization(ref_1d)
+            new_data_arr = np.append(new_data_arr, ref_1d.reshape(1, -1), axis=0)
+
+        # json.parseがnanを処理出来ないため
+        for i in range(len(new_data_arr)):
+            new_data_arr[i] = [x if not np.isnan(x) else -9999 for x in new_data_arr[i]]
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.T.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+        return json_data
+    
+
+<<<<<<< HEAD
+=======
 def scaling_Reflectance(params_json):
     if params_json["type"] == 'normalize':
         data_arr = params_json["dataArr"]
@@ -362,6 +411,7 @@ def scaling_Reflectance(params_json):
         return json_data
     
 
+>>>>>>> origin/main
 def smoothing_Reflectance(params_json):
     if params_json["type"] == 'stacking':
         data_arr = params_json["dataArr"]
@@ -371,6 +421,35 @@ def smoothing_Reflectance(params_json):
         # ref only
         ref_2d = np.delete(data_arr, 0, axis=1)
         ref_2d_rev = np.array([], dtype=np.float64).reshape(0, len(ref_2d[0]))
+<<<<<<< HEAD
+=======
+
+        # for i, row in enumerate(ref_2d):
+        for row in ref_2d:
+            ref_nonone = np.array([x if x is not None else np.nan for x in row])
+            ref_2d_rev = np.vstack((ref_2d_rev, ref_nonone))
+
+        stacked_ref = SpectrumSmoothing().stacking(ref_2d_rev)
+
+        print("stacked_ref")
+        print(stacked_ref)
+
+        stacked_ref = [x if not np.isnan(x) else -9999 for x in stacked_ref]
+        new_data_arr = np.column_stack((wav, stacked_ref))
+
+        print('new_data_arr')
+        print(new_data_arr)
+
+        field = cl.OrderedDict()
+        field["dataArr"] = new_data_arr.tolist()
+        field["type"] = params_json["type"]
+        json_data = json.dumps(field)
+
+        print(json_data)
+        return json_data
+
+    
+>>>>>>> origin/main
 
         # for i, row in enumerate(ref_2d):
         for row in ref_2d:
@@ -414,6 +493,7 @@ def reflectance(request):
     return HttpResponse(json_data)
 
 
+<<<<<<< HEAD
 # TODO SuperCam閲覧機能 2024/3/1(kuro)
 # @csrf_protect
 # def reflectance_comparison(request):
@@ -763,3 +843,49 @@ def reflectance(request):
 #                 new_data_arr[i] = np.nan
 
 #         return new_data_arr
+=======
+class SpectrumScaling:
+    def normalization(self, ref_1d_arr):
+        if ref_1d_arr.size == 0 or np.all(np.isnan(ref_1d_arr)):
+            return ref_1d_arr
+        return (ref_1d_arr - np.nanmin(ref_1d_arr)) / (np.nanmax(ref_1d_arr) - np.nanmin(ref_1d_arr))
+
+    def standardization(self, ref_1d_arr):
+        if ref_1d_arr.size == 0:
+            return ref_1d_arr
+        return (ref_1d_arr - np.nanmean(ref_1d_arr)) / np.nanstd(ref_1d_arr)
+    
+    # todo
+    def relative_ref(self, target_ref_1d_arr, base_ref_1d_arr):
+        if target_ref_1d_arr.size == 0 or target_ref_1d_arr.size == 0:
+            return target_ref_1d_arr
+        return target_ref_1d_arr / base_ref_1d_arr
+    
+class SpectrumSmoothing:
+    def moving_avg(self, ref, window_size):
+        b = np.ones(window_size) / window_size
+        ref_mean = np.convolve(ref, b, mode="same")
+        n_conv = window_size // 2
+
+        # 補正部分、始めと終わり部分をwindow_sizeの半分で移動平均を取る
+        ref_mean[0] *= window_size / n_conv
+        for i in range(1, n_conv):
+            ref_mean[i] *= window_size / (i + n_conv)
+            ref_mean[-i] *= window_size / (i + n_conv - (window_size % 2)) # size % 2は奇数偶数での違いに対応するため
+
+        return ref_mean
+    
+    def stacking(self, data_arr):
+        new_data_arr = np.empty(len(data_arr))
+
+        for i, row in enumerate(data_arr):
+            is_all_nan = np.all(np.isnan(row))
+            if not is_all_nan:
+                new_data_arr[i] = np.nanmean(row)
+            else:
+                new_data_arr[i] = np.nan
+
+        return new_data_arr
+
+
+>>>>>>> origin/main

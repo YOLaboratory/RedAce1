@@ -124,10 +124,15 @@ def base_json(params):
         field["geometry"] = geometry
 
         cube_data2 = gdal.Open(params_json["path"]["data"]["derived"]["cub"], gdal.GA_ReadOnly)
+<<<<<<< HEAD
         cube_coords = cl.OrderedDict()
         cube_coords["lat"] = cube_data2.GetRasterBand(4).ReadAsArray().tolist()
         cube_coords["lon"] = cube_data2.GetRasterBand(5).ReadAsArray().tolist()
         field["cube_coords"] = cube_coords
+=======
+        field["coords_lat"] = cube_data2.GetRasterBand(4).ReadAsArray().tolist()
+        field["coords_lon"] = cube_data2.GetRasterBand(5).ReadAsArray().tolist()
+>>>>>>> origin/main
 
     else:
         return "NoData"

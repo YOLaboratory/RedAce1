@@ -277,8 +277,24 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
     // console.log(obsName);
     // console.log(wav);
 
+<<<<<<< HEAD
     // 左下基準の取得ピクセルを左上基準に変更（Cubデータが左上基準より）
     px[1] = imgSize[1] - px[1];
+=======
+    // px[0]:x軸、pixels[1]:y軸。だと思う。
+    // if (reFlag === 0) {
+    //     // thumbnailをclick
+    //     // setAlignment(px, flag);
+    //     // px[0] = px[0] - 1;
+    //     px[1] = imgSize[1] - px[1]; // - 1; // cubデータが左上基準だから調整しているのだと思う。。
+    // } else if (reFlag === 1) {
+    //     // thumbnail box内左上または右側部分click
+    //     var rePx = px.concat();
+    //     rePx[0] = px[0] + 1;
+    //     rePx[1] = imgSize[1] - px[1] - 1;
+    // }
+    px[1] = imgSize[1] - px[1] - 1; //画像とずれる？
+>>>>>>> origin/main
 
     // pixel座標がイメージサイズ(四角形)より内側ならデータ探す
     // ピクセル座標、左下基準。
@@ -335,7 +351,11 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
     for (let i = 0; i < pxArray.length; i++) {
         newPxArr[i] = [];
         newPxArr[i].push(pxArray[i][0]);
+<<<<<<< HEAD
         newPxArr[i].push(imgSize[1] - pxArray[i][1]);
+=======
+        newPxArr[i].push(imgSize[1] - pxArray[i][1] - 1);
+>>>>>>> origin/main
     }
 
     $.ajax({

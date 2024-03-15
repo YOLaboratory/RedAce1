@@ -58,6 +58,18 @@ class Project(models.Model):
     admin = models.ManyToManyField(CustomUser,related_name='project_admin')
     member = models.ManyToManyField(CustomUser, related_name='project_member')
 
+<<<<<<< HEAD
     def __str__(self):
         return self.name
     
+=======
+    # def save(self, *args, **kwargs):
+    #     self.password = hash_password(self.password)
+    #     super().save(*args, **kwargs)
+
+    def __str__(self):
+        return self.name
+    
+# def hash_password(password):
+#     return make_password(password)
+>>>>>>> origin/main
