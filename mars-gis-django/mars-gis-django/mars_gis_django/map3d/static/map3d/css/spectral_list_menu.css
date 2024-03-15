@@ -62,8 +62,8 @@ a {
     position: fixed;
     top: 45px;
     right: -100vw;
-    width: 750px;
-    height: 80%;
+    width: 900px;
+    height: 90%;
     -webkit-transition: 0.53s transform;
             transition: 0.53s transform;
     -webkit-transition-timing-function: cubic-bezier(.38,.52,.23,.99);
@@ -112,10 +112,7 @@ button#updatebtn:hover, button#sortbtn:hover, button#searchbtn:hover, button#del
 
 
 .plot_rightmenu {
-    width: 500px;
-    position: relative; right: 45px;
     display: table;
-    border-collapse: separate;
     border-spacing: 8px 10px;
 }
 .plot_table_rightmenu {
@@ -144,9 +141,10 @@ button#updatebtn:hover, button#sortbtn:hover, button#searchbtn:hover, button#del
 
 .hidden_box {
     margin: 2em 0;
-    padding-top: 25px;
     position: relative;
-    bottom: 120px;
+    bottom: 70px;
+    left: 10px;
+    width: 550px;
 }
 .hidden_box label {
     padding: 2px 8px;
@@ -175,10 +173,8 @@ button#updatebtn:hover, button#sortbtn:hover, button#searchbtn:hover, button#del
 .created_description {
     background-color: silver;
     color: black;
-    width: 420px;
     height: auto;
     text-align: justify;
-    text-justify: auto;
     padding: 1px;
 }
 #created_description {
@@ -233,20 +229,20 @@ button#updatebtn:hover, button#sortbtn:hover, button#searchbtn:hover, button#del
     transition: all 0.5s;
     margin: 0;
     list-style: none;
+    color: black;
 }
 .accordion_menu input[type="checkbox"].on-off + div {
     height: 0;
     overflow: hidden;
 }
 .accordion_menu input[type="checkbox"].on-off:checked + div {
-    height: 500px;
+    height: 440px;
 }
 .hidden_contents {
     background: #CCCCCC;
     opacity: 1.0;
     position:relative;
-    width: 655px;
-    padding: 35px;
+    width: 860px;
     display: block;
     border: 1px solid #fff;
 }

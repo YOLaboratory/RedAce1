@@ -1,3 +1,15 @@
+function getToday() {
+    let days = new Date();
+    let year = days.getFullYear();
+    let month = ('0' + (days.getMonth() + 1)).slice(-2);
+    let date = ('0' + days.getDate()).slice(-2);
+    let hours = ('0' + days.getHours()).slice(-2);
+    let minutes = ('0' + days.getMinutes()).slice(-2);
+    let seconds = ('0' + days.getSeconds()).slice(-2);
+    let today = [year, month, date, hours, minutes, seconds];
+    return today;
+}
+
 // 補助情報のダウンロードボタン、4つ
 function createAncillaryArray() {
     let data = [];
@@ -96,67 +108,115 @@ function downloadAncPVL() {
 }
 
 // スペクトルプロットの下部ダウンロードボタン、CSVダウンロード
-function download_csv_spectral(value) {
-    // console.log(chartList[value].file_[0]);              　// 最初の[x,y]
-    // console.log(chartList[value].file_[0].length);       // 2
-    // console.log(chartList[value].user_attrs_.labels[0]); // band
-    // console.log(chartList[value].user_attrs_.labels[1]); // frt00003621_07_if166l: E:-97.65137  N:24.90353
-    // console.log(chartList[value].file_);                　// [[x,y],[x,y],...] (430)、データが少ない場合もある。
-    // console.log(chartList[value].user_attrs_);           // Dygraphの設定
+function downloadGraphCSV(value) {
+    let selectedDownloadValue = $('input[name=download_type]:checked').val();
+    let labelList = chartList[value].user_attrs_.labels;
+    let dataArr = chartList[value].file_;
+    let [yyyy, MM, dd, hh, mm, ss] = getToday();
+    let buf = new Uint8Array([0xef, 0xbb, 0xbf]);
 
-    // Lockした時のループ
-    for (var csv_i = 1; csv_i < chartList[value].file_[0].length; csv_i++) {
-        // ダウンロード時のcsvファイル名作成
-        // 例） chartList[value].user_attrs_.labels[csv_i] = "frt00003621_07_if166l: E_-97.65137 N_24.90353"
-        var filename_spectral = chartList[value].user_attrs_.labels[csv_i] + '.csv';
-        filename_spectral = filename_spectral.replace(' ', '_'); // コロンの変換はしてないけど問題ないみたい。
-        filename_spectral = filename_spectral.replace(':', '');
+    const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
-        // x（波長）とy（反射率）をワンペア、データ構造は縦持ち
-        var sp_csv = '';
-        sp_csv += 'wavelength[μm],' + 'reflectance\n';
-        for (var csv_i2 in chartList[value].file_) {
-            // x、yのペア、430回
-            if (chartList[value].file_[csv_i2][csv_i] != null) {
-                sp_csv +=
-                    chartList[value].file_[csv_i2][0].toFixed(5) + ',' + chartList[value].file_[csv_i2][csv_i] + '\n';
+    let newLabelList = [];
+    for (let i = 1; i < labelList.length; i++) {
+        newLabelList.push(labelList[i].replace(/\s+/g, ''));
+    }
+
+    if (selectedDownloadValue === 'one') {
+        delayedLoop();
+        async function delayedLoop() {
+            let csv = 'wavelength[μm]';
+            for (let i = 1; i < labelList.length; i++) {
+                csv += `,reflectance${i}`;
             }
+            csv += '\n';
+            for (let i = 0; i < dataArr.length; i++) {
+                csv += `${dataArr[i][0]}`;
+                for (let j = 1; j < dataArr[0].length; j++) {
+                    csv += `,${dataArr[i][j]}`;
+                }
+                csv += '\n';
+            }
+
+            let filename = `${yyyy}${MM}${dd}_${hh}${mm}${ss}_inOne_spectra.csv`;
+            saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
+            console.log(`Download >> ${filename}`);
+            await sleep(100);
+
+            csv = 'Reflectance Number,Label Name\n';
+            for (let i = 0; i < newLabelList.length; i++) {
+                csv += `reflectance${i + 1},`;
+                csv += `${newLabelList[i]}\n`;
+            }
+
+            filename = `${yyyy}${MM}${dd}_${hh}${mm}${ss}_inOne_catalogue.csv`;
+            saveAs(new Blob([buf, csv], { type: 'text/csv' }), filename);
+            console.log(`Download >> ${filename}`);
         }
+    } else if (selectedDownloadValue === 'each') {
+        const zip = new JSZip();
+        delayedLoop();
+        async function delayedLoop() {
+            for (let i = 1; i < labelList.length; i++) {
+                let csv = `wavelength[μm],reflectance\n`;
+                for (let j = 0; j < dataArr.length; j++) {
+                    csv += `${dataArr[j][0]},${dataArr[j][i]}\n`;
+                }
 
-        // 型付き配列で、8ビット符号なし整数値の配列を表します, [0xEF,0xBB,0xBF]はバイトオーダマーク
-        var buf = new Uint8Array([0xef, 0xbb, 0xbf]);
+                let num = ('0000' + i).slice(-4);
+                let filename = `spectrum${num}.csv`;
 
-        // Binary Large OBject, バイナリデータを表すオブジェクト
-        saveAs(new Blob([buf, sp_csv], { type: 'text/csv' }), filename_spectral);
+                // ZIPファイルにCSVデータを追加
+                zip.file(filename, csv);
+
+                await sleep(100);
+            }
+
+            filename = `catalogue.csv`;
+            csv = 'File Name,Label Name\n';
+            for (let i = 0; i < newLabelList.length; i++) {
+                num = ('0000' + (i + 1)).slice(-4);
+                csv += `spectrum${num},`;
+                csv += `${newLabelList[i]}\n`;
+            }
+            zip.file(filename, csv);
+
+            // ZIPファイルを生成
+            const zipBlob = await zip.generateAsync({ type: 'blob' });
+            const uri = URL.createObjectURL(zipBlob);
+            const link = document.createElement('a');
+            link.download = `${yyyy}${MM}${dd}_${hh}${mm}${ss}_inEach.zip`;
+            link.href = uri;
+            link.click();
+            console.log(`Download >> ${link.download}`);
+        }
     }
 }
 
 function download_csv_roi_area(data) {
     let dataObj = JSON.parse(data);
-    let wav_array = dataObj['band_bin_center'];
-    let ref_array = dataObj['reflectance'];
-    let band_size = wav_array.length;
-    let px_size = ref_array.length;
-    let obs_id = dataObj['obs_ID'];
+    let wavArr = dataObj['band_bin_center'];
+    let refArr = dataObj['reflectance'];
+    let obsID = dataObj['obs_ID'];
     let coordinate = dataObj['coordinate'];
-    let filename = `${obs_id}_E_${coordinate[0]}_N_${coordinate[1]}.csv`;
+    let filename = `${obsID}_E_${coordinate[0]}_N_${coordinate[1]}.csv`;
 
     console.log('download_csv_roi_area');
     console.log(dataObj);
 
     // Header
     let csv = 'wavelength[μm]';
-    for (let j = 1; j <= px_size; j++) {
+    for (let j = 1; j <= refArr.length; j++) {
         csv += `,reflectance${j}`;
     }
     csv += '\n';
 
     // Spectral Data
-    for (let i = 0; i < band_size; i++) {
-        csv += wav_array[i];
-        for (let j = 0; j < px_size; j++) {
-            if (ref_array[j][i] !== -1) {
-                csv += `,${ref_array[j][i]}`;
+    for (let i = 0; i < wavArr.length; i++) {
+        csv += wavArr[i];
+        for (let j = 0; j < refArr.length; j++) {
+            if (refArr[j][i] !== -1) {
+                csv += `,${refArr[j][i]}`;
             } else {
                 csv += ',' + NaN;
             }

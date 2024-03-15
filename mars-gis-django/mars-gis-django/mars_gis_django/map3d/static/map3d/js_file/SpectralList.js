@@ -6,6 +6,7 @@ record_spectra_user_id = DjangoURL.record_spectra_user_id;
 record_spectra_user = DjangoURL.record_spectra_user;
 change_permission = DjangoURL.change_permission;
 description_update = DjangoURL.description_update;
+export_from_list = DjangoURL.export_from_list;
 delete_from_list = DjangoURL.delete_from_list;
 
 var vm = new Vue({//umemo  use Vue.js (version Vue2)
@@ -42,7 +43,7 @@ var vm = new Vue({//umemo  use Vue.js (version Vue2)
             console.log("comecomecome")
         },
         get_record_spectra: function() {
-            console.log("get_record_spectra here!!!!")
+            // console.log("get_record_spectra here!!!!")
             vm.dygraphs.splice(0)
             vm.record_spectra.splice(0)
             vm.dygraphs2_tmp.splice(0)
@@ -90,21 +91,27 @@ var vm = new Vue({//umemo  use Vue.js (version Vue2)
             })
         },
 
+        // TODO 複数反射率表示対応
         graph: function(){
             var config = {
-                labels: [ "wavelength", "reflectance" ],
+                labels: ["wavelength", "reflectance"],
                 xlabel: 'Wavelength',
+                ylabel: 'Reflectance',
                 showRangeSelector: true, 
-                rangeSelectorHeight: 40, //umemo 下部の白グラフ
-                // color: "orange", 
+                rangeSelectorHeight: 40,
                 axisLineColor: "black", 
                 gridLineColor: "black",
-                highlightSeriesBackgroundColor: "white", 
                 highlightSeriesBackgroundAlpha: 1.0
             };
             for(var d in vm.dygraphs) {
                 var graph = document.getElementById(vm.dygraphs[d].id_graph);
                 var wv_ref = vm.dygraphs[d].data;
+                // -1を NaN に変換
+                for (let i = 0; i < wv_ref.length; i++) {
+                    if (wv_ref[i][1] == -1) {
+                        wv_ref[i][1] = NaN;
+                    }
+                }
                 new Dygraph(graph, wv_ref, config);
             }
         },
@@ -223,39 +230,104 @@ var vm = new Vue({//umemo  use Vue.js (version Vue2)
             })
         },
 
-        delete_from_list: function(){
-            console.log("delete from list here!!")
-            area = $('[id="delete_from_list"]:checked').map(function(){
+        export_from_list: function(){
+            console.log("Execute export function.");
+
+            let e = document.getElementById("export_list");
+            let export_value = e.options[e.selectedIndex].value;
+            let export_list_name = [];
+            let export_list = [];
+            let graph_data, user, instrument, obs_id, latitude, longitude, created_date;
+            let checked_data = $('[id="export_from_list"]:checked').map( function() {
                 return $(this).val();
             }).get();
-            delete_list_index = [];
-            delete_list_name = [];
-            for(i=0; i<area.length; i++){
+
+            for (let i = 0; i < checked_data.length; i++) {
                 this.record_spectra.forEach((object, index) => {
-                    if(object.id_delete === area[i]){
-                        delete_list_index.push(index);
-                        delete_list_name.push(" "+this.record_spectra[index]["data_id"]+"("+this.record_spectra[index]["latitude"]+", "+this.record_spectra[index]["longitude"]+")")
+                    if(object.id_export === checked_data[i]){
+                        graph_data = vm.dygraphs[index].data;
+                        for (let j = 0; j < graph_data.length; j++) {
+                            if (graph_data[j][1] === -1) {
+                                graph_data[j][1] = "NaN";
+                            }
+                        }
+                        user = this.record_spectra[index]["user"];
+                        instrument = this.record_spectra[index]["instrument"];
+                        obs_id = this.record_spectra[index]["obs_id"];
+                        latitude = this.record_spectra[index]["latitude"];
+                        longitude = this.record_spectra[index]["longitude"];
+                        created_date = this.record_spectra[index]["created_date"];
+
+                        export_list_name.push(
+                            "\n" + instrument + " " + obs_id + " ( Lat:" + latitude + ", Lon:" + longitude + " )\n" +
+                            "\t-- " + created_date + " -- "
+                        );
+                        let export_data = { 
+                            "destination":export_value,
+                            "csv_filename":`${ obs_id }_E${ longitude }_N${ latitude }.csv`,
+                            "graph_data":graph_data,
+                        };
+                        export_list.push(export_data);
                     }
                 })
             }
-            var e = document.getElementById("select_list");
-            var select_value = e.options[e.selectedIndex].value;
-            if(select_value!="my_all" && select_value!="private"){
-                alert('You cannot remove any data with viewing shared data list.');
-            }else if(window.confirm('You are about to remove the following data.\n\n' + delete_list_name)){
-                axios.defaults.xsrfCookieName = 'csrftoken'
-                axios.defaults.xsrfHeaderName = "X-CSRFTOKEN"
-                axios.post(delete_from_list,{"id_delete":area})
-                for(index=delete_list_index.length; index>0; index--){
-                    this.record_spectra.splice(delete_list_index[index-1], 1);
-                    this.dygraphs.splice(delete_list_index[index-1], 1);
-                }
-                alert('Data Deleted from your spectral list.');
-            }else{
-                alert('The command has been canceled.');
+
+            if (window.confirm('You are about to export the following data.\n' + export_list_name)) {
+                axios.defaults.xsrfCookieName = 'csrftoken';
+                axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+                axios.post(export_from_list, export_list);
             }
         },
 
+        delete_from_list: function() {
+            console.log("Execute delete function.");
+
+            let delete_list_index = [];
+            let delete_list_name = [];
+            let delete_list = [];
+            let instrument, obs_id, latitude, longitude, created_date;
+            let checked_data = $('[id="delete_from_list"]:checked').map( function() {
+                return $(this).val();
+            }).get();
+
+            for (let i = 0 ; i < checked_data.length; i++) {
+                this.record_spectra.forEach((object, index) => {
+                    if (object.id_delete === checked_data[i]) {
+                        instrument = this.record_spectra[index]["instrument"];
+                        obs_id = this.record_spectra[index]["obs_id"];
+                        latitude = this.record_spectra[index]["latitude"];
+                        longitude = this.record_spectra[index]["longitude"];
+                        created_date = this.record_spectra[index]["created_date"];
+                        data_id = this.record_spectra[index]["data_id"];
+
+                        delete_list_index.push(index);
+                        delete_list_name.push(
+                            "\n" + instrument + " " + obs_id + " ( Lat:" + latitude + ", Lon:" + longitude + " )\n" +
+                            "\t-- " + created_date + " -- "
+                        );
+                        let delete_data = { "data_id":data_id };
+                        delete_list.push(delete_data);
+                    }
+                })
+            }
+            let e = document.getElementById("select_list");
+            let select_value = e.options[e.selectedIndex].value;
+
+            if (select_value != "my_all" && select_value != "private") {
+                alert('You cannot remove any data with viewing shared data list.');
+            } else if (window.confirm('You are about to remove the following data.\n' + delete_list_name)) {
+                axios.defaults.xsrfCookieName = 'csrftoken';
+                axios.defaults.xsrfHeaderName = "X-CSRFTOKEN";
+                axios.post(delete_from_list, delete_list);
+
+                for (index = delete_list_index.length; index > 0; index--) {
+                    this.record_spectra.splice(delete_list_index[index-1], 1);
+                    this.dygraphs.splice(delete_list_index[index-1], 1);
+                }
+            }
+        },
+
+        // FIXME usui search_from_list
         search_from_list: function(){
             console.log("search from list here!!")
             var obs_id = document.getElementById("search_obs_id").value;
@@ -277,7 +349,7 @@ var vm = new Vue({//umemo  use Vue.js (version Vue2)
                 filtered_record_spectra = [];
                 filtered_record_dygraphs = [];
                 search_from_this_record.forEach((object, index) => {
-                    if(object.data_id.indexOf(obs_id) !== -1){
+                    if(object.obs_id.indexOf(obs_id) !== -1){
                         filtered_record_spectra.push(object);
                         filtered_record_dygraphs.push(search_from_this_dygraphs[index]);
                     }

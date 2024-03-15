@@ -1,0 +1,26 @@
+CRISM ISIS
+
+* ISIS環境構築
+
+以下でコンテナ起動（マウントは一つ目以外適宜変更可）
+docker run -itd --name redace_isis -v /home/fukuchi/isis3:/isis3volume -v /mnt/mars_data/generated:/mars_data/generated -v /mnt/mars_data_distributed/distributed:/mars_data/distributed c46b0a45fb9f
+コンテナ入る
+以下でISIS実行環境設定（コンテナ内で）
+ISISROOT=/isis3volume/isis
+export ISISROOT
+. $ISISROOT/scripts/isis3Startup.sh
+
+* cub生成手順（コンテナ内で）
+trr3(TRDR)-->スペクトルデータ
+ddr1-->観測補助情報データ
+
+前提-->img, lblをDownload
+※ それぞれファイル名を変えないこと、データ追加・付与したものを後に利用しているため。
+1. crism2isis from=“Downloadしたlbl (trr3)”to=“生成するcub (trr3)”
+2. spiceinit from=“生成したcub (trr3)”
+3. caminfo from=“生成したcub (trr3)” append=true polygon=true to=“Downloadしたlbl (trr3)”
+4. crism2isis from=“Downloadしたlbl (ddr1)” to=“生成するcub (ddr1)”
+5. nocam2map from=“生成したcub (trr3)”  latcube=“生成したcub (ddr1)”+4 loncube=“生成したcub (ddr1)”+5 to=“生成したcub (trr3)”
+6. nocam2map from=“生成したcub (ddr1)”  latcube=“生成したcub (ddr1)”+4 loncube=“生成したcub (ddr1)”+5 to=“生成したcub (ddr1)”
+
+※ ３で情報を追記したlblについて、途中のENDを消すこと。

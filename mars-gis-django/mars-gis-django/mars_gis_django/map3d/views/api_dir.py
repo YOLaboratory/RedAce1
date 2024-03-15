@@ -3,6 +3,7 @@ cgitb.enable()
 
 import pvl
 import json
+import multiprocessing
 import numpy as np
 import collections as cl
 from osgeo import gdal, osr
@@ -21,16 +22,16 @@ from osgeo import gdal, osr
 ##############     THEMIS    ############################
 def GetExtent(gt,cols,rows):
     ext = []
-    xarr = [0, cols]
-    yarr = [0, rows]
+    x_arr = [0, cols]
+    y_arr = [0, rows]
 
-    for px in xarr:
-        for py in yarr:
+    for px in x_arr:
+        for py in y_arr:
             x = gt[0] + (px * gt[1]) + (py * gt[2])
             y = gt[3] + (px * gt[4]) + (py * gt[5])
             ext.append([x, y])
 			#print x,y
-        yarr.reverse()
+        y_arr.reverse()
     return ext
 
 def ReprojectCoords(coords, src_srs, tgt_srs):
@@ -105,22 +106,29 @@ def base_json(params):
         data["SOLAR_DISTANCE"] = " ".join(map(str, lbl_data["SOLAR_DISTANCE"]))
 
         filter_num = int(lbl_data['MRO:WAVELENGTH_FILTER']) + 1
-        cdr = np.genfromtxt(params_json["path"]["data"]["derived"]["wavelength"], delimiter = "," , dtype = np.float, usecols = (1))
+        cdr = np.genfromtxt(params_json["path"]["data"]["derived"]["wavelength"], delimiter = "," , dtype = float, usecols = (1))
         filter_rf = np.genfromtxt(params_json["path"]["data"]["derived"]["filter"], delimiter = ",", dtype = np.uint16, usecols = (filter_num))
-        usedwv = []
+        used_wav = []
         num_band = 1
         while num_band < filter_rf.shape[0]:
             if filter_rf[num_band] == 1:
-                usedwv.append(cdr[num_band] / 1000)
+                used_wav.append(cdr[num_band] / 1000)
             num_band += 1
 
-        data["band_bin_center"] = ",".join(map(str, usedwv))
+        data["band_bin_center"] = ",".join(map(str, used_wav))
         data2 = cl.OrderedDict()
         data2["Image_size"] = [cube_data.RasterXSize, cube_data.RasterYSize]
         field["Mapping"] = data2
         field["Image_path"] = params_json["path"]["image"]["thumbnail"]
         field["Ratio_path_json"] = params_json["path"]["image"].get('ratio')
         field["geometry"] = geometry
+
+        cube_data2 = gdal.Open(params_json["path"]["data"]["derived"]["cub"], gdal.GA_ReadOnly)
+        cube_coords = cl.OrderedDict()
+        cube_coords["lat"] = cube_data2.GetRasterBand(4).ReadAsArray().tolist()
+        cube_coords["lon"] = cube_data2.GetRasterBand(5).ReadAsArray().tolist()
+        field["cube_coords"] = cube_coords
+
     else:
         return "NoData"
 

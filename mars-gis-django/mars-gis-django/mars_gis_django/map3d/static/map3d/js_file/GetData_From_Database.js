@@ -1,5 +1,4 @@
 // 下記、グローバル変数
-var graphList = [];
 var entity = new Cesium.Entity();
 var flagEntity = 0;
 var ratio_flag = false;
@@ -128,6 +127,11 @@ function fetchDataClickedCoordinates(lon, lat) {
         Y: lon,
     };
 
+    console.log('====================')
+    console.log('featureClickedCoordinates');
+    console.log(featureClickedCoordinates);
+    console.log('====================')
+
     $.ajax({
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
@@ -148,7 +152,10 @@ function fetchDataClickedCoordinates(lon, lat) {
 
 // 関数fetchDataClickedCoordinatesで見つけたデータのリストを受け取る, ID一覧を表示する(ID_box)
 function displayObsIdBox(data) {
-    // console.log(data);
+    console.log('=============-');
+    console.log('displayObsIdBox')
+    console.log(data);
+    console.log('===========');
     let dataObject = JSON.parse(data);
 
     if (dataObject['hit_data'][0][0]['features'].length > 0) {
@@ -206,6 +213,10 @@ function removeElement(button) {
 
 // Observation ID Box でクリックされたデータを受け取る
 function getAncillaryData(data) {
+    console.log('getAncillaryData')
+    console.log('===========')
+    console.log(data)
+    console.log('===========')
     $.ajax({
         type: 'POST',
         headers: { 'X-CSRFToken': csrftoken },
@@ -215,6 +226,7 @@ function getAncillaryData(data) {
     }).then(
         function (data) {
             console.log('SUCCESS >> getAncillaryData');
+            // console.log(data);
             displayThumbnailWindow(data);
         },
         function () {
@@ -236,6 +248,7 @@ function getSpectralDataAll(obs_name, obs_ID, path, wavelength, flag) {
         url: 'reflectance/',
         contentType: 'application/json',
         data: JSON.stringify({
+            operation: 'get',
             obs_name: obs_name,
             obs_ID: obs_ID,
             path: path,
@@ -264,18 +277,7 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
     // console.log(obsName);
     // console.log(wav);
 
-    // px[0]:x軸、pixels[1]:y軸。だと思う。
-    // if (reFlag === 0) {
-    //     // thumbnailをclick
-    //     // setAlignment(px, flag);
-    //     // px[0] = px[0] - 1;
-    //     px[1] = imgSize[1] - px[1]; // - 1; // cubデータが左上基準だから調整しているのだと思う。。
-    // } else if (reFlag === 1) {
-    //     // thumbnail box内左上または右側部分click
-    //     var rePx = px.concat();
-    //     rePx[0] = px[0] + 1;
-    //     rePx[1] = imgSize[1] - px[1] - 1;
-    // }
+    // 左下基準の取得ピクセルを左上基準に変更（Cubデータが左上基準より）
     px[1] = imgSize[1] - px[1];
 
     // pixel座標がイメージサイズ(四角形)より内側ならデータ探す
@@ -287,12 +289,14 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
             url: 'reflectance/',
             contentType: 'application/json',
             data: JSON.stringify({
+                operation: 'get',
                 obs_name: obsName,
                 obs_ID: obsID,
                 path: path,
                 Image_path: imgPath,
                 wavelength: wav,
                 pixels: px,
+                // cube_coords: cube_coords,
                 type: 'DIRECT',
             }),
             beforeSend: function () {
@@ -304,7 +308,7 @@ function getSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName,
                 $loading.addClass('is-hide');
                 $loading2.addClass('is-hide');
                 console.log('SUCCESS >> getSpectralDataClickedPixel');
-                console.log(data);
+                // console.log(data);
                 displaySpectralBox(data);
             },
             function () {
@@ -327,8 +331,11 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
     // pxArray[0][1] = imgSize[1] - pxArray[0][1] - 1;
     // pxArray[1][1] = imgSize[1] - pxArray[1][1] - 1;
 
+    let newPxArr = [];
     for (let i = 0; i < pxArray.length; i++) {
-        pxArray[i][1] = imgSize[1] - pxArray[i][1] - 1;
+        newPxArr[i] = [];
+        newPxArr[i].push(pxArray[i][0]);
+        newPxArr[i].push(imgSize[1] - pxArray[i][1]);
     }
 
     $.ajax({
@@ -337,12 +344,14 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
         url: 'reflectance/',
         contentType: 'application/json',
         data: JSON.stringify({
-            pixels: pxArray,
+            operation: 'get',
+            pixels: newPxArr,
             obs_name: obsName,
             obs_ID: obsID,
             path: path,
             Image_path: imgPath,
             wavelength: wav,
+            // cube_coords: cube_coords,
             type: 'ROI',
         }),
         beforeSend: function () {
@@ -354,7 +363,9 @@ function getSpectralDataRoiArea(pxArray, imgSize, obsID, path, imgPath, obsName,
             $loading.addClass('is-hide');
             $loading2.addClass('is-hide');
             console.log('SUCCESS >> getSpectralDataRoiArea');
-            download_csv_roi_area(data);
+            // console.log(data);
+            displaySpectralBox(data);
+            // download_csv_roi_area(data);
         },
         function () {
             $loading.addClass('is-hide');
@@ -508,5 +519,77 @@ spectral_jagged = new Array(3);
 //             wms_layers.thumbnail2.removeLayer(ratio_layer_g);
 //             ratio_flag2 = false;
 //         }
+//     }
+// }
+
+// TODO SuperCam閲覧機能　　2024/3/1(kuro)
+// function getOrbiterAndRoverSpectralDataClickedPixel(px, imgSize, obsID, path, imgPath, obsName, wav) {
+//     // console.log(px);
+//     // console.log(imgSize);
+//     // console.log(obsID);
+//     // console.log(path);
+//     // console.log(imgPath);
+//     // console.log(obsName);
+//     // console.log(wav);
+
+//     // 左下基準の取得ピクセルを左上基準に変更（Cubデータが左上基準より）
+//     px[1] = imgSize[1] - px[1];
+
+//     // pixel座標がイメージサイズ(四角形)より内側ならデータ探す
+//     // ピクセル座標、左下基準。
+//     if (px[0] <= imgSize[0] && px[1] <= imgSize[1] && 0 <= px[0] && 0 <= px[1]) {
+//         $.ajax({
+//             type: 'POST',
+//             headers: { 'X-CSRFToken': csrftoken },
+//             url: 'reflectance/comparison/',
+//             contentType: 'application/json',
+//             data: JSON.stringify({
+//                 operation: 'get',
+//                 obs_name: obsName,
+//                 obs_ID: obsID,
+//                 path: path,
+//                 Image_path: imgPath,
+//                 wavelength: wav,
+//                 pixels: px,
+//                 // cube_coords: cube_coords,
+//                 type: 'DIRECT',
+//             }),
+//             beforeSend: function () {
+//                 $loading.removeClass('is-hide');
+//                 $loading2.removeClass('is-hide');
+//             },
+//         }).then(
+//             function (responseData) {
+//                 $loading.addClass('is-hide');
+//                 $loading2.addClass('is-hide');
+//                 console.log('SUCCESS >> getSpectralDataClickedPixel');
+//                 console.log(responseData);
+//                 $("#Lock1").prop("checked", true);
+//                 // displaySpectralBox(responseData.crism);
+//                 $("#Lock1").prop("checked", true);
+
+//                 print(responseData)
+
+//                 // if (responseData.hasOwnProperty("supercam")) {
+//                     $("#Lock1").prop("checked", true);
+//                     console.log("SUCCESS >> supercam graph")
+//                     console.log(responseData.supercam)
+//                     responseData.supercam.forEach(function(data) {
+//                         console.log(data);
+//                         $("#Lock1").prop("checked", true);
+//                         displaySpectralBox(JSON.stringify(data));
+//                         $("#Lock1").prop("checked", true);
+//                     });
+//                 // }
+//             },
+//             function () {
+//                 $loading.addClass('is-hide');
+//                 $loading2.addClass('is-hide');
+//                 console.log('ERROR >> getSpectralDataClickedPixel');
+//                 alert('読み込み失敗');
+//             }
+//         );
+//     } else {
+//         alert('No data.');
 //     }
 // }

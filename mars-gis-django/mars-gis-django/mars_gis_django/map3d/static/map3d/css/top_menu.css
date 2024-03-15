@@ -1,3 +1,32 @@
+.top-menu{
+    position: absolute;
+    z-index: 10;
+    right: 0px;
+    top: 0px;
+    /* border-radius: 0; */
+    width: 100px;
+    height: 40px;
+}
+.top-menu button{
+    border-radius: 0;
+}
+.top-menu-in{
+    width: 500px;
+    padding: 0;
+    height: 40px;
+    border: 0px;
+    border-radius: 0;
+}
+.top-menu-in2{
+    width: 100%;
+    height: 40px;
+    padding: 0;
+    border-radius: 0;
+}
+.top-menu-in2 li{
+    width: 100px;
+    border-radius: 0;
+}
 .top_menu {
     position: absolute;
     z-index: 10;

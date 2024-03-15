@@ -44,10 +44,33 @@ function displaySpectralBox(data) {
             let counter = graphCounter - 1;
             downCheckList.push(graphCounter);
 
+            let scalingButton = document.createElement('div');
+            scalingButton.innerHTML = `
+                <div class="normalize_button" onclick="scaling(${counter}, 'normalize');">Normalize</div>
+                <div class="standardize_button" onclick="scaling(${counter}, 'standardize');">Normalize</div>
+                <div class="stacking_button" onclick="smoothing(${counter}, 'stacking');">Stacking</div>
+                <div class="undo_button" onclick="undoCurrentChart(${counter});">Undo</div>
+                <div class="redo_button" onclick="redoChartUpdate(${counter});">Redo</div>`;
+            funcArea.appendChild(scalingButton);
+
+            let htmlDownloadType = document.createElement('div');
+            htmlDownloadType.innerHTML = `
+                <div class="download_type">
+                    <label><input type="radio" id="one_file" value="one" name="download_type" checked> Marged</label>
+                    <label><input type="radio" id="each_file" value="each" name="download_type"> Separate</label>
+                </div>`;
+            funcArea.appendChild(htmlDownloadType);
+
+            // radioボタンの切り替え
+            let radioDownloadType = document.querySelectorAll(`input[type='radio'][name='download_type']`);
+            for (let target of radioDownloadType) {
+                target.addEventListener('change', () => {});
+            }
+
             // スペクトルプロットの下部ダウンロードボタン生成
             var htmlDownloadButton = document.createElement('div');
             htmlDownloadButton.innerHTML = `
-                <div class="download_button" onclick="download_csv_spectral(${counter});">Download</div>`;
+                <div class="download_button" onclick="downloadGraphCSV(${counter});">Download</div>`;
 
             // スペクトルプロットの下部メモ欄生成
             htmlSaveMemo = document.createElement('div');
@@ -66,30 +89,79 @@ function displaySpectralBox(data) {
             document.getElementById(idTabName).appendChild(htmlSaveButton);
         }
     }
+    function stackingSpectralData(preGraphArr, arrToAdd) {
+        let refColNum = preGraphArr[0].length - 1;
+        let tmpGraphArr = [];
+
+        for (let i = 0; i < preGraphArr.length; i++) {
+            tmpGraphArr.push(preGraphArr[i]);
+            tmpGraphArr[i].push(null);
+        }
+
+        for (let i = 0; i < arrToAdd.length; i++) {
+            for (let j = 0; j < tmpGraphArr.length; j++) {
+                if (arrToAdd[i][0] == tmpGraphArr[j][0]) {
+                    let newRefCol = tmpGraphArr[j].pop();
+                    if (newRefCol == null) {
+                        tmpGraphArr[j].push(arrToAdd[i][1]);
+                        break;
+                    } else {
+                        tmpGraphArr[j].push(newRefCol); //?
+                    }
+                } else {
+                    // 異なる波長域のデータを合体
+                    if (tmpGraphArr.length - 1 === j) {
+                        let null_arr = Array.apply(null, Array(refColNum)).map(function () {
+                            return null;
+                        });
+                        Array.prototype.splice.apply(arrToAdd[i], [1, 0].concat(null_arr)); //挿入
+                        tmpGraphArr.push(arrToAdd[i]);
+                        break;
+                    }
+                }
+            }
+        }
+
+        tmpGraphArr = tmpGraphArr.sort(function (a, b) {
+            return a[0] - b[0];
+        });
+        return tmpGraphArr;
+    }
 
     if (dataObj['reflectance'] !== -1) {
-        // if (dataObj['type'] === 'DIRECT') {
+        let isTypeDIRECT = dataObj['type'] === 'DIRECT' ? true : false;
+        let isTypeROI = dataObj['type'] === 'ROI' ? true : false;
+        let newGraphArr = [];
         let band = 0;
-        let wav_arr = dataObj['band_bin_center'].split(','); // Wavelength
-        let ref_arr = dataObj['reflectance'].split(',');
-        graphList.length = 0;
+        let wavList = dataObj['band_bin_center']; // Wavelength
 
-        // スペクトル要素を配列に格納
-        for (let i = 0; i < dataObj['band_number'].length; i++) {
-            graphList[band] = new Array();
-            graphList[band][0] = Number(wav_arr[i]);
-            graphList[band][1] = Number(ref_arr[i]) !== -1 ? Number(ref_arr[i]) : NaN;
-            band += 1;
+        if (isTypeDIRECT) {
+            let refList = dataObj['reflectance'];
+
+            for (let i = 0; i < dataObj['band_number']; i++) {
+                newGraphArr[i] = [];
+                newGraphArr[i][0] = wavList[i];
+                newGraphArr[i][1] = refList[i] !== -1 ? refList[i] : NaN;
+            }
+        } else if (isTypeROI) {
+            let refArr = dataObj['reflectance'];
+
+            for (let i = 0; i < dataObj['band_number']; i++) {
+                newGraphArr[i] = [];
+                newGraphArr[i][0] = wavList[i];
+                for (let j = 0; j < refArr.length; j++) {
+                    newGraphArr[i][j + 1] = refArr[j][i] !== -1 ? refArr[j][i] : NaN;
+                }
+            }
         }
+
+        // スペクトル取得時グラフエリアに遷移
+        // if (flag_ref_position) {
+        //     $('html,body').animate({
+        //         scrollTop: $('#graph_move').offset().top - 100,
+        //     });
+        //     flag_ref_position = false;
         // }
-        graphList = graphList.filter((n) => n.length > 0);
-
-        if (flag_ref_position) {
-            $('html,body').animate({
-                scrollTop: $('#graph_move').offset().top - 100,
-            });
-            flag_ref_position = false;
-        }
 
         createFuncArea();
         setLockElement();
@@ -108,101 +180,74 @@ function displaySpectralBox(data) {
             dataSave[saveNum - 1].push(dataObj);
         }
 
-        // ###########################
-        let htmlDownloadType = document.createElement('div');
-        htmlDownloadType.innerHTML = `
-            <div class="download_type">
-                <label><input type="radio" id="one_file" value="one" name="download_type" checked> In one file</label>
-                <label><input type="radio" id="each_file" value="each" name="download_type"> In each file</label>
-            </div>`;
-        funcArea.appendChild(htmlDownloadType);
+        // let htmlDownloadType = document.createElement('div');
+        // htmlDownloadType.innerHTML = `
+        //     <div class="download_type">
+        //         <label><input type="radio" id="one_file" value="one" name="download_type" checked> In one file</label>
+        //         <label><input type="radio" id="each_file" value="each" name="download_type"> In each file</label>
+        //     </div>`;
+        // funcArea.appendChild(htmlDownloadType);
 
-        // radioボタンの切り替え
-        let radioDownloadType = document.querySelectorAll(`input[type='radio'][name='download_type']`);
-        for (let target of radioDownloadType) {
-            target.addEventListener('change', () => {});
-        }
-        // 途中
-        let elementDownloadType = document.getElementsByName('download_type');
-        let checkValueDownloadType = '';
-        for (let i = 0; i < elementDownloadType.length; i++) {
-            if (elementDownloadType.item(i).checked) {
-                checkValueDownloadType = elementDownloadType.item(i).value;
-            }
-        }
-        // ###########################
+        // // radioボタンの切り替え
+        // let radioDownloadType = document.querySelectorAll(`input[type='radio'][name='download_type']`);
+        // for (let target of radioDownloadType) {
+        //     target.addEventListener('change', () => {});
+        // }
 
         createArea(`graph${graphCounter}`);
         createFuncElement();
 
-        let titleLon = dataObj['coordinate'][0].toFixed(5);
-        let titleLat = dataObj['coordinate'][1].toFixed(5);
-        let graphLabels = ['band', `${dataObj['obs_ID']}: E_${titleLon} N_${titleLat}`];
-
-        let hasLock2 = lockNum == 2 && chartList.length >= 2 ? true : false;
-        let hasLock3 = lockNum == 3 && chartList.length >= 3 ? true : false;
-
-        if (chartList.length != 0 && (lockNum == 1 || hasLock2 || hasLock3)) {
-            var preSpectralArr = chartList[lockNum - 1].file_.concat();
-            [graphList, preSpectralArr] = [preSpectralArr, graphList];
-
-            // crismとthemis 合体
-
-            // 配列 previousとgraph が前段階でswapされていることに注意
-            var graphList2 = graphList.concat(); //積む前
-            var graphList3 = preSpectralArr.concat(); //新しい
-            var spectrumNum = graphList2[0].length - 1; //スペクトルの数？
-            var graphListTmp = [];
-
-            for (let i = 0; i < graphList2.length; i++) {
-                graphListTmp.push(graphList2[i].concat());
-                graphListTmp[i].push(null); //?
+        let titleLon, titleLat, newLabel, graphArr, graphLabel;
+        if (isTypeDIRECT) {
+            titleLon = dataObj['coordinate'][0];
+            titleLat = dataObj['coordinate'][1];
+            newLabel = ['band', `${dataObj['obs_ID']}: E_${titleLon} N_${titleLat}`];
+        } else if (isTypeROI) {
+            newLabel = ['band'];
+            for (let j = 0; j < dataObj['coordinate'].length; j++) {
+                titleLon = dataObj['coordinate'][j][0];
+                titleLat = dataObj['coordinate'][j][1];
+                newLabel.push(`${dataObj['obs_ID']}: E_${titleLon} N_${titleLat}`);
             }
+        }
 
-            for (let i = 0; i < graphList3.length; i++) {
-                for (let j = 0; j < graphListTmp.length; j++) {
-                    if (graphList3[i][0] == graphListTmp[j][0]) {
-                        var last_number = graphListTmp[j].pop();
+        let hasLock2 = lockNum === 2 && chartList.length >= 2 ? true : false;
+        let hasLock3 = lockNum === 3 && chartList.length >= 3 ? true : false;
 
-                        if (last_number == null) {
-                            graphListTmp[j].push(graphList3[i][1]);
-                            break;
-                        } else {
-                            graphListTmp[j].push(last_number);
-                        }
-                    } else {
-                        if (graphListTmp.length - 1 == j) {
-                            var null_arr = Array.apply(null, Array(spectrumNum)).map(function () {
-                                return null;
-                            });
-                            Array.prototype.splice.apply(graphList3[i], [1, 0].concat(null_arr));
-                            graphListTmp.push(graphList3[i]);
-                            break;
-                        }
+        // ロック時の計算
+        if (chartList.length !== 0 && (lockNum === 1 || hasLock2 || hasLock3)) {
+            graphLabel = chartList[lockNum - 1].user_attrs_.labels;
+            graphLabel = graphLabel.concat(newLabel.slice(1));
+            graphArr = chartList[lockNum - 1].file_;
+
+            if (isTypeDIRECT) {
+                graphArr = stackingSpectralData(graphArr, newGraphArr);
+            } else if (isTypeROI) {
+                for (let j = 0; j < newGraphArr[0].length - 1; j++) {
+                    let newTmpGraphArr = [];
+                    for (let i = 0; i < dataObj['band_number']; i++) {
+                        newTmpGraphArr[i] = [];
+                        newTmpGraphArr[i].push(newGraphArr[i][0]);
+                        newTmpGraphArr[i].push(newGraphArr[i][j + 1]);
                     }
+                    graphArr = stackingSpectralData(graphArr, newTmpGraphArr);
                 }
             }
-
-            graphList = graphListTmp.sort(function (a, b) {
-                return a[0] - b[0];
-            });
-            let preSpectralId = chartList[lockNum - 1].user_attrs_.labels.concat();
-            [graphLabels, preSpectralId] = [preSpectralId, graphLabels];
-            graphLabels.push(preSpectralId[1]);
+        } else {
+            graphArr = newGraphArr;
+            graphLabel = newLabel;
         }
 
         if (chartList.length >= graphCounter) {
             chartList[graphCounter - 1].destroy();
-            // console.log(dataSave);
         }
 
         let graphTabId = `graph_tab${graphCounter}`;
-        document.getElementById(graphTabId.toString()).innerHTML = `${dataObj['obs_name']}::${dataObj['obs_ID']}`;
-        if ($(`#${graphTabId}`.toString()).css('background-color') != 'rgb(0, 255, 255)') {
-            document.getElementById(graphTabId.toString()).style.backgroundColor = 'goldenrod';
-        }
-        if (chartList.length == 0) {
-            document.getElementById(graphTabId.toString()).style.backgroundColor = 'aqua';
+        document.getElementById(graphTabId).innerHTML = `${dataObj['obs_name']}::${dataObj['obs_ID']}`;
+        changeTabColor(graphTabId, 'goldenrod');
+
+        if (chartList.length === 0) {
+            document.getElementById(graphTabId).style.backgroundColor = 'aqua';
         }
 
         // prettier-ignore
@@ -210,22 +255,22 @@ function displaySpectralBox(data) {
             graphCounter === 1 ? ['graph_tab2', 'graph_tab3'] : 
             graphCounter === 2 ? ['graph_tab1', 'graph_tab3'] : ['graph_tab2', 'graph_tab1'];
 
-        if (document.getElementById(graphTabId_A).style.backgroundColor != null) {
-            if ($(`#${graphTabId_A}`).css('background-color') != 'rgb(0, 255, 255)') {
-                $(`#${graphTabId_A}`).css('background-color', '#d9d9d9');
-            }
-        }
-        if (document.getElementById(graphTabId_B).style.backgroundColor != null) {
-            if ($(`#${graphTabId_B}`).css('background-color') != 'rgb(0, 255, 255)') {
-                $(`#${graphTabId_B}`).css('background-color', '#d9d9d9');
+        changeTabColor(graphTabId_A, '#d9d9d9');
+        changeTabColor(graphTabId_B, '#d9d9d9');
+
+        function changeTabColor(id, color) {
+            if (document.getElementById(id).style.backgroundColor != null) {
+                if ($(`#${id}`).css('background-color') != 'rgb(0, 255, 255)') {
+                    $(`#${id}`).css('background-color', `${color}`);
+                }
             }
         }
 
-        let graphListChart = graphList.slice(); // なぜスライス？これをしないと、グラフの積み重ねでエラー
+        let graphArrChart = graphArr.slice(); // スライスでコピーしている
 
         chartList[graphCounter - 1] = new Dygraph(
             graphArea, // 表示ID名?
-            graphListChart, // グラフデータ
+            graphArrChart, // グラフデータ
             {
                 // オプション
                 colors: ['#000080', '#8b0000', '#32cd32', '#ff00ff', '#f4a460'],
@@ -249,7 +294,7 @@ function displaySpectralBox(data) {
                     strokeBorderWidth: 1,
                 },
                 connectSeparatedPoints: true,
-                labels: graphLabels,
+                labels: graphLabel,
             }
         );
 
@@ -270,4 +315,168 @@ function displaySpectralBox(data) {
     } else {
         alert('No data.');
     }
+}
+
+function scaling(value, type) {
+    // let selectedDownloadValue = $('input[name=download_type]:checked').val();
+    let labelList = chartList[value].user_attrs_.labels;
+    let dataArr = chartList[value].file_;
+    storeCurrentChart(labelList, dataArr);
+    // console.log(dataArr);
+
+    $.ajax({
+        type: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        url: 'reflectance/',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            operation: 'scaling',
+            dataArr: dataArr,
+            type: type,
+        }),
+    }).then(
+        function (data) {
+            console.log('SUCCESS >> scaling');
+            // console.log(data);
+            updateChart(value, type, data);
+        },
+        function () {
+            console.log('ERROR >> scaling');
+            alert('読み込み失敗');
+        }
+    );
+}
+
+function smoothing(value, type) {
+    // let selectedDownloadValue = $('input[name=download_type]:checked').val();
+    let labelList = chartList[value].user_attrs_.labels;
+    let dataArr = chartList[value].file_;
+    storeCurrentChart(labelList, dataArr);
+    // console.log(dataArr);
+
+    $.ajax({
+        type: 'POST',
+        headers: { 'X-CSRFToken': csrftoken },
+        url: 'reflectance/',
+        contentType: 'application/json',
+        data: JSON.stringify({
+            operation: 'smoothing',
+            dataArr: dataArr,
+            type: type,
+        }),
+    }).then(
+        function (data) {
+            console.log('SUCCESS >> smoothing');
+            // console.log(data);
+            updateChart(value, type, data);
+        },
+        function () {
+            console.log('ERROR >> smoothing');
+            alert('読み込み失敗');
+        }
+    );
+}
+
+var labelsStorageForUndo = [];
+var spectraStorageForUndo = [];
+function storeCurrentChart(labels, spectraData) {
+    labelsStorageForUndo.push(labels);
+    spectraStorageForUndo.push(spectraData);
+
+    updateButtonState();
+
+    console.log('store');
+    console.log(labelsStorageForUndo);
+    console.log(labelsStorageForRedo);
+}
+
+var labelsStorageForRedo = [];
+var spectraStorageForRedo = [];
+function undoCurrentChart(value) {
+    let currentLabels = chartList[value].user_attrs_.labels;
+    let currentChart = chartList[value].file_;
+    labelsStorageForRedo.push(currentLabels);
+    spectraStorageForRedo.push(currentChart);
+
+    let previousLabels = labelsStorageForUndo.pop();
+    let previousChart = spectraStorageForUndo.pop();
+    chartList[value].updateOptions({
+        labels: previousLabels,
+        file: previousChart,
+    });
+    chartList[value].resize();
+
+    updateButtonState();
+
+    console.log('undo');
+    console.log(labelsStorageForUndo);
+    console.log(labelsStorageForRedo);
+}
+
+function redoChartUpdate(value) {
+    let currentLabels = chartList[value].user_attrs_.labels;
+    let currentChart = chartList[value].file_;
+    labelsStorageForUndo.push(currentLabels);
+    spectraStorageForUndo.push(currentChart);
+
+    let nextLabels = labelsStorageForRedo.pop();
+    let nextChart = spectraStorageForRedo.pop();
+    chartList[value].updateOptions({
+        labels: nextLabels,
+        file: nextChart,
+    });
+    chartList[value].resize();
+
+    updateButtonState();
+
+    console.log('redo');
+    console.log(labelsStorageForUndo);
+    console.log(labelsStorageForRedo);
+}
+
+function updateButtonState() {
+    var divElement = document.getElementsByClassName('undo_button')[0];
+    if (spectraStorageForUndo.length === 0) {
+        divElement.style.pointerEvents = 'none';
+        divElement.style.backgroundColor = '#ccc'; // クリック不可時のスタイルを設定
+    } else {
+        divElement.style.pointerEvents = 'auto';
+        divElement.style.backgroundColor = 'white'; // クリック可能時のスタイルを設定
+    }
+
+    var divElement = document.getElementsByClassName('redo_button')[0];
+    if (spectraStorageForRedo.length === 0) {
+        divElement.style.pointerEvents = 'none';
+        divElement.style.backgroundColor = '#ccc'; // クリック不可時のスタイルを設定
+    } else {
+        divElement.style.pointerEvents = 'auto';
+        divElement.style.backgroundColor = 'white'; // クリック可能時のスタイルを設定
+    }
+}
+
+function updateChart(value, type, data) {
+    let dataObj = JSON.parse(data);
+    let dataArr = dataObj['dataArr'];
+    let newDataArr = [];
+    // console.log(dataObj);
+
+    for (let i = 0; i < dataArr.length; i++) {
+        newDataArr[i] = [];
+        newDataArr[i][0] = dataArr[i][0];
+        for (let j = 1; j < dataArr[0].length; j++) {
+            newDataArr[i][j] = dataArr[i][j] !== -9999 ? dataArr[i][j] : NaN;
+        }
+    }
+
+    if (type === 'stacking') {
+        chartList[value].updateOptions({
+            labels: ['band', 'stacked_ref'],
+            file: newDataArr,
+        });
+    } else {
+        chartList[value].updateOptions({
+            file: newDataArr,
+        });
+    }
+    chartList[value].resize();
 }

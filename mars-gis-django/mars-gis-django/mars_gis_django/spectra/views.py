@@ -1,13 +1,16 @@
 from django.shortcuts import render, redirect
 from django.http import HttpResponse
-from datetime import datetime,date
+from datetime import datetime, date
 from . import forms, models
+from spectra.models import Spectrum
+from accounts.models import CustomUser
+from django.contrib.auth import get_user_model
 from django.contrib.auth.decorators import login_required
 from django.http import JsonResponse
 from django.core import serializers
 from django.core.serializers.json import DjangoJSONEncoder
 from decimal import Decimal
-import json
+import json, csv, os
 
 
 @login_required
@@ -16,43 +19,31 @@ def index(request):
 	}
 	return render(request, "spectra/index.html", settings)
 
-def convert_dygraphs_data(rec_spectra):
+def convert_dygraphs_data(record_spectra):
+    print("Execute convert_dygraphs_data.")
+
     dygraphs_spectra = []
-    for j,spectrum in enumerate(rec_spectra):
+
+    for j,spectrum in enumerate(record_spectra):
         data = []
-        dygraphs_spectrum = ''
-        wavelengths = spectrum.wavelength.split(",")
-        reflectances = spectrum.reflectance.split(",")
-        band_num = len(wavelengths)
-        if spectrum.instrument == "CRISM":
-            for i,reflectance in enumerate(reflectances):
-                in_array = []
-                if reflectances[band_num-i-1] == "-1":
-                    pass
-                else:
-                    in_array.append(float(wavelengths[band_num-i-1]))
-                    in_array.append(float(reflectances[band_num-i-1]))
-                    data.append(in_array)
-                    dygraphs_spectrum += '['+wavelengths[band_num-i-1]+','+reflectances[band_num-i-1]+'],\n'
+        wavelengths = list(map(float, spectrum.wavelength.lstrip('[').rstrip(']').split(', ')))
+        reflectances = list(map(float, spectrum.reflectance.lstrip('[').rstrip(']').split(', ')))
 
-            dygraphs_spectra.append({
-                "data":data, 
-                "id_graph":"graph"+str(j),
-                "id_map":"map"+str(j),"rec":spectrum
-            })
-        else:
-            for i,wavelength in enumerate(wavelengths):
-                in_array = []
-                in_array.append(float(wavelength))
-                in_array.append(float(reflectances[i]))
-                data.append(in_array)
-                dygraphs_spectrum += '['+wavelength+','+reflectances[i]+'],\n'
+        # 逆順であれば直す
+        if wavelengths[0] > wavelengths[-1]:
+            wavelengths.reverse()
+            reflectances.reverse()
 
-            dygraphs_spectra.append({
-                "data":data, 
-                "id_graph":"graph"+str(j),
-                "id_map":"map"+str(j),"rec":spectrum
-            })
+        for (wav, ref) in zip(wavelengths, reflectances):
+            pair = [wav, ref]
+            data.append(pair)
+
+        dygraphs_spectra.append({
+            "data": data,
+            "id_graph": "graph" + str(j),
+            "id_map": "map" + str(j),
+            "rec": spectrum
+        })
 
     return dygraphs_spectra
 
@@ -61,10 +52,9 @@ from django.contrib.auth.models import User, Group
 from django.shortcuts import get_object_or_404
 def spectra(request):
     user_id = request.user.id
-    user = get_object_or_404(User, pk=user_id)
+    # user = get_object_or_404(User, pk=user_id)
+    user = get_object_or_404(get_user_model(), pk=user_id)
     spectra = user.spectrum_set.all()
-
-
     dygraphs_spectra = convert_dygraphs_data(spectra)
     settings = {
         'user': user,
@@ -79,7 +69,7 @@ from decimal import Decimal
 def get_spectra(request):
     if request.method == "GET":
         user_id = request.user.id
-        user = get_object_or_404(User, pk=user_id)
+        user = get_object_or_404(get_user_model(), pk=user_id)
         spectra = request.user.spectrum_set.all()
         dygraphs_spectra = convert_dygraphs_data(spectra)
         settings = {
@@ -98,7 +88,8 @@ class LazyEncoder(DjangoJSONEncoder):
             return float(obj)
         elif isinstance(obj, (datetime, date)):
             return str(obj)
-        elif isinstance(obj, User):
+        # elif isinstance(obj, User):
+        elif isinstance(obj, get_user_model()):
             return str(obj)
         else:
             raise TypeError(
@@ -111,7 +102,7 @@ def get_spectra_axios(request):
         print("agagagagagag")
 
         user = request.user
-        spectra = spectra_values = models.Spectrum.objects.filter(user=user).order_by('-id')
+        spectra = models.Spectrum.objects.filter(user=user).order_by('-id')
         dygraphs_spectra = convert_dygraphs_data(spectra)
 
         spectra_list = []
@@ -119,25 +110,27 @@ def get_spectra_axios(request):
         for j,spectrum in enumerate(spectra):
             spectra_list.append({
                 "instrument": spectrum.instrument, 
-                "data_id": spectrum.data_id, 
+                "obs_id": spectrum.obs_id, 
                 "path": spectrum.path,
                 "image_path": spectrum.image_path,
                 "x_pixel": spectrum.x_pixel, 
                 "y_pixel": spectrum.y_pixel, 
                 "mineral_id": spectrum.mineral_id,
                 "description": spectrum.description, 
-                "latitude": round(spectrum.latitude,3), 
-                "longitude": round(spectrum.longitude,3),
+                "latitude": round(spectrum.latitude, 6), 
+                "longitude": round(spectrum.longitude, 6),
                 "created_date": spectrum.created_date.strftime("%Y/%m/%d %H:%M:%S"), 
                 "user": spectrum.user,
                 "permission": spectrum.permission, 
+                "data_id": spectrum.data_id, 
                 "id": spectrum.id, 
                 "id_edit": "edit" + str(spectrum.id),
                 "id_update": "update" + str(spectrum.id), 
                 "id_accordion": "accordion" + str(spectrum.id), 
                 "id_permission": "permission" + str(spectrum.id),
+                "id_export": "export" + str(spectrum.id), 
                 "id_delete": "delete" + str(spectrum.id), 
-                "id_thumbnail": "thumbnail" + str(spectrum.id)
+                "id_thumbnail": "thumbnail" + str(spectrum.id),
             })
 
         settings = {
@@ -164,7 +157,7 @@ def get_spectra_axios(request):
             for j,spectrum in enumerate(spectra):
                 spectra_list.append({
                     "instrument": spectrum.instrument, 
-                    "data_id": spectrum.data_id, 
+                    "obs_id": spectrum.obs_id, 
                     "path": spectrum.path,
                     "image_path": spectrum.image_path,
                     "x_pixel": spectrum.x_pixel, 
@@ -176,6 +169,7 @@ def get_spectra_axios(request):
                     "created_date": spectrum.created_date.strftime("%Y/%m/%d %H:%M:%S"), 
                     "user": spectrum.user,
                     "permission": spectrum.permission, 
+                    "data_id": spectrum.data_id, 
                     "id": spectrum.id, 
                     "id_edit": "edit" + str(spectrum.id),
                     "id_update": "update" + str(spectrum.id), 
@@ -205,7 +199,7 @@ def get_spectra_axios(request):
             for j,spectrum in enumerate(spectra):
                 spectra_list.append({
                     "instrument": spectrum.instrument, 
-                    "data_id": spectrum.data_id, 
+                    "obs_id": spectrum.obs_id, 
                     "path": spectrum.path,
                     "image_path": spectrum.image_path,
                     "x_pixel": spectrum.x_pixel, 
@@ -217,6 +211,7 @@ def get_spectra_axios(request):
                     "created_date": spectrum.created_date.strftime("%Y/%m/%d %H:%M:%S"), 
                     "user": spectrum.user,
                     "permission": spectrum.permission, 
+                    "data_id": spectrum.data_id, 
                     "id": spectrum.id, 
                     "id_edit": "edit" + str(spectrum.id),
                     "id_update": "update" + str(spectrum.id), 
@@ -236,6 +231,7 @@ def get_spectra_axios(request):
 
 def change_permission(request):
     print("change_permission")
+
     if request.method == "POST":
         data_content = request.body.decode("utf-8")
         params_list = json.loads(data_content)
@@ -251,21 +247,38 @@ def change_permission(request):
         }
 
         return render(request, "spectra/spectrum_new.html", settings)
+    
+def export_from_list(request):
+    print("Execute export_from_list.")
+
+    if request.method == "POST":
+        export_list = json.loads(request.body.decode("utf-8"))
+
+        for param in export_list:
+            destination = param["destination"]
+            csv_filename = param["csv_filename"]
+            if destination == "private":
+                export_path = f"/data/users/{request.user}/{csv_filename}"
+            else:
+                export_path = f"/data/groups/{destination}/{csv_filename}"
+
+            with open(export_path, mode='w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(param["graph_data"])
+
+        return HttpResponse("Success delete_from_list")
 
 def delete_from_list(request):
-    print("delete_from_list")
+    print("Execute delete_from_list.")
+
     if request.method == "POST":
-        delete_list = request.body.decode("utf-8")
-        param_list = json.loads(delete_list)
-        id_list = param_list["id_delete"]
-        for id in id_list:
-            index_id = id.lstrip("delete")
+        delete_list = json.loads(request.body.decode("utf-8"))
 
-        settings = {
-            'permission': id_list,
-        }
+        for param in delete_list:
+            Spectrum.objects.get(data_id=param["data_id"]).delete()
+            print("Execute delete_from_list.x")
 
-    return render(request, "spectra/spectrum_new.html", settings)
+        return HttpResponse("Success delete_from_list")
 
 ###usui, 準備中
 @login_required
@@ -319,9 +332,12 @@ def spectrum_new(request):
         data_content = request.body.decode("utf-8")
         params_list = json.loads(data_content)
         new_records = []
+        user = get_object_or_404(get_user_model(), pk=request.user.id)
+        description = params_list["description"]
+
         for params_json in params_list["spectral_data"]:
-            obs_id = params_json["obs_ID"][0:11]
             instrument = params_json["obs_name"]
+            obs_id = params_json["obs_ID"]
             path = params_json["path"]
             image_path = params_json["Image_path"]
             x_pixel = params_json["pixels"][0]
@@ -330,34 +346,34 @@ def spectrum_new(request):
             y_image_size = params_json["Image_size"][1]
             wavelength = params_json["band_bin_center"]
             reflectance = params_json["reflectance"]
-            latitude = params_json["coordinate"][1]
             longitude = params_json["coordinate"][0]
-            user_id = request.user.id
-            user = get_object_or_404(User, pk=user_id)
+            latitude = params_json["coordinate"][1]
             point = GEOSGeometry('Point(%s %s)' %(longitude, latitude))
-
-            description = params_list["description"]
+            created_date = timezone.datetime.now()
+            data_id = f"{user}{instrument}{obs_id}{longitude}{latitude}{created_date.strftime('%Y-%m-%d-%H:%M:%S')}"
 
             new_rec = models.Spectrum(
-                data_id=obs_id,
-                instrument=instrument,
-                path=path,
-                image_path=image_path,
-                x_pixel=x_pixel,
-                y_pixel=y_pixel,
-                x_image_size=x_image_size,
-                y_image_size=y_image_size,
-                wavelength=wavelength,
-                reflectance=reflectance,
-                # mineral_id=mineral_id,
-                latitude=latitude,
-                longitude=longitude,
-                point=point,
-                user=user,
-                description=description,
-                created_date=timezone.datetime.now(),
+                obs_id = obs_id,
+                instrument = instrument,
+                path = path,
+                image_path = image_path,
+                x_pixel = x_pixel,
+                y_pixel = y_pixel,
+                x_image_size = x_image_size,
+                y_image_size = y_image_size,
+                wavelength = wavelength,
+                reflectance = reflectance,
+                # mineral_id = mineral_id,
+                latitude = latitude,
+                longitude = longitude,
+                point = point,
+                user = user,
+                description = description,
+                created_date = created_date,
+                data_id = data_id,
             )
             new_records.append(new_rec)
+
         models.Spectrum.objects.bulk_create(new_records)
 
         return redirect("/accounts/home")

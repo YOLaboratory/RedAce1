@@ -1,10 +1,12 @@
 # from django.db import models ###usui, sqlite3(default)の場合
-from django.contrib.auth.models import User
-
+from django.contrib.auth.models import User, AbstractUser
+from django.conf import settings
 from django.contrib.gis.db import models ###usui, geodjango, postgisの場合
+from accounts.models import Project
+
 class Spectrum(models.Model):
     instrument = models.CharField(max_length=10)
-    data_id = models.CharField(max_length=25, blank=True)
+    obs_id = models.CharField(max_length=50, blank=True)
     path = models.TextField()
     image_path = models.TextField()
     x_pixel = models.IntegerField()
@@ -19,14 +21,15 @@ class Spectrum(models.Model):
     longitude = models.DecimalField(max_digits=9, decimal_places=6)
     point = models.PointField(null=True, blank=True) ###usui, PointFieldはgeodjangoによるもの
     description = models.TextField(null=True, blank=True)
-    # permission = models.TextField(null=True, blank=True)
     permission = models.TextField(default="private")
-    user = models.ForeignKey(User, on_delete=models.CASCADE) #具体的に、所有者？登録者？
+    share_project = models.ManyToManyField(Project)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE)
     created_date = models.DateTimeField()
-    # permission = models.TextField(default="private")
     # spectra_collection_id = models.IntegerField()
+    data_id = models.CharField(max_length=100, blank=True)
+
     def __str__(self):
-        return self.instrument+"___"+self.data_id+"___("+self.permission+")"
+        return f"{self.instrument}___{self.obs_id}"
         # return "%s_%s(%s)" % (self.instrument, self.id,self.user)
 
 

@@ -15,5 +15,6 @@ urlpatterns = [
     path('axios_spectra', views.get_spectra_axios, name='get_spectra_axios'),
     path('description_update', views.description_update, name='description_update'),
     path('change_permission', views.change_permission, name='change_permission'),
+    path('export_from_list', views.export_from_list, name='export_from_list'),
     path('delete_from_list', views.delete_from_list, name='delete_from_list'),
 ]

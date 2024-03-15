@@ -1,19 +1,19 @@
 .layer_menu {
     position: absolute;
-    z-index: 10;
+    z-index: 2500;
     left: 0px;
     top: 50px;
 }
 #layer_menu_toggle {
     position: absolute;
-	display: none;
+    display: none;
 }
 #layer_menu_open {
     position: absolute;
     padding: 5px 0;
     width: 40px;
     background-color: rgba(65, 65, 65, 0.7);
-    color: #FFF;
+    color: #fff;
     border: 1px solid rgb(99, 99, 99);
     border-left: 0;
     border-radius: 0 10px 10px 0;
@@ -32,11 +32,11 @@
     background-color: rgba(233, 64, 64, 0.583);
     color: white;
     width: 30px;
-	text-align: center;
+    text-align: center;
 }
 #layer_menu_close:hover {
     cursor: pointer;
-    background-color:goldenrod;
+    background-color: goldenrod;
 }
 .layer_menu_contents {
     position: fixed;
@@ -44,32 +44,30 @@
     left: -50vw;
     width: 370px;
     -webkit-transition: 0.53s transform;
-            transition: 0.53s transform;
-    -webkit-transition-timing-function: cubic-bezier(.38,.52,.23,.99);
-            transition-timing-function: cubic-bezier(.38,.52,.23,.99);
-    background-color: rgba(0,0,0,0.7);
+    transition: 0.53s transform;
+    -webkit-transition-timing-function: cubic-bezier(0.38, 0.52, 0.23, 0.99);
+    transition-timing-function: cubic-bezier(0.38, 0.52, 0.23, 0.99);
+    background-color: rgba(0, 0, 0, 0.7);
 }
 .layer_menu_contents select {
     width: 130px;
     height: 30px;
     font-size: 14px;
     color: rgb(199, 198, 198);
-
 }
 #layer_menu_toggle:checked ~ .layer_menu_contents {
     -webkit-transform: translateX(50vw);
-            transform: translateX(50vw);
-
+    transform: translateX(50vw);
 }
 #layer_menu_toggle:checked + #layer_menu_open {
     display: none;
 }
 
 @import url(https://fonts.googleapis.com/css?family=Open+Sans);
-.layer_menu_contents input[type="checkbox"]{ 
+.layer_menu_contents input[type="checkbox"] {
     display: none;
 }
-.layer_menu_contents input[type="checkbox"] + label{
+.layer_menu_contents input[type="checkbox"] + label {
     display: block;
     position: relative;
     padding-left: 25px;
@@ -81,11 +79,11 @@
     -moz-user-select: none;
     -ms-user-select: none;
 }
-.layer_menu_contents input[type="checkbox"]+ label:last-child{ 
-    margin-bottom: 0; 
+.layer_menu_contents input[type="checkbox"] + label:last-child {
+    margin-bottom: 0;
 }
-.layer_menu_contents input[type="checkbox"]+ label:before{
-    content: '';
+.layer_menu_contents input[type="checkbox"] + label:before {
+    content: "";
     display: block;
     width: 12px;
     height: 12px;
@@ -94,10 +92,10 @@
     left: 0;
     top: 0px;
     opacity: 1;
-    -webkit-transition: all .12s, border-color .08s;
-    transition: all .12s, border-color .08s;
+    -webkit-transition: all 0.12s, border-color 0.08s;
+    transition: all 0.12s, border-color 0.08s;
 }
-.layer_menu_contents input[type="checkbox"]:checked + label:before{
+.layer_menu_contents input[type="checkbox"]:checked + label:before {
     width: 5px;
     top: -3px;
     left: 3px;
@@ -109,8 +107,8 @@
     transform: rotate(45deg);
 }
 .layer_menu_contents input[type="checkbox"]:checked + label,
-.layer_menu_contents input[type="checkbox"]:checked + label + select{
-    color:#6cc0e5;
+.layer_menu_contents input[type="checkbox"]:checked + label + select {
+    color: #6cc0e5;
 }
 #toolbar {
     margin-left: 5px;

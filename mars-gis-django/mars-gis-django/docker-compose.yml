@@ -33,7 +33,7 @@ services:
       - ./mars_gis_django/mars_data:/mars_data
       # - ./todatabase_test_usui_v1:/mnt ###test
       # - ../../git/mars_data_distributed:/mars_data_distributed
-      - ./jupyterhub/data:/code/data
+      - ./jupyterhub/data:/data
     environment:
       - DJANGO_SETTINGS_MODULE=mars_gis_django.settings
     depends_on:
@@ -151,7 +151,7 @@ services:
       - ./jupyterhub/config:/srv/jupyterhub/config
       - ./jupyterhub/bootstrap-script:/srv/jupyterhub/bootstrap-script
       - ./jupyterhub/data:/data
-    # command: jupyterhub --config /srv/jupyterhub/config/jupyterhub_config.py
+    command: jupyterhub --config /srv/jupyterhub/config/jupyterhub_config.py
     tty: true
     networks:
       redace_network:
